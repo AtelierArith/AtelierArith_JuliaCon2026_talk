@@ -10,145 +10,148 @@ format:
     include-after-body: assets/after-body.html
 ---
 
-## JuliaCon 2026 · short talk
+## JuliaCon 2026 · ショートトーク
 
 **Let’s run Julia everywhere — from mobile to web**
 
-A Rust-based VM for a subset of Julia, running where the official runtime is hard to deploy.
+公式ランタイムを載せにくい環境でも動く、
+Julia サブセット向けの Rust 製 VM の話です。
 
 ::: {.notes}
-~10 minutes including live demos. Slot is 15 min; leave buffer for Q&A.
+ライブデモ込みで約10分。枠は15分なので Q&A 用に余裕を残す。
 :::
 
-## Motivation
+## 動機
 
-Julia’s Tier‑1 platforms cover most users.
+Julia の Tier‑1 プラットフォームは、多くの利用者をカバーしています。
 
-But we are greedy: we want more.
+それでも欲張りたい。もっと先へ行きたい。
 
-- Offline mobile (airplane mode)
-- Browsers without long TTFX
-- Older ARMv7 devices
-- **iOS / iPadOS** (no JIT, strict App Review)
+- 機内モードのモバイル
+- 長い TTFX のないブラウザ
+- 古い ARMv7 デバイス
+- **iOS / iPadOS**（JIT 不可、審査が厳しい）
 
-## Why not `libjulia`?
+## なぜ `libjulia` では足りないか
 
-Official Julia leans on **LLVM JIT**.
+公式 Julia は **LLVM JIT** に大きく依存しています。
 
-That is a poor fit when:
+次の条件では相性が悪いです。
 
-- writable+executable memory is banned (iOS)
-- cold start / binary size must stay small (web, mobile)
-- the host wants a **static** link (Swift / Flutter)
+- 書き込み可能かつ実行可能なメモリが禁じられる（iOS）
+- 冷起動やバイナリサイズを小さくしたい（Web / モバイル）
+- ホスト側で **静的リンク** したい（Swift / Flutter）
 
-We need a portable runtime that does **not** depend on JIT.
+JIT に依存しない、持ち運びやすいランタイムが必要です。
 
-## Approach
+## 方針
 
-**SubsetJuliaVM (sjulia)** — a Rust VM for a strict subset of Julia.
+**SubsetJuliaVM（sjulia）** — Julia の厳密なサブセットを実行する Rust 製 VM。
 
 ```
 Julia source → Parser → Lowering → Compiler → VM
 ```
 
-- Pure Rust parser / pipeline (no tree-sitter runtime)
-- Stack-based bytecode interpreter (**no JIT**)
-- Same subset on native, **WASM**, and **iOS**
+- Pure Rust のパーサ / パイプライン（tree-sitter 実行時なし）
+- スタック型バイトコードインタプリタ（**JIT なし**）
+- native・**WASM**・**iOS** で同じサブセット
 
-OSS core: [AtelierArith/julia-vm-oss](https://github.com/AtelierArith/julia-vm-oss)
+OSS の中核: [AtelierArith/julia-vm-oss](https://github.com/AtelierArith/julia-vm-oss)
 
-## Design commitments
+## 設計の約束
 
-1. **Output parity** with upstream Julia (fixtures + oracles)
-2. **Upstream-driven** design — read `julia/` before inventing shortcuts
-3. **Pure Julia first** for Base/stdlib-shaped code; Rust for no-JIT hot paths
+1. 上流 Julia との **出力パリティ**（fixture と oracle）
+2. **上流駆動** — 近道を作る前に `julia/` を読む
+3. **Pure Julia 優先** — Base/stdlib 形のコードは Julia、no-JIT のホットパスは Rust
 
-Parity target series: Julia **1.12**
+パリティ対象系列: Julia **1.12**
 
-## Where it ships
+## 届け先
 
-| Target | How |
-|--------|-----|
-| Web / education | WASM + browser playground |
-| iOS / iPadOS | C ABI → SwiftUI app (App Store) |
-| Flutter / mobile | Static link via the same C ABI |
-| AoT experiments | Transpile subset Julia → Rust binaries |
+| 対象 | 方法 |
+|------|------|
+| Web / 教育 | WASM + ブラウザ playground |
+| iOS / iPadOS | C ABI → SwiftUI アプリ（App Store） |
+| Flutter / モバイル | 同じ C ABI による静的リンク |
+| AoT 実験 | サブセット Julia → Rust バイナリへ変換 |
 
-## Live demos (in this deck)
+## ライブデモ（このスライド内）
 
-The next slides embed the **same WASM VM**.
+次のスライドには、**同じ WASM VM** が埋め込まれています。
 
-Edit the code, then press **Ctrl+Enter** / **⌘+Enter** (or **Run**).
+コードを編集し、**Ctrl+Enter** / **⌘+Enter**（または **Run**）で実行できます。
 
 ::: {.notes}
-Demos are the heart of the talk — keep narration short and run code.
+デモが本編の中心。説明は短くし、コードを動かす。
 :::
 
-## Demo · Hello, sjulia
+## デモ · Hello, sjulia
 
 ```{=html}
 <div class="sjulia-executor" data-code="println(&quot;Hello from WebAssembly!&quot;)\nprintln(1 + 2 * 3)"></div>
 ```
 
-## Demo · Multiple dispatch
+## デモ · 多重ディスパッチ
 
 ```{=html}
 <div class="sjulia-executor" data-code="area(r::Real) = π * r^2\narea(w::Real, h::Real) = w * h\n\nprintln(area(2.0))\nprintln(area(3, 4))"></div>
 ```
 
-## Demo · Plotly via Plots
+## デモ · Plots 経由の Plotly
 
 ```{=html}
-<div class="sjulia-executor" data-code="using Plots\nx = 0:0.1:2π\nplot(x, sin.(x), label=&quot;sin&quot;)\nplot!(x, cos.(x), label=&quot;cos&quot;)\ntitle!(&quot;in the browser&quot;)"></div>
+<div class="sjulia-executor" data-code="using Plots\nx = 0:0.1:2π\nplot(x, sin.(x), label=&quot;sin&quot;)\nplot!(x, cos.(x), label=&quot;cos&quot;)\ntitle!(&quot;ブラウザ上で実行&quot;)"></div>
 ```
 
-## Demo · Mandelbrot heatmap
+## デモ · Mandelbrot ヒートマップ
 
 ```{=html}
 <div class="sjulia-executor" data-code="using Plots\nfunction esc(c, n)\n  z = 0.0+0.0im\n  for k in 1:n\n    abs2(z) > 4 && return k\n    z = z^2 + c\n  end; n\nend\nxs = range(-2, 1; length=80)\nys = range(-1.2, 1.2; length=60)\nheatmap(xs, ys, esc.(xs' .+ im .* ys, Ref(40)))"></div>
 ```
 
-## Beyond the browser
+## ブラウザの外へ
 
-**iOS / iPadOS** — native app, no JIT, App Store compliant
+**iOS / iPadOS** — JIT なしのネイティブアプリ、App Store 準拠
 
-- [SubsetJuliaVM on the App Store](https://apps.apple.com/us/app/subsetjuliavm/id6757257182)
+- [App Store の SubsetJuliaVM](https://apps.apple.com/us/app/subsetjuliavm/id6757257182)
 
 **Web playground**
 
 - [terasakisatoshi.github.io/subset_julia](https://terasakisatoshi.github.io/subset_julia/)
 
-Static linking also targets Flutter / Swift hosts via the C ABI.
+同じ C ABI で Flutter / Swift ホストへ静的リンクもできます。
 
-## What about packages?
+## パッケージはどうするのか
 
-Not a full Pkg ecosystem — **bundled subsets** for education / demos, with upstream trees as parity oracles, e.g.:
+フルな Pkg エコシステムではありません。
+教育・デモ向けの **同梱サブセット** で、上流ツリーをパリティ oracle に使います。例:
 
 - Plots.jl · Distributions.jl · OrdinaryDiffEq.jl
 - Symbolics.jl · DataStructures.jl · Rotations.jl · …
 
-Goal: useful Julia **where Julia normally cannot run**, not a drop-in `libjulia`.
+目標は `libjulia` の代替ではなく、
+**普段 Julia を動かせない場所で使える Julia** です。
 
-## How it was built
+## どう作ったか
 
-Much of the VM was written with **Claude Code / Codex / Cursor**.
+VM の多くは **Claude Code / Codex / Cursor** で書いています。
 
-Human role:
+人の役割:
 
-- Keep designs aligned with upstream Julia
-- Prefer Pure Julia where possible
-- Gate correctness with parity fixtures and audits
+- 設計を上流 Julia に揃える
+- 可能なところは Pure Julia を優先する
+- パリティ fixture と監査で正しさをゲートする
 
-## Takeaways
+## まとめ
 
-- A **no-JIT Rust VM** makes Julia syntax runnable on iOS and the web
-- WASM demos (this deck) and App Store apps share one pipeline
-- Portable alternative to embedding `libjulia`
+- **no-JIT の Rust VM** で、iOS と Web 上に Julia 構文を載せられる
+- このデッキの WASM デモと App Store アプリは、同じパイプラインを共有する
+- `libjulia` 埋め込みより持ち運びやすい選択肢になる
 
-**Try it:** [julia-vm-oss](https://github.com/AtelierArith/julia-vm-oss) · [web playground](https://terasakisatoshi.github.io/subset_julia/) · [App Store](https://apps.apple.com/us/app/subsetjuliavm/id6757257182)
+**試す:** [julia-vm-oss](https://github.com/AtelierArith/julia-vm-oss) · [web playground](https://terasakisatoshi.github.io/subset_julia/) · [App Store](https://apps.apple.com/us/app/subsetjuliavm/id6757257182)
 
-## Thanks
+## ありがとうございました
 
-Questions?
+ご質問をどうぞ。
 
-Materials: this repository’s Quarto site / slides.
+資料はこのリポジトリの Quarto サイト / スライドにあります。
