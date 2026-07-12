@@ -1,5 +1,6 @@
 ---
-title: "sjulia Live Slides"
+title: "Let’s run Julia everywhere from mobile to web"
+author: "terasakisatoshi"
 format:
   revealjs:
     theme: dark
@@ -9,32 +10,145 @@ format:
     include-after-body: assets/after-body.html
 ---
 
-## sjulia in Quarto slides
+## JuliaCon 2026 · short talk
 
-Edit and run Julia code on the next slides.
+**Let’s run Julia everywhere — from mobile to web**
 
-Press **Ctrl+Enter** (or **⌘+Enter**) to execute.
+A Rust-based VM for a subset of Julia, running where the official runtime is hard to deploy.
 
-## Hello, sjulia
+::: {.notes}
+~10 minutes including live demos. Slot is 15 min; leave buffer for Q&A.
+:::
 
-A minimal print sample.
+## Motivation
 
-```{=html}
-<div class="sjulia-executor" data-code="println(&quot;Hello, sjulia!&quot;)"></div>
+Julia’s Tier‑1 platforms cover most users.
+
+But we are greedy: we want more.
+
+- Offline mobile (airplane mode)
+- Browsers without long TTFX
+- Older ARMv7 devices
+- **iOS / iPadOS** (no JIT, strict App Review)
+
+## Why not `libjulia`?
+
+Official Julia leans on **LLVM JIT**.
+
+That is a poor fit when:
+
+- writable+executable memory is banned (iOS)
+- cold start / binary size must stay small (web, mobile)
+- the host wants a **static** link (Swift / Flutter)
+
+We need a portable runtime that does **not** depend on JIT.
+
+## Approach
+
+**SubsetJuliaVM (sjulia)** — a Rust VM for a strict subset of Julia.
+
+```
+Julia source → Parser → Lowering → Compiler → VM
 ```
 
-## Plot a sine curve
+- Pure Rust parser / pipeline (no tree-sitter runtime)
+- Stack-based bytecode interpreter (**no JIT**)
+- Same subset on native, **WASM**, and **iOS**
 
-A 5-line plotting sample.
+OSS core: [AtelierArith/julia-vm-oss](https://github.com/AtelierArith/julia-vm-oss)
+
+## Design commitments
+
+1. **Output parity** with upstream Julia (fixtures + oracles)
+2. **Upstream-driven** design — read `julia/` before inventing shortcuts
+3. **Pure Julia first** for Base/stdlib-shaped code; Rust for no-JIT hot paths
+
+Parity target series: Julia **1.12**
+
+## Where it ships
+
+| Target | How |
+|--------|-----|
+| Web / education | WASM + browser playground |
+| iOS / iPadOS | C ABI → SwiftUI app (App Store) |
+| Flutter / mobile | Static link via the same C ABI |
+| AoT experiments | Transpile subset Julia → Rust binaries |
+
+## Live demos (in this deck)
+
+The next slides embed the **same WASM VM**.
+
+Edit the code, then press **Ctrl+Enter** / **⌘+Enter** (or **Run**).
+
+::: {.notes}
+Demos are the heart of the talk — keep narration short and run code.
+:::
+
+## Demo · Hello, sjulia
 
 ```{=html}
-<div class="sjulia-executor" data-code="using Plots\nx = 0:0.1:2π\ny = sin.(x)\nplot(x, y)\ntitle!(&quot;sin(x)&quot;)"></div>
+<div class="sjulia-executor" data-code="println(&quot;Hello from WebAssembly!&quot;)\nprintln(1 + 2 * 3)"></div>
 ```
 
-## Computed value
-
-Return a number.
+## Demo · Multiple dispatch
 
 ```{=html}
-<div class="sjulia-executor" data-code="sum(1:10)"></div>
+<div class="sjulia-executor" data-code="area(r::Real) = π * r^2\narea(w::Real, h::Real) = w * h\n\nprintln(area(2.0))\nprintln(area(3, 4))"></div>
 ```
+
+## Demo · Plotly via Plots
+
+```{=html}
+<div class="sjulia-executor" data-code="using Plots\nx = 0:0.1:2π\nplot(x, sin.(x), label=&quot;sin&quot;)\nplot!(x, cos.(x), label=&quot;cos&quot;)\ntitle!(&quot;in the browser&quot;)"></div>
+```
+
+## Demo · Mandelbrot heatmap
+
+```{=html}
+<div class="sjulia-executor" data-code="using Plots\nfunction esc(c, n)\n  z = 0.0+0.0im\n  for k in 1:n\n    abs2(z) > 4 && return k\n    z = z^2 + c\n  end; n\nend\nxs = range(-2, 1; length=80)\nys = range(-1.2, 1.2; length=60)\nheatmap(xs, ys, esc.(xs' .+ im .* ys, Ref(40)))"></div>
+```
+
+## Beyond the browser
+
+**iOS / iPadOS** — native app, no JIT, App Store compliant
+
+- [SubsetJuliaVM on the App Store](https://apps.apple.com/us/app/subsetjuliavm/id6757257182)
+
+**Web playground**
+
+- [terasakisatoshi.github.io/subset_julia](https://terasakisatoshi.github.io/subset_julia/)
+
+Static linking also targets Flutter / Swift hosts via the C ABI.
+
+## What about packages?
+
+Not a full Pkg ecosystem — **bundled subsets** for education / demos, with upstream trees as parity oracles, e.g.:
+
+- Plots.jl · Distributions.jl · OrdinaryDiffEq.jl
+- Symbolics.jl · DataStructures.jl · Rotations.jl · …
+
+Goal: useful Julia **where Julia normally cannot run**, not a drop-in `libjulia`.
+
+## How it was built
+
+Much of the VM was written with **Claude Code / Codex / Cursor**.
+
+Human role:
+
+- Keep designs aligned with upstream Julia
+- Prefer Pure Julia where possible
+- Gate correctness with parity fixtures and audits
+
+## Takeaways
+
+- A **no-JIT Rust VM** makes Julia syntax runnable on iOS and the web
+- WASM demos (this deck) and App Store apps share one pipeline
+- Portable alternative to embedding `libjulia`
+
+**Try it:** [julia-vm-oss](https://github.com/AtelierArith/julia-vm-oss) · [web playground](https://terasakisatoshi.github.io/subset_julia/) · [App Store](https://apps.apple.com/us/app/subsetjuliavm/id6757257182)
+
+## Thanks
+
+Questions?
+
+Materials: this repository’s Quarto site / slides.
