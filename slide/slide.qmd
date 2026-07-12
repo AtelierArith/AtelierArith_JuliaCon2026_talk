@@ -3,6 +3,10 @@ title: "sjulia Live Slides"
 format:
   revealjs:
     theme: dark
+    slide-number: true
+    preview-links: auto
+    css: assets/slide-executor.css
+    include-after-body: assets/after-body.html
 ---
 
 ## sjulia in Quarto slides
