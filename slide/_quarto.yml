@@ -1,0 +1,17 @@
+project:
+  type: default
+  output-dir: _site
+  resources:
+    - "sjulia-runtime.js"
+    - "assets/julia-language.js"
+    - "pkg/**"
+
+format:
+  revealjs:
+    theme: dark
+    slide-number: true
+    preview-links: auto
+    css:
+      - assets/slide-executor.css
+    include-after-body:
+      - assets/after-body.html

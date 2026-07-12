@@ -1,0 +1,36 @@
+---
+title: "sjulia Live Slides"
+format:
+  revealjs:
+    theme: dark
+---
+
+## sjulia in Quarto slides
+
+Edit and run Julia code on the next slides.
+
+Press **Ctrl+Enter** (or **⌘+Enter**) to execute.
+
+## Hello, sjulia
+
+A minimal print sample.
+
+```{=html}
+<div class="sjulia-executor" data-code="println(&quot;Hello, sjulia!&quot;)"></div>
+```
+
+## Plot a sine curve
+
+A 5-line plotting sample.
+
+```{=html}
+<div class="sjulia-executor" data-code="using Plots\nx = 0:0.1:2π\ny = sin.(x)\nplot(x, y)\ntitle!(&quot;sin(x)&quot;)"></div>
+```
+
+## Computed value
+
+Return a number.
+
+```{=html}
+<div class="sjulia-executor" data-code="sum(1:10)"></div>
+```

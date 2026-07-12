@@ -1,0 +1,11 @@
+<!-- Load Plotly first so window.Plotly is available to the executor.
+     Plotly and JSXGraph ship UMD wrappers that register as AMD modules
+     when a `define` is present, so they must load BEFORE Monaco's
+     RequireJS loader (which defines define.amd). -->
+<script src="assets/plotly.min.js"></script>
+<!-- Load Monaco Editor loader before the executor modules. -->
+<script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js"></script>
+<!-- Load sjulia WASM runtime and per-slide executor as ES modules so their
+     import.meta.url (and therefore the wasm-bindgen wasm path) is preserved. -->
+<script type="module" src="sjulia-runtime.js"></script>
+<script type="module" src="assets/slide-executor.js"></script>
