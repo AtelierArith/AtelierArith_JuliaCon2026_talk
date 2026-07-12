@@ -1,3 +1,6 @@
 /.quarto/
 /env/
+node_modules/
 _site
+
+**/*.quarto_ipynb

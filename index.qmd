@@ -1,0 +1,14 @@
+---
+title: "Let’s read Julia documentation in your preferred language"
+---
+
+## Description
+
+This webpage serves as a repository for the presentation materials and links I will be discussing at [JuliaCon 2025](https://juliacon.org/2025/).
+
+- [Slide](slide/slide.html)
+  - We propose a technique for translating Julia documents written in Markdown. The proposed method is primarily intended to assist non-native English speakers.
+
+## Appendix
+
+- This page is built using [Quarto](https://quarto.org/). The `qmd` files are maintained at [this repository](https://github.com/AtelierArith/AtelierArith_JuliaCon2025_talk). Readers are free to use these materials for educational and research purposes.

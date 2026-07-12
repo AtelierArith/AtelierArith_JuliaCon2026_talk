@@ -13,16 +13,11 @@ from `using Plots; plot(...)`.
 ## Quick start
 
 ```bash
-./slide/launch.sh          # stage assets if missing, then `quarto preview`
-./slide/launch.sh --static # ... then `quarto render` + a plain static server
-./slide/launch.sh --build  # force a WASM rebuild and restage
+quarto preview
 ```
 
-`launch.sh` exists because `slide/pkg/` and `slide/assets/plotly.min.js` are
-gitignored, so a fresh checkout has no WASM runtime or Plotly bundle — the deck
-renders but every executor stays blank. The script stages both from `./web`
-(building the WASM package first if `./web/pkg` is absent) whenever `slide/pkg`
-is missing, then serves.
+The project home page is served at `/`, and the reveal.js deck is served at
+`/slide/slide.html`.
 
 ## Build (manual)
 
@@ -37,16 +32,15 @@ mkdir -p slide/pkg
 cp -R web/pkg/* slide/pkg/
 cp web/plotly.min.js slide/assets/plotly.min.js
 
-# 3. Render the slides
-cd slide
+# 3. Render the website and slides
 quarto render
 ```
 
-Open `slide/_site/index.html` in a browser. Because of WASM fetch / ES module
+Open `_site/slide/slide.html` in a browser. Because of WASM fetch / ES module
 restrictions, use a local server rather than `file://`:
 
 ```bash
-cd slide/_site
+cd _site
 python3 -m http.server 8080
 ```
 
@@ -55,14 +49,11 @@ Then open <http://localhost:8080>.
 ## Development preview
 
 ```bash
-./slide/launch.sh    # or, once assets are staged: cd slide && quarto preview
+quarto preview
 ```
 
-Note: if `quarto preview` serves `.wasm` without the `application/wasm` MIME
-type, the wasm-bindgen loader logs a warning and falls back to
-`WebAssembly.instantiate()`, so the runtime still loads. The blank-slide symptom
-is almost always the missing `slide/pkg/` — run `./slide/launch.sh` (or the
-manual copy step above) first.
+Note: if the executor stays blank, confirm that `slide/pkg/` and
+`slide/assets/plotly.min.js` exist, then render again.
 
 ## Adding a new executable slide
 
@@ -80,8 +71,7 @@ at runtime.
 
 ## Files
 
-- `launch.sh` — one-shot launcher: stages the gitignored runtime assets (`pkg/`, `assets/plotly.min.js`) when missing, then runs `quarto preview` (or `--static`).
-- `index.qmd` — the single Quarto reveal.js source file containing all slides.
+- `slide.qmd` — the single Quarto reveal.js source file containing all slides.
 - `sjulia-runtime.js` — loads the WASM module and warms it up (loaded as a module script to preserve `import.meta.url`).
 - `assets/after-body.html` — HTML fragment loaded after the body; contains the `<script>` tags for Plotly, the runtime, and the executor.
 - `assets/slide-executor.js` — attaches UI and executes code per slide.
@@ -95,9 +85,8 @@ at runtime.
 After rendering, run the headless smoke test:
 
 ```bash
-cd slide
-node test-render.js
+node slide/test-render.js
 ```
 
-This requires Google Chrome at `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome` and the Playwright core package installed in `../web/node_modules`.
+This requires Google Chrome at `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`. Install the test dependency with `npm install` first.
 # AtelierArith_JuliaCon2026_talk

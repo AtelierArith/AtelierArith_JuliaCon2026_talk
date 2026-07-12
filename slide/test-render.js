@@ -4,9 +4,9 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const { chromium } = require('../web/node_modules/playwright-core');
+const { chromium } = require('playwright-core');
 
-const SITE_DIR = path.join(__dirname, '_site');
+const SITE_DIR = path.join(__dirname, '..', '_site');
 const PORT = 9876;
 const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 
@@ -64,7 +64,7 @@ async function runTest() {
       }
     });
 
-    await page.goto(`http://localhost:${PORT}/`, { waitUntil: 'networkidle' });
+    await page.goto(`http://localhost:${PORT}/slide/slide.html`, { waitUntil: 'networkidle' });
 
     // Wait for runtime to be ready (Run button enabled on first executor).
     await page.waitForFunction(() => {

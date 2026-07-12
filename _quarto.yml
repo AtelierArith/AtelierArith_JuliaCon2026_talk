@@ -1,0 +1,19 @@
+project:
+  type: website
+  output-dir: _site
+  resources:
+    - slide/pkg/**
+    - slide/assets/julia-language.js
+
+website:
+  title: "Let’s run Julia everywhere"
+  navbar:
+    left:
+      - href: slide/slide.qmd
+        text: slide
+
+format:
+  html:
+    theme: cosmo
+    css: styles/style.css
+    toc: true

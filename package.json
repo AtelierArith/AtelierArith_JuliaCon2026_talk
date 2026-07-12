@@ -1,0 +1,24 @@
+{
+  "name": "juliacon2026_talk",
+  "version": "1.0.0",
+  "description": "Quarto reveal.js slides with an embedded SubsetJuliaVM runtime. Each slide can run ~5 lines of Julia code and visualize the result, including Plotly graphs from `using Plots; plot(...)`.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AtelierArith/AtelierArith_JuliaCon2026_talk.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/AtelierArith/AtelierArith_JuliaCon2026_talk/issues"
+  },
+  "homepage": "https://github.com/AtelierArith/AtelierArith_JuliaCon2026_talk#readme",
+  "devDependencies": {
+    "playwright-core": "^1.61.1"
+  }
+}
