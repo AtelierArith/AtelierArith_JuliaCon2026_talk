@@ -1,6 +1,10 @@
 project:
   type: website
   output-dir: _site
+  render:
+    - "*.qmd"
+    - "slide/**/*.qmd"
+    - "!extern/**"
   resources:
     - slide/pkg/**
     - slide/assets/julia-language.js
