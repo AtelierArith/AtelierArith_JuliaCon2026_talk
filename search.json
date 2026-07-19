@@ -1,0 +1,121 @@
+[
+  {
+    "objectID": "slide/slide.html#what-i-created",
+    "href": "slide/slide.html#what-i-created",
+    "title": "Let’s run Julia everywhere from mobile to web",
+    "section": "What I created",
+    "text": "What I created\n\nSubsetJuliaVM (a.k.a sjulia)\n\nJulia の一部の文法をサポート\nRust 実装の Stack based VM (Virtual Machine)\n\niOS, Android が搭載したマシンで動作ができる\n\n作った Virtual Machine は WebAssembly に変換できるので，Web 上でも実行可能\n\nPlots.jl, OrdinaryDiffEq.jl, AbstractAlgebra.jl などの一部の機能をサポート"
+  },
+  {
+    "objectID": "slide/slide.html#成果物",
+    "href": "slide/slide.html#成果物",
+    "title": "Let’s run Julia everywhere from mobile to web",
+    "section": "成果物",
+    "text": "成果物\niOS / iPadOS — JIT なしのネイティブアプリ、App Store 準拠\n\n\niOS アプリApp Store\n\n\nソースコードjulia-vm-oss\n\n\nWeb playgroundsubset_julia\n\n\nGoogle it SubsetJuliaVM"
+  },
+  {
+    "objectID": "slide/slide.html#why-i-created",
+    "href": "slide/slide.html#why-i-created",
+    "title": "Let’s run Julia everywhere from mobile to web",
+    "section": "Why I created",
+    "text": "Why I created\n\nJulia を iPad で動作させたい．\n\niOS / iPadOS（JIT 不可、審査が厳しい）\nW^X (Write XOR Execute) policy\n\nBinder, Google Colab?\n\nインターネット環境が不安定なところでは使えない\n外部パッケージの導入に時間がかかる．"
+  },
+  {
+    "objectID": "slide/slide.html#how-i-created",
+    "href": "slide/slide.html#how-i-created",
+    "title": "Let’s run Julia everywhere from mobile to web",
+    "section": "How I created",
+    "text": "How I created\n\nPythonista, Carnets などのようなアプリは動かせる．\n\nJulia の文法を受け付ける仮想マシンを作ればよい？！\n\n実際に作ろう!\n\nスタック型バイトコードインタプリタ（JIT なし）\nJulia source → Parser → Lowering → Compiler → VM\nClaude Code, Codex, Cursor, Kimi など AI をフル活用\n成果物 AtelierArith/julia-vm-oss"
+  },
+  {
+    "objectID": "slide/slide.html#ライブデモこのスライド内",
+    "href": "slide/slide.html#ライブデモこのスライド内",
+    "title": "Let’s run Julia everywhere from mobile to web",
+    "section": "ライブデモ（このスライド内）",
+    "text": "ライブデモ（このスライド内）\n\n百聞は一見にしかず\n次のスライドには、同じ WASM VM が埋め込まれています。\n\nコードを編集し、Ctrl+Enter / ⌘+Enter（または Run）で実行できます。Clear で出力を消します。\n\nデモが本編の中心。説明は短くし、コードを動かす。"
+  },
+  {
+    "objectID": "slide/slide.html#デモ-hello-sjulia",
+    "href": "slide/slide.html#デモ-hello-sjulia",
+    "title": "Let’s run Julia everywhere from mobile to web",
+    "section": "デモ · Hello, sjulia",
+    "text": "デモ · Hello, sjulia"
+  },
+  {
+    "objectID": "slide/slide.html#デモ-plots-経由の-plotly",
+    "href": "slide/slide.html#デモ-plots-経由の-plotly",
+    "title": "Let’s run Julia everywhere from mobile to web",
+    "section": "デモ · Plots 経由の Plotly",
+    "text": "デモ · Plots 経由の Plotly"
+  },
+  {
+    "objectID": "slide/slide.html#デモ-mandelbrot-ヒートマップ",
+    "href": "slide/slide.html#デモ-mandelbrot-ヒートマップ",
+    "title": "Let’s run Julia everywhere from mobile to web",
+    "section": "デモ · Mandelbrot ヒートマップ",
+    "text": "デモ · Mandelbrot ヒートマップ"
+  },
+  {
+    "objectID": "slide/slide.html#デモ-lorenz-アトラクタordinarydiffeq",
+    "href": "slide/slide.html#デモ-lorenz-アトラクタordinarydiffeq",
+    "title": "Let’s run Julia everywhere from mobile to web",
+    "section": "デモ · Lorenz アトラクタ(OrdinaryDiffEq)",
+    "text": "デモ · Lorenz アトラクタ(OrdinaryDiffEq)"
+  },
+  {
+    "objectID": "slide/slide.html#julia-本家と-sjulia-の違い",
+    "href": "slide/slide.html#julia-本家と-sjulia-の違い",
+    "title": "Let’s run Julia everywhere from mobile to web",
+    "section": "Julia 本家と sjulia の違い",
+    "text": "Julia 本家と sjulia の違い\nコードがどう解釈・実行されるか:\n\n\n\n\n\n\n\n\n段階\nJulia 本家\nSubsetJuliaVM\n\n\n\n\nParser\nflisp / JuliaSyntax.jl\npure Rust parser → CST\n\n\nLowering\nlowered IR\nRust 実装 → Core IR\n\n\nコード生成\nLLVM JIT で実行時にネイティブ化\nbytecode compiler(実行前に完了)\n\n\n実行\nネイティブコード\nスタック型 VM(バイトコード解釈)\n\n\nランタイム\nC runtime + pure Julia base/\nRust builtins + pure Julia サブセット\n\n\n\n\nSubsetJuliaVM は JIT がないので iOS(W^X)や WASM でも動く"
+  },
+  {
+    "objectID": "slide/slide.html#try-sjulia-subsetjuliavm",
+    "href": "slide/slide.html#try-sjulia-subsetjuliavm",
+    "title": "Let’s run Julia everywhere from mobile to web",
+    "section": "Try sjulia (SubsetJuliaVM)",
+    "text": "Try sjulia (SubsetJuliaVM)\n\n\nInstall Rust\nRun the following commands:\n\n$ git clone https://github.com/AtelierArith/julia-vm-oss.git\n$ cd julia-vm-oss\n$ ./scripts/sjulia_install.sh\n$ sjulia examples/mandelbrot.jl\n  0.40394 seconds\nMandelbrot Set (50x25):\n\n                              .\n                              . .\n                              .+\n                             ###+.\n                        .   .####.\n                       .#++#########....\n                      ..##############.\n            .        ..################..\n             ...... .##################.\n            .#######.###################\n          ...##########################.\n#####################################..\n          ...##########################.\n            .#######.###################\n             ...... .##################.\n            .        ..################..\n                      ..##############.\n                       .#++#########....\n                        .   .####.\n                             ###+.\n                              .+\n                              . .\n                              ."
+  },
+  {
+    "objectID": "slide/slide.html#juliars",
+    "href": "slide/slide.html#juliars",
+    "title": "Let’s run Julia everywhere from mobile to web",
+    "section": "juliars",
+    "text": "juliars\n\n\nJulia から Rust へのトランスパイラ(試験段階)\nJuliaC とは異なり libjulia は不要\n\n$ cargo build --release -p subset_julia_vm \\\n    --features aot --bin juliars\n$ target/release/juliars --minimal-prelude examples/mandelbrot.jl \\\n    --emit-binary target/mandelbrot_aot\n$ target/mandelbrot_aot\n  9.4e-5 seconds\nMandelbrot Set (50x25):\n\n                              .\n                              . .\n                              .+\n                             ###+.\n                        .   .####.\n                       .#++#########....\n                      ..##############.\n            .        ..################..\n             ...... .##################.\n            .#######.###################\n          ...##########################.\n#####################################..\n          ...##########################.\n            .#######.###################\n             ...... .##################.\n            .        ..################..\n                      ..##############.\n                       .#++#########....\n                        .   .####.\n                             ###+.\n                              .+\n                              . .\n                              ."
+  },
+  {
+    "objectID": "slide/slide.html#julia-subsetjuliavm-のパフォーマンス",
+    "href": "slide/slide.html#julia-subsetjuliavm-のパフォーマンス",
+    "title": "Let’s run Julia everywhere from mobile to web",
+    "section": "Julia, SubsetJuliaVM のパフォーマンス",
+    "text": "Julia, SubsetJuliaVM のパフォーマンス\nマンデルブロー集合ベンチマーク(Apple Silicon macOS、2026-07 計測):\n\n\nfunction mandel_point(c::ComplexF64,\n                      maxiter::Int64)::Int64\n    z = 0.0 + 0.0im\n    for k in 1:maxiter\n        abs2(z) &gt; 4.0 && return k - 1\n        z = z * z + c\n    end\n    return maxiter\nend\n\nfunction mandel_count(width, height, maxiter)\n    total = 0\n    for y in 1:height\n        ci = -1.2 + 2.4 * (y - 1) / (height - 1)\n        for x in 1:width\n            cr = -2.0 + 3.0 * (x - 1) / (width - 1)\n            total += mandel_point(cr + ci * im, maxiter)\n        end\n    end\n    total\nend\n\nmandel_count(1500, 1500, 500)  # 全実装共通ソース\n\n\n\n\nランタイム\n時間\n\n\n\n\nJulia 本家\n0.50 s\n\n\njuliars(AoT)\n0.52 s\n\n\nsjulia VM\n4.0 s\n\n\nPython 3.14\n20.8 s\n\n\n\n\nAoT は 本家とほぼ同速"
+  },
+  {
+    "objectID": "slide/slide.html#android-アプリに興味はありますか",
+    "href": "slide/slide.html#android-アプリに興味はありますか",
+    "title": "Let’s run Julia everywhere from mobile to web",
+    "section": "Android アプリに興味はありますか？",
+    "text": "Android アプリに興味はありますか？\n\n準備中．テスターを募集しています．\ns.terasaki@atelier-arith.jp にメールを送ってください．"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Let’s run Julia everywhere from mobile to web",
+    "section": "",
+    "text": "This webpage serves as a repository for the presentation materials and links I will be discussing at JuliaCon 2026.\n\nSlide\n\nWe implemented a Rust-based virtual machine that accepts and executes a subset of Julia syntax. This enables Julia code to run in environments where the official runtime is difficult to deploy. By compiling the VM to WebAssembly, Julia can run web apps for educational purposes, and static linking with Swift or Flutter allows mobile applications. This short talk demonstrates these capabilities through live demos."
+  },
+  {
+    "objectID": "index.html#description",
+    "href": "index.html#description",
+    "title": "Let’s run Julia everywhere from mobile to web",
+    "section": "",
+    "text": "This webpage serves as a repository for the presentation materials and links I will be discussing at JuliaCon 2026.\n\nSlide\n\nWe implemented a Rust-based virtual machine that accepts and executes a subset of Julia syntax. This enables Julia code to run in environments where the official runtime is difficult to deploy. By compiling the VM to WebAssembly, Julia can run web apps for educational purposes, and static linking with Swift or Flutter allows mobile applications. This short talk demonstrates these capabilities through live demos."
+  },
+  {
+    "objectID": "index.html#appendix",
+    "href": "index.html#appendix",
+    "title": "Let’s run Julia everywhere from mobile to web",
+    "section": "Appendix",
+    "text": "Appendix\n\nThis page is built using Quarto. The qmd files are maintained at this repository. Readers are free to use these materials for educational and research purposes."
+  }
+]

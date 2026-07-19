@@ -1,0 +1,166 @@
+/* slide/assets/slide-executor.css */
+
+.sjulia-executor {
+  --sjulia-editor-ratio: 0.5;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-family: 'Fira Code', 'Consolas', 'Monaco', monospace;
+  font-size: 1.25rem;
+  text-align: left;
+  background: #1e1f1c;
+  border: 1px solid #4a4a40;
+  border-radius: 6px;
+  padding: 0.75rem;
+  max-height: 55vh;
+  overflow: auto;
+}
+
+.sjulia-code {
+  width: 100%;
+  min-height: 8.5rem;
+  height: 100%;
+  background: #272822;
+  color: #f8f8f2;
+  border: 1px solid #4a4a40;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: 1.4;
+  tab-size: 4;
+  overflow: hidden;
+}
+
+.sjulia-code .monaco-editor {
+  --vscode-editor-background: #272822;
+}
+
+.sjulia-controls {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.sjulia-divider {
+  display: none;
+}
+
+.sjulia-run-btn,
+.sjulia-clear-btn {
+  border: none;
+  border-radius: 4px;
+  padding: 0.4rem 1rem;
+  font-size: 1.25rem;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.sjulia-run-btn {
+  background: #66d9ef;
+  color: #1e1f1c;
+}
+
+.sjulia-run-btn:disabled {
+  background: #4a4a40;
+  color: #888;
+  cursor: not-allowed;
+}
+
+.sjulia-clear-btn {
+  background: #4a4a40;
+  color: #f8f8f2;
+}
+
+.sjulia-clear-btn:hover {
+  background: #5a5a50;
+}
+
+.sjulia-output {
+  margin: 0;
+  padding: 0.75rem;
+  background: #272822;
+  color: #f8f8f2;
+  border-radius: 4px;
+  min-height: 2rem;
+  max-height: 12rem;
+  overflow: auto;
+  white-space: pre-wrap;
+  font-size: 1.4rem !important;
+}
+
+.sjulia-output.sjulia-error {
+  color: #f92672;
+}
+
+.sjulia-plot {
+  width: 100%;
+  min-height: 280px;
+  background: #1e1f1c;
+  border-radius: 4px;
+}
+
+.sjulia-plot.hidden,
+.sjulia-output.hidden {
+  display: none;
+}
+
+/* Two-column layout on wide slides */
+@media (min-width: 768px) {
+  .sjulia-executor {
+    display: grid;
+    grid-template-columns:
+      minmax(16rem, calc((100% - 0.5rem) * var(--sjulia-editor-ratio)))
+      0.5rem
+      minmax(14rem, 1fr);
+    grid-template-rows: auto minmax(8.5rem, 1fr);
+    grid-template-areas:
+      "code divider controls"
+      "code divider output";
+  }
+
+  .sjulia-code {
+    grid-area: code;
+    min-height: 8.5rem;
+  }
+
+  .sjulia-controls {
+    grid-area: controls;
+  }
+
+  .sjulia-divider {
+    grid-area: divider;
+    display: block;
+    position: relative;
+    min-height: 100%;
+    cursor: col-resize;
+    touch-action: none;
+  }
+
+  .sjulia-divider::before {
+    content: "";
+    position: absolute;
+    inset: 0.25rem 0.2rem;
+    border-radius: 999px;
+    background: #4a4a40;
+    opacity: 0.45;
+    transition: background 120ms ease, opacity 120ms ease;
+  }
+
+  .sjulia-divider:hover::before,
+  .sjulia-divider:focus-visible::before,
+  .sjulia-resizing .sjulia-divider::before {
+    background: #66d9ef;
+    opacity: 0.9;
+  }
+
+  .sjulia-divider:focus-visible {
+    outline: 2px solid #66d9ef;
+    outline-offset: 2px;
+  }
+
+  .sjulia-output,
+  .sjulia-plot {
+    grid-area: output;
+    max-height: 45vh;
+  }
+}
