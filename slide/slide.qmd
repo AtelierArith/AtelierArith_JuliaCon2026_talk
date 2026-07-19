@@ -65,6 +65,8 @@ format:
   - Unusable where the internet connection is unreliable
   - Installing external packages takes a long time
 
+![](assets/colab.png)
+
 ## How I created it
 
 - Apps like Pythonista and Carnets do run on iOS.
