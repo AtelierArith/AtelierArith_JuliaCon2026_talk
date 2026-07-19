@@ -361,6 +361,26 @@ CST ─[lowering]→ Core IR ─[bytecode compiler]→ bytecode → stack VM
 - Known gaps: no real threads (single-threaded by design), partial LinearAlgebra/views,
   some macros are no-ops (`@inbounds`, `@inline`), and `Dict`-heavy hot loops are unoptimized.
 
+## Q. Why test compatibility this way — isn't there a Julia spec? {.smaller}
+
+**A.** No. Julia has no complete, normative, implementation-independent language
+specification — so "fully Julia-compatible" can only be defined *operationally*,
+not as conformance to a standard.
+
+- Python has a mature **Language Reference** and accepted **PEPs**, giving
+  alternative implementations (PyPy, MicroPython, …) a much clearer compatibility
+  target — though even there, CPython remains the de-facto reference for the gaps.
+- Julia has nothing comparable: the docs describe behavior informally, and for
+  corner cases (scope rules, promotion, printing, dispatch ambiguities) the
+  **official implementation is the ultimate de-facto reference**.
+- Consequence: with no conformance suite to pass, sjulia defines compatibility
+  operationally — thousands of small **differential tests**: run a snippet under
+  official `julia` and `sjulia`, demand identical output, and pin a concrete
+  version (Julia 1.12) as the target.
+- Differential fuzzing and official-test-suite sweeps extend the same idea:
+  for undocumented behavior, **running the reference implementation is the
+  strongest practical oracle**.
+
 ## Q. Which Julia syntax is supported? (1/2) {.smaller}
 
 **A.** The everyday core of the language
