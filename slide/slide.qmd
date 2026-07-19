@@ -13,24 +13,24 @@ format:
 ## What I created
 
 - SubsetJuliaVM (a.k.a `sjulia`)
-  - Julia の一部の文法をサポート
-  - Rust 実装の Stack based VM (Virtual Machine)
-- iOS, Android が搭載したマシンで動作ができる
-  - 作った Virtual Machine は WebAssembly に変換できるので，Web 上でも実行可能
-- Plots.jl, OrdinaryDiffEq.jl, AbstractAlgebra.jl などの一部の機能をサポート
+  - Supports a subset of Julia's syntax
+  - A stack-based VM (Virtual Machine) implemented in Rust
+- Runs on iOS and Android devices
+  - The VM compiles to WebAssembly, so it also runs in the browser
+- Supports parts of Plots.jl, OrdinaryDiffEq.jl, AbstractAlgebra.jl, and more
 
-## 成果物 {.smaller}
+## Deliverables {.smaller}
 
-**iOS / iPadOS** — JIT なしのネイティブアプリ、App Store 準拠
+**iOS / iPadOS** — a native app with no JIT, fully App Store compliant
 
 ::: {.columns}
 ::: {.column width="33%"}
-**iOS アプリ**<br>[App Store](https://apps.apple.com/us/app/subsetjuliavm/id6757257182)
+**iOS app**<br>[App Store](https://apps.apple.com/us/app/subsetjuliavm/id6757257182)
 
 ![](assets/ios-app.png){width="240"}
 :::
 ::: {.column width="33%"}
-**ソースコード**<br>[julia-vm-oss](https://github.com/AtelierArith/julia-vm-oss)
+**Source code**<br>[julia-vm-oss](https://github.com/AtelierArith/julia-vm-oss)
 
 ![](assets/julia-vm-oss.png){width="240"}
 :::
@@ -43,69 +43,69 @@ format:
 
 ### Google it `SubsetJuliaVM`
 
-## Why I created
+## Why I created it
 
-- Julia を iPad で動作させたい．
-  - **iOS / iPadOS**（JIT 不可、審査が厳しい）
+- I wanted to run Julia on my iPad.
+  - **iOS / iPadOS** (no JIT allowed, strict App Store review)
   - W^X (Write XOR Execute) policy
-- Binder, Google Colab?
-  - インターネット環境が不安定なところでは使えない
-  - 外部パッケージの導入に時間がかかる．
+- What about Binder or Google Colab?
+  - Unusable where the internet connection is unreliable
+  - Installing external packages takes a long time
 
-## How I created
+## How I created it
 
-- Pythonista, Carnets などのようなアプリは動かせる．
-  - Julia の文法を受け付ける仮想マシンを作ればよい？！
-- 実際に作ろう!
-  - スタック型バイトコードインタプリタ（**JIT なし**）
+- Apps like Pythonista and Carnets do run on iOS.
+  - So why not build a virtual machine that accepts Julia syntax?!
+- Let's actually build it!
+  - A stack-based bytecode interpreter (**no JIT**)
   - `Julia source → Parser → Lowering → Compiler → VM`
-  - Claude Code, Codex, Cursor, Kimi など AI をフル活用
-  - 成果物 [AtelierArith/julia-vm-oss](https://github.com/AtelierArith/julia-vm-oss)
+  - Built with heavy use of AI tools: Claude Code, Codex, Cursor, Kimi, etc.
+  - Result: [AtelierArith/julia-vm-oss](https://github.com/AtelierArith/julia-vm-oss)
 
-## Julia 本家と sjulia の違い {.smaller}
+## How sjulia differs from upstream Julia {.smaller}
 
-コードがどう解釈・実行されるか:
+How code is interpreted and executed:
 
-| 段階 | Julia 本家 | SubsetJuliaVM |
+| Stage | Upstream Julia | SubsetJuliaVM |
 |------|-----------|---------------|
 | Parser | flisp / JuliaSyntax.jl | pure Rust parser → CST |
-| Lowering | lowered IR | Rust 実装 → Core IR |
-| コード生成 | LLVM **JIT** で実行時にネイティブ化 | bytecode compiler(**実行前に完了**) |
-| 実行 | ネイティブコード | スタック型 VM(バイトコード解釈) |
-| ランタイム | C runtime + pure Julia `base/` | Rust builtins + pure Julia サブセット |
+| Lowering | lowered IR | Rust implementation → Core IR |
+| Code generation | native code via LLVM **JIT** at runtime | bytecode compiler (**done before execution**) |
+| Execution | native code | stack-based VM (bytecode interpretation) |
+| Runtime | C runtime + pure Julia `base/` | Rust builtins + a pure Julia subset |
 
-- SubsetJuliaVM は JIT がないので **iOS(W^X)や WASM でも動く**
+- With no JIT, SubsetJuliaVM **runs even on iOS (W^X) and WASM**
 
-## ライブデモ（このスライド内）
+## Live demo (inside these slides)
 
-- 百聞は一見にしかず
-- 次のスライドには、**同じ WASM VM** が埋め込まれています。
+- Seeing is believing
+- The next slides embed **the very same WASM VM**.
 
-コードを編集し、**Ctrl+Enter** / **⌘+Enter**（または **Run**）で実行できます。**Clear** で出力を消します。
+Edit the code and run it with **Ctrl+Enter** / **⌘+Enter** (or **Run**). Press **Clear** to clear the output.
 
 ::: {.notes}
-デモが本編の中心。説明は短くし、コードを動かす。
+The demo is the heart of this talk. Keep the explanation short and run the code.
 :::
 
-## デモ · Hello, sjulia
+## Demo · Hello, sjulia
 
 ```{=html}
 <div class="sjulia-executor" data-code="println(&quot;Hello from WebAssembly!&quot;)\nprintln(1 + 2 * 3)"></div>
 ```
 
-## デモ · Plots 経由の Plotly
+## Demo · Plotly via Plots
 
 ```{=html}
-<div class="sjulia-executor" data-code="using Plots\nx = 0:0.1:2π\nplot(x, sin.(x), label=&quot;sin&quot;)\nplot!(x, cos.(x), label=&quot;cos&quot;)\ntitle!(&quot;ブラウザ上で実行&quot;)"></div>
+<div class="sjulia-executor" data-code="using Plots\nx = 0:0.1:2π\nplot(x, sin.(x), label=&quot;sin&quot;)\nplot!(x, cos.(x), label=&quot;cos&quot;)\ntitle!(&quot;Running in your browser&quot;)"></div>
 ```
 
-## デモ · Mandelbrot ヒートマップ
+## Demo · Mandelbrot heatmap
 
 ```{=html}
 <div class="sjulia-executor" data-code="using Plots\nfunction kernel(c, n)\n  z = 0.0+0.0im\n  for k in 1:n\n    abs2(z) > 4 && return k\n    z = z^2 + c\n  end; n\nend\nxs = range(-2, 1; length=80)\nys = range(\n  -1.2, 1.2;length=60\n)\ncs = xs' .+ im .* ys\nzs = kernel.(cs, Ref(40))\nheatmap(xs, ys, zs)"></div>
 ```
 
-## デモ · Lorenz アトラクタ(OrdinaryDiffEq)
+## Demo · Lorenz attractor (OrdinaryDiffEq)
 
 ```{=html}
 <div class="sjulia-executor" data-code="using OrdinaryDiffEq\nfunction lorenz!(du, u, p, t)\n    du[1] = 10.0 * (u[2] - u[1])\n    du[2] = u[1] * (28.0 - u[3]) - u[2]\n    du[3] = u[1] * u[2] - (8 / 3) * u[3]\nend\nu0 = [1.0, 0.0, 0.0]\ntspan = (0.0, 60.0)\nprob = ODEProblem(lorenz!, u0, tspan)\nsol = solve(prob, Tsit5(), dt=0.05, saveat=0.05)\nusing Plots\nplot(sol, idxs=(1, 2, 3), title=&quot;Lorenz attractor&quot;)"></div>
@@ -156,8 +156,8 @@ Mandelbrot Set (50x25):
 
 ![](assets/julia-vm-oss.png){.absolute top="80" right="0" width="170"}
 
-- Julia から Rust へのトランスパイラ(試験段階)
-- JuliaC とは異なり `libjulia` は不要
+- A Julia-to-Rust transpiler (experimental)
+- Unlike JuliaC, it does not require `libjulia`
 
 ```sh
 $ cargo build --release -p subset_julia_vm \
@@ -193,9 +193,9 @@ Mandelbrot Set (50x25):
                               .
 ```
 
-## Julia, SubsetJuliaVM のパフォーマンス {.smaller}
+## Performance: Julia vs. SubsetJuliaVM {.smaller}
 
-マンデルブロー集合ベンチマーク(Apple Silicon macOS、2026-07 計測):
+Mandelbrot set benchmark (Apple Silicon macOS, measured 2026-07):
 
 ::: {.columns}
 ::: {.column width="55%"}
@@ -222,25 +222,25 @@ function mandel_count(width, height, maxiter)
     total
 end
 
-mandel_count(1500, 1500, 500)  # 全実装共通ソース
+mandel_count(1500, 1500, 500)  # same source for all implementations
 ```
 :::
 ::: {.column width="45%"}
-| ランタイム | 時間 |
+| Runtime | Time |
 |-----------|-----:|
-| Julia 本家 | 0.50 s |
-| `juliars`(AoT) | 0.52 s |
+| Upstream Julia | 0.50 s |
+| `juliars` (AoT) | 0.52 s |
 | sjulia **VM** | 4.0 s |
 | Python 3.14 | 20.8 s |
 
-- AoT は **本家とほぼ同速**
+- AoT is **about as fast as upstream Julia**
 :::
 :::
 
-## Android アプリに興味はありますか？
+## Interested in the Android app?
 
-- 準備中．テスターを募集しています．
-- `s.terasaki@atelier-arith.jp` にメールを送ってください．
+- Coming soon — we are looking for testers.
+- Send an email to `s.terasaki@atelier-arith.jp`.
 ![](assets/google_play.png)
 
 ---
