@@ -62,6 +62,20 @@ format:
   - Claude Code, Codex, Cursor, Kimi など AI をフル活用
   - 成果物 [AtelierArith/julia-vm-oss](https://github.com/AtelierArith/julia-vm-oss)
 
+## Julia 本家と sjulia の違い {.smaller}
+
+コードがどう解釈・実行されるか:
+
+| 段階 | Julia 本家 | SubsetJuliaVM |
+|------|-----------|---------------|
+| Parser | flisp / JuliaSyntax.jl | pure Rust parser → CST |
+| Lowering | lowered IR | Rust 実装 → Core IR |
+| コード生成 | LLVM **JIT** で実行時にネイティブ化 | bytecode compiler(**実行前に完了**) |
+| 実行 | ネイティブコード | スタック型 VM(バイトコード解釈) |
+| ランタイム | C runtime + pure Julia `base/` | Rust builtins + pure Julia サブセット |
+
+- SubsetJuliaVM は JIT がないので **iOS(W^X)や WASM でも動く**
+
 ## ライブデモ（このスライド内）
 
 - 百聞は一見にしかず
@@ -97,21 +111,7 @@ format:
 <div class="sjulia-executor" data-code="using OrdinaryDiffEq\nfunction lorenz!(du, u, p, t)\n    du[1] = 10.0 * (u[2] - u[1])\n    du[2] = u[1] * (28.0 - u[3]) - u[2]\n    du[3] = u[1] * u[2] - (8 / 3) * u[3]\nend\nu0 = [1.0, 0.0, 0.0]\ntspan = (0.0, 60.0)\nprob = ODEProblem(lorenz!, u0, tspan)\nsol = solve(prob, Tsit5(), dt=0.05, saveat=0.05)\nusing Plots\nplot(sol, idxs=(1, 2, 3), title=&quot;Lorenz attractor&quot;)"></div>
 ```
 
-## Julia 本家と sjulia の違い {.smaller}
-
-コードがどう解釈・実行されるか:
-
-| 段階 | Julia 本家 | SubsetJuliaVM |
-|------|-----------|---------------|
-| Parser | flisp / JuliaSyntax.jl | pure Rust parser → CST |
-| Lowering | lowered IR | Rust 実装 → Core IR |
-| コード生成 | LLVM **JIT** で実行時にネイティブ化 | bytecode compiler(**実行前に完了**) |
-| 実行 | ネイティブコード | スタック型 VM(バイトコード解釈) |
-| ランタイム | C runtime + pure Julia `base/` | Rust builtins + pure Julia サブセット |
-
-- SubsetJuliaVM は JIT がないので **iOS(W^X)や WASM でも動く**
-
-## Try `sjulia` (SubsetJuliaVM)
+## Try `sjulia` (SubsetJuliaVM) on your machine!!!
 
 ![](assets/julia-vm-oss.png){.absolute top="0" right="0" width="170"}
 
