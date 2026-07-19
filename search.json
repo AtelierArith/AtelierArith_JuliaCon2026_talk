@@ -70,11 +70,11 @@
     "text": "Demo · Lorenz attractor (OrdinaryDiffEq)"
   },
   {
-    "objectID": "slide/slide.html#try-sjulia-subsetjuliavm-on-your-machine",
-    "href": "slide/slide.html#try-sjulia-subsetjuliavm-on-your-machine",
+    "objectID": "slide/slide.html#try-sjulia",
+    "href": "slide/slide.html#try-sjulia",
     "title": "Let’s run Julia everywhere from mobile to web",
-    "section": "Try sjulia (SubsetJuliaVM) on your machine!!!",
-    "text": "Try sjulia (SubsetJuliaVM) on your machine!!!\n\n\nInstall Rust\nRun the following commands:\n\n$ git clone https://github.com/AtelierArith/julia-vm-oss.git\n$ cd julia-vm-oss\n$ ./scripts/sjulia_install.sh\n$ sjulia examples/mandelbrot.jl\n  0.40394 seconds\nMandelbrot Set (50x25):\n\n                              .\n                              . .\n                              .+\n                             ###+.\n                        .   .####.\n                       .#++#########....\n                      ..##############.\n            .        ..################..\n             ...... .##################.\n            .#######.###################\n          ...##########################.\n#####################################..\n          ...##########################.\n            .#######.###################\n             ...... .##################.\n            .        ..################..\n                      ..##############.\n                       .#++#########....\n                        .   .####.\n                             ###+.\n                              .+\n                              . .\n                              ."
+    "section": "Try sjulia",
+    "text": "Try sjulia\n\n\nTry sjulia (SubsetJuliaVM) on your machine!!!\nInstall Rust\nRun the following commands:\n\n$ git clone https://github.com/AtelierArith/julia-vm-oss.git\n$ cd julia-vm-oss\n$ ./scripts/sjulia_install.sh\n$ sjulia examples/mandelbrot.jl\n  0.40394 seconds\nMandelbrot Set (50x25):\n\n                              .\n                              . .\n                              .+\n                             ###+.\n                        .   .####.\n                       .#++#########....\n                      ..##############.\n            .        ..################..\n             ...... .##################.\n            .#######.###################\n          ...##########################.\n#####################################..\n          ...##########################.\n            .#######.###################\n             ...... .##################.\n            .        ..################..\n                      ..##############.\n                       .#++#########....\n                        .   .####.\n                             ###+.\n                              .+\n                              . .\n                              ."
   },
   {
     "objectID": "slide/slide.html#juliars",
