@@ -18,8 +18,9 @@ Anticipated questions about SubsetJuliaVM (`sjulia`), with answers grounded in t
 **A.** A clean-room implementation of a **subset of the Julia language**, written in Rust —
 built to run Julia code where the official runtime cannot go.
 
-- One pipeline, no JIT: pure-Rust parser → lowering → Core IR → bytecode compiler →
-  **stack-based bytecode VM**. All code generation stays in data (bytecode),
+- One pipeline, no JIT: a pure-Rust parser, lowering, and bytecode compiler feed a
+  **stack-based bytecode VM** (`source → CST → Core IR → bytecode`).
+  All code generation stays in data (bytecode),
   so it runs on iOS (W^X), Android, WASM, and desktop.
 - Ships with a reimplemented Base subset (~46k lines of pure Julia + Rust builtins)
   and ~34 bundled packages (Plots, OrdinaryDiffEq surface, AbstractAlgebra, …).
@@ -108,7 +109,11 @@ specialized print opcodes, not even a function call.
 
 ## Q. What happens between Julia source and execution? {.smaller}
 
-**A.** `Source → Parser → Lowering → Core IR → Compiler → Bytecode → VM`
+**A.** Data are nouns, stages are arrows:
+
+```
+Source ─[parse]→ CST ─[lower]→ Core IR ─[compile]→ Bytecode ─[VM interprets]→ result
+```
 
 - **Parser**: pure Rust, producing a tree-sitter-compatible CST, validated against
   upstream Julia's parser. Pure Rust means the same parser runs natively, on iOS,

@@ -61,7 +61,7 @@ format:
   - So why not build a virtual machine that accepts Julia syntax?!
 - Let's actually build it!
   - A stack-based bytecode interpreter (**no JIT**)
-  - `Julia source → Parser → Lowering → Compiler → VM`
+  - `Julia source ─parse→ CST ─lower→ IR ─compile→ bytecode ─→ VM interprets`
   - Built with heavy use of AI tools: Claude Code, Codex, Cursor, Kimi, etc.
   - Result: [AtelierArith/julia-vm-oss](https://github.com/AtelierArith/julia-vm-oss)
 
@@ -69,13 +69,15 @@ format:
 
 How code is interpreted and executed:
 
+Each cell: *who does it* → *what it produces*
+
 | Stage | Upstream Julia | SubsetJuliaVM |
 |------|-----------|---------------|
-| Parser | flisp / JuliaSyntax.jl | pure Rust parser → CST |
-| Lowering | lowered IR | Rust implementation → Core IR |
-| Code generation | native code via LLVM **JIT** at runtime | bytecode compiler (**done before execution**) |
-| Execution | native code | stack-based VM (bytecode interpretation) |
-| Runtime | C runtime + pure Julia `base/` | Rust builtins + a pure Julia subset |
+| Parsing | flisp / JuliaSyntax.jl → AST | pure-Rust parser → CST |
+| Lowering | Julia's lowering → lowered IR | Rust lowering → Core IR |
+| Code generation | LLVM **JIT at runtime** → native code | bytecode compiler **before execution** → bytecode |
+| Execution | CPU runs native code | stack VM interprets bytecode |
+| Runtime library | C runtime + pure-Julia `base/` | Rust builtins + a pure-Julia subset |
 
 - With no JIT, SubsetJuliaVM **runs even on iOS (W^X) and WASM**
 
