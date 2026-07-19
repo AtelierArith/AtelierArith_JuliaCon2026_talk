@@ -164,3 +164,13 @@
     max-height: 45vh;
   }
 }
+
+/* Full-width mermaid diagrams: wrap a ```{mermaid} block in ::: {.mermaid-big} */
+.reveal .mermaid-big .mermaid {
+  width: 100%;
+}
+.reveal .mermaid-big .mermaid svg {
+  width: 100% !important;
+  max-width: none !important;
+  height: auto !important;
+}

@@ -9,7 +9,7 @@
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-0a6b7249c26820e032cb0bd839ff02b1.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
   <meta name="generator" content="quarto-1.9.38">
 
-  <meta name="author" content="terasakisatoshi">
+  <meta name="author" content="Satoshi Terasaki@AtelierArith">
   <title>Let’s run Julia everywhere – Let’s run Julia everywhere from mobile to web</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -191,6 +191,9 @@
       margin-right: 0; 
     }
   </style>
+  <script src="../site_libs/quarto-diagram/mermaid.min.js"></script>
+  <script src="../site_libs/quarto-diagram/mermaid-init.js"></script>
+  <link href="../site_libs/quarto-diagram/mermaid.css" rel="stylesheet">
 </head>
 <body class="quarto-dark">
   <div class="reveal">
@@ -202,7 +205,7 @@
 <div class="quarto-title-authors">
 <div class="quarto-title-author">
 <div class="quarto-title-author-name">
-terasakisatoshi 
+Satoshi Terasaki@AtelierArith 
 </div>
 </div>
 </div>
@@ -239,19 +242,31 @@ terasakisatoshi
 </div></div>
 <h3 id="google-it-subsetjuliavm">Google it <code>SubsetJuliaVM</code></h3>
 </section>
-<section id="why-i-created-it" class="slide level2">
+<section id="why-i-created-it" class="slide level2 smaller">
 <h2>Why I created it</h2>
 <ul>
-<li>I wanted to run Julia on my iPad.
+<li>I wanted to run Julia on my iPad</li>
+<li>But Julia normally relies on <strong>JIT</strong> compilation — and iOS blocks JIT twice:
 <ul>
-<li><strong>iOS / iPadOS</strong> (no JIT allowed, strict App Store review)</li>
-<li>W^X (Write XOR Execute) policy</li>
+<li><strong>The OS blocks it</strong> — W^X: memory is writable <strong>xor</strong> executable
+<ul>
+<li>A JIT <em>writes</em> machine code, then <em>executes</em> it</li>
+<li>→ it needs pages it can write <strong>and</strong> then execute</li>
+<li><strong>General-purpose JIT is unavailable to ordinary distributed apps</strong> — Apple reserves it for its own apps like Safari’s JS engine (exceptions: approved browser engines, debugger-attached dev builds) — <a href="https://support.apple.com/guide/security/security-of-runtime-process-sec15bfe098e/web">Apple Platform Security</a></li>
 </ul></li>
-<li>What about Binder or Google Colab?
+<li><strong>The store forbids it</strong>
+<ul>
+<li>Apps may not download, install, or execute code that introduces or changes app functionality — <a href="https://developer.apple.com/app-store/review/guidelines/#2.5.2">App Store Review Guidelines §2.5.2</a></li>
+</ul></li>
+</ul></li>
+<li>A <strong>bundled interpreter</strong> is fine: bytecode is just <em>data</em> read by an already-signed app (downloaded code would still fall under §2.5.2)</li>
+</ul>
+</section>
+<section id="what-about-binder-or-google-colab" class="slide level2">
+<h2>What about Binder or Google Colab?</h2>
 <ul>
 <li>Unusable where the internet connection is unreliable</li>
 <li>Installing external packages takes a long time</li>
-</ul></li>
 </ul>
 </section>
 <section id="how-i-created-it" class="slide level2">
@@ -261,18 +276,40 @@ terasakisatoshi
 <ul>
 <li>So why not build a virtual machine that accepts Julia syntax?!</li>
 </ul></li>
-<li>Let’s actually build it!
+<li>I don’t have an ability to create this
 <ul>
-<li>A stack-based bytecode interpreter (<strong>no JIT</strong>)</li>
-<li><code>Julia source → Parser → Lowering → Compiler → VM</code></li>
-<li>Built with heavy use of AI tools: Claude Code, Codex, Cursor, Kimi, etc.</li>
-<li>Result: <a href="https://github.com/AtelierArith/julia-vm-oss">AtelierArith/julia-vm-oss</a></li>
+<li>Let’s use AI</li>
+<li>Built with heavy use of AI tools: Claude Code, Codex, Cursor, DeepSeek, Kimi, etc.</li>
 </ul></li>
 </ul>
 </section>
-<section id="how-sjulia-differs-from-upstream-julia" class="slide level2 smaller">
-<h2>How sjulia differs from upstream Julia</h2>
+<section id="lets-actually-build-it" class="slide level2">
+<h2>Let’s actually build it!</h2>
+<ul>
+<li>A stack-based bytecode interpreter (<strong>no JIT</strong>)</li>
+</ul>
+<div class="mermaid-big">
+<div class="cell" data-reveal="true" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class=""><p></p>
+<div>
+<pre class="mermaid mermaid-js">%%{init: {"flowchart": {"useMaxWidth": false, "nodeSpacing": 25, "rankSpacing": 32, "padding": 10}}}%%
+flowchart LR
+  SRC["Julia source"] -- parse --&gt; CST["CST"] -- lower --&gt; IR["Core IR"] -- compile --&gt; BC["bytecode"] -- "stack VM interprets" --&gt; OUT["result"]
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</div>
+<p>Result: <a href="https://github.com/AtelierArith/julia-vm-oss">AtelierArith/julia-vm-oss</a></p>
+</section>
+<section id="how-sjulia-differs-from-official-julia" class="slide level2 smaller">
+<h2>How sjulia differs from official Julia</h2>
 <p>How code is interpreted and executed:</p>
+<p>Each cell: <em>who does it</em> → <em>what it produces</em></p>
 <table class="caption-top">
 <colgroup>
 <col style="width: 18%">
@@ -282,41 +319,55 @@ terasakisatoshi
 <thead>
 <tr class="header">
 <th>Stage</th>
-<th>Upstream Julia</th>
+<th>Official Julia</th>
 <th>SubsetJuliaVM</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>Parser</td>
-<td>flisp / JuliaSyntax.jl</td>
-<td>pure Rust parser → CST</td>
+<td>Parsing</td>
+<td>flisp / JuliaSyntax.jl → AST</td>
+<td>pure-Rust parser → CST</td>
 </tr>
 <tr class="even">
 <td>Lowering</td>
-<td>lowered IR</td>
-<td>Rust implementation → Core IR</td>
+<td>Julia’s lowering → lowered IR</td>
+<td>Rust lowering → Core IR</td>
 </tr>
 <tr class="odd">
 <td>Code generation</td>
-<td>native code via LLVM <strong>JIT</strong> at runtime</td>
-<td>bytecode compiler (<strong>done before execution</strong>)</td>
+<td>LLVM <strong>JIT at runtime</strong> → native code</td>
+<td>bytecode compiler <strong>before execution</strong> → bytecode</td>
 </tr>
 <tr class="even">
 <td>Execution</td>
-<td>native code</td>
-<td>stack-based VM (bytecode interpretation)</td>
+<td>CPU runs native code</td>
+<td>stack VM interprets bytecode</td>
 </tr>
 <tr class="odd">
-<td>Runtime</td>
-<td>C runtime + pure Julia <code>base/</code></td>
-<td>Rust builtins + a pure Julia subset</td>
+<td>Runtime library</td>
+<td>C runtime + pure-Julia <code>base/</code></td>
+<td>Rust builtins + a pure-Julia subset</td>
 </tr>
 </tbody>
 </table>
 <ul>
 <li>With no JIT, SubsetJuliaVM <strong>runs even on iOS (W^X) and WASM</strong></li>
 </ul>
+</section>
+<section id="what-subsetjuliavm-does-not-provide" class="slide level2 smaller">
+<h2>What SubsetJuliaVM does <em>not</em> provide</h2>
+<p>Everything that would break the sandboxed, offline, no-downloaded-code model:</p>
+<ul>
+<li><strong>Pkg.jl / package management</strong> — no <code>Pkg.add</code>, no registry, no downloads; <code>using X</code> only reaches the ~34 packages bundled into the binary</li>
+<li><strong>Network I/O</strong> — no Sockets, no Downloads/HTTP</li>
+<li><strong>Filesystem access</strong> — file operations are unimplemented; <code>include</code> resolves through virtual embedded paths</li>
+<li><strong>External processes</strong> — no <code>run(cmd)</code></li>
+<li><strong>C interface</strong> — no <code>@ccall</code>/<code>pointer</code>/<code>unsafe_*</code></li>
+<li><strong>Real parallelism</strong> — single-threaded by design; Tasks/Channels are cooperative continuations</li>
+<li><strong>Native-code reflection</strong> — no <code>@code_llvm</code>/<code>@code_native</code> (there is no LLVM); use <code>sjulia --dump-bytecode</code> instead</li>
+</ul>
+<p>More details: see the <a href="appendix.html">Appendix slides</a></p>
 </section>
 <section id="live-demo-inside-these-slides" class="slide level2">
 <h2>Live demo (inside these slides)</h2>
@@ -339,20 +390,20 @@ terasakisatoshi
           display:block!important;
       }</style></aside>
 </section>
-<section id="demo-hello-sjulia" class="slide level2">
-<h2>Demo · Hello, sjulia</h2>
+<section id="hello-sjulia" class="slide level2">
+<h2>Hello, sjulia</h2>
 <div class="sjulia-executor" data-code="println(&quot;Hello from WebAssembly!&quot;)\nprintln(1 + 2 * 3)"></div>
 </section>
-<section id="demo-plotly-via-plots" class="slide level2">
-<h2>Demo · Plotly via Plots</h2>
+<section id="plotly-via-plots" class="slide level2">
+<h2>Plotly via Plots</h2>
 <div class="sjulia-executor" data-code="using Plots\nx = 0:0.1:2π\nplot(x, sin.(x), label=&quot;sin&quot;)\nplot!(x, cos.(x), label=&quot;cos&quot;)\ntitle!(&quot;Running in your browser&quot;)"></div>
 </section>
-<section id="demo-mandelbrot-heatmap" class="slide level2">
-<h2>Demo · Mandelbrot heatmap</h2>
+<section id="mandelbrot-heatmap" class="slide level2">
+<h2>Mandelbrot heatmap</h2>
 <div class="sjulia-executor" data-code="using Plots\nfunction kernel(c, n)\n  z = 0.0+0.0im\n  for k in 1:n\n    abs2(z) > 4 &amp;&amp; return k\n    z = z^2 + c\n  end; n\nend\nxs = range(-2, 1; length=80)\nys = range(\n  -1.2, 1.2;length=60\n)\ncs = xs' .+ im .* ys\nzs = kernel.(cs, Ref(40))\nheatmap(xs, ys, zs)"></div>
 </section>
-<section id="demo-lorenz-attractor-ordinarydiffeq" class="slide level2">
-<h2>Demo · Lorenz attractor (OrdinaryDiffEq)</h2>
+<section id="lorenz-attractor-ordinarydiffeq" class="slide level2">
+<h2>Lorenz attractor (OrdinaryDiffEq)</h2>
 <div class="sjulia-executor" data-code="using OrdinaryDiffEq\nfunction lorenz!(du, u, p, t)\n    du[1] = 10.0 * (u[2] - u[1])\n    du[2] = u[1] * (28.0 - u[3]) - u[2]\n    du[3] = u[1] * u[2] - (8 / 3) * u[3]\nend\nu0 = [1.0, 0.0, 0.0]\ntspan = (0.0, 60.0)\nprob = ODEProblem(lorenz!, u0, tspan)\nsol = solve(prob, Tsit5(), dt=0.05, saveat=0.05)\nusing Plots\nplot(sol, idxs=(1, 2, 3), title=&quot;Lorenz attractor&quot;)"></div>
 </section>
 <section id="try-sjulia" class="slide level2">
@@ -360,7 +411,7 @@ terasakisatoshi
 <p><img data-src="assets/julia-vm-oss.png" class="absolute" style="top: 0px; right: 0px; width: 170px; "></p>
 <ul>
 <li>Try <code>sjulia</code> (SubsetJuliaVM) on your machine!!!</li>
-<li>Install Rust</li>
+<li><a href="https://rust-lang.org/tools/install/">Install Rust</a></li>
 <li>Run the following commands:</li>
 </ul>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a></a><span class="ex">$</span> git clone https://github.com/AtelierArith/julia-vm-oss.git</span>
@@ -471,7 +522,7 @@ terasakisatoshi
 </thead>
 <tbody>
 <tr class="odd">
-<td>Upstream Julia</td>
+<td>Official Julia</td>
 <td style="text-align: right;">0.50 s</td>
 </tr>
 <tr class="even">
@@ -489,7 +540,7 @@ terasakisatoshi
 </tbody>
 </table>
 <ul>
-<li>AoT is <strong>about as fast as upstream Julia</strong></li>
+<li>AoT is <strong>about as fast as official Julia</strong></li>
 </ul>
 </div></div>
 </section>
@@ -505,6 +556,7 @@ terasakisatoshi
 </section>
 <section id="thank-you" class="title-slide slide level1 center">
 <h1>Thank you!!!</h1>
+<p>Q&amp;A material: see the <a href="appendix.html">Appendix slides</a></p>
 
 
 </section>

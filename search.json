@@ -18,21 +18,42 @@
     "href": "slide/slide.html#why-i-created-it",
     "title": "Let’s run Julia everywhere from mobile to web",
     "section": "Why I created it",
-    "text": "Why I created it\n\nI wanted to run Julia on my iPad.\n\niOS / iPadOS (no JIT allowed, strict App Store review)\nW^X (Write XOR Execute) policy\n\nWhat about Binder or Google Colab?\n\nUnusable where the internet connection is unreliable\nInstalling external packages takes a long time"
+    "text": "Why I created it\n\nI wanted to run Julia on my iPad\nBut Julia normally relies on JIT compilation — and iOS blocks JIT twice:\n\nThe OS blocks it — W^X: memory is writable xor executable\n\nA JIT writes machine code, then executes it\n→ it needs pages it can write and then execute\nGeneral-purpose JIT is unavailable to ordinary distributed apps — Apple reserves it for its own apps like Safari’s JS engine (exceptions: approved browser engines, debugger-attached dev builds) — Apple Platform Security\n\nThe store forbids it\n\nApps may not download, install, or execute code that introduces or changes app functionality — App Store Review Guidelines §2.5.2\n\n\nA bundled interpreter is fine: bytecode is just data read by an already-signed app (downloaded code would still fall under §2.5.2)"
+  },
+  {
+    "objectID": "slide/slide.html#what-about-binder-or-google-colab",
+    "href": "slide/slide.html#what-about-binder-or-google-colab",
+    "title": "Let’s run Julia everywhere from mobile to web",
+    "section": "What about Binder or Google Colab?",
+    "text": "What about Binder or Google Colab?\n\nUnusable where the internet connection is unreliable\nInstalling external packages takes a long time"
   },
   {
     "objectID": "slide/slide.html#how-i-created-it",
     "href": "slide/slide.html#how-i-created-it",
     "title": "Let’s run Julia everywhere from mobile to web",
     "section": "How I created it",
-    "text": "How I created it\n\nApps like Pythonista and Carnets do run on iOS.\n\nSo why not build a virtual machine that accepts Julia syntax?!\n\nLet’s actually build it!\n\nA stack-based bytecode interpreter (no JIT)\nJulia source → Parser → Lowering → Compiler → VM\nBuilt with heavy use of AI tools: Claude Code, Codex, Cursor, Kimi, etc.\nResult: AtelierArith/julia-vm-oss"
+    "text": "How I created it\n\nApps like Pythonista and Carnets do run on iOS.\n\nSo why not build a virtual machine that accepts Julia syntax?!\n\nI don’t have an ability to create this\n\nLet’s use AI\nBuilt with heavy use of AI tools: Claude Code, Codex, Cursor, DeepSeek, Kimi, etc."
   },
   {
-    "objectID": "slide/slide.html#how-sjulia-differs-from-upstream-julia",
-    "href": "slide/slide.html#how-sjulia-differs-from-upstream-julia",
+    "objectID": "slide/slide.html#lets-actually-build-it",
+    "href": "slide/slide.html#lets-actually-build-it",
     "title": "Let’s run Julia everywhere from mobile to web",
-    "section": "How sjulia differs from upstream Julia",
-    "text": "How sjulia differs from upstream Julia\nHow code is interpreted and executed:\n\n\n\n\n\n\n\n\nStage\nUpstream Julia\nSubsetJuliaVM\n\n\n\n\nParser\nflisp / JuliaSyntax.jl\npure Rust parser → CST\n\n\nLowering\nlowered IR\nRust implementation → Core IR\n\n\nCode generation\nnative code via LLVM JIT at runtime\nbytecode compiler (done before execution)\n\n\nExecution\nnative code\nstack-based VM (bytecode interpretation)\n\n\nRuntime\nC runtime + pure Julia base/\nRust builtins + a pure Julia subset\n\n\n\n\nWith no JIT, SubsetJuliaVM runs even on iOS (W^X) and WASM"
+    "section": "Let’s actually build it!",
+    "text": "Let’s actually build it!\n\nA stack-based bytecode interpreter (no JIT)\n\n\n\n\n\n\n\n%%{init: {\"flowchart\": {\"useMaxWidth\": false, \"nodeSpacing\": 25, \"rankSpacing\": 32, \"padding\": 10}}}%%\nflowchart LR\n  SRC[\"Julia source\"] -- parse --&gt; CST[\"CST\"] -- lower --&gt; IR[\"Core IR\"] -- compile --&gt; BC[\"bytecode\"] -- \"stack VM interprets\" --&gt; OUT[\"result\"]\n\n\n\n\n\n\n\nResult: AtelierArith/julia-vm-oss"
+  },
+  {
+    "objectID": "slide/slide.html#how-sjulia-differs-from-official-julia",
+    "href": "slide/slide.html#how-sjulia-differs-from-official-julia",
+    "title": "Let’s run Julia everywhere from mobile to web",
+    "section": "How sjulia differs from official Julia",
+    "text": "How sjulia differs from official Julia\nHow code is interpreted and executed:\nEach cell: who does it → what it produces\n\n\n\n\n\n\n\n\nStage\nOfficial Julia\nSubsetJuliaVM\n\n\n\n\nParsing\nflisp / JuliaSyntax.jl → AST\npure-Rust parser → CST\n\n\nLowering\nJulia’s lowering → lowered IR\nRust lowering → Core IR\n\n\nCode generation\nLLVM JIT at runtime → native code\nbytecode compiler before execution → bytecode\n\n\nExecution\nCPU runs native code\nstack VM interprets bytecode\n\n\nRuntime library\nC runtime + pure-Julia base/\nRust builtins + a pure-Julia subset\n\n\n\n\nWith no JIT, SubsetJuliaVM runs even on iOS (W^X) and WASM"
+  },
+  {
+    "objectID": "slide/slide.html#what-subsetjuliavm-does-not-provide",
+    "href": "slide/slide.html#what-subsetjuliavm-does-not-provide",
+    "title": "Let’s run Julia everywhere from mobile to web",
+    "section": "What SubsetJuliaVM does not provide",
+    "text": "What SubsetJuliaVM does not provide\nEverything that would break the sandboxed, offline, no-downloaded-code model:\n\nPkg.jl / package management — no Pkg.add, no registry, no downloads; using X only reaches the ~34 packages bundled into the binary\nNetwork I/O — no Sockets, no Downloads/HTTP\nFilesystem access — file operations are unimplemented; include resolves through virtual embedded paths\nExternal processes — no run(cmd)\nC interface — no @ccall/pointer/unsafe_*\nReal parallelism — single-threaded by design; Tasks/Channels are cooperative continuations\nNative-code reflection — no @code_llvm/@code_native (there is no LLVM); use sjulia --dump-bytecode instead\n\nMore details: see the Appendix slides"
   },
   {
     "objectID": "slide/slide.html#live-demo-inside-these-slides",
@@ -42,32 +63,32 @@
     "text": "Live demo (inside these slides)\n\nSeeing is believing\nThe next slides embed the very same WASM VM.\n\nEdit the code and run it with Ctrl+Enter / ⌘+Enter (or Run). Press Clear to clear the output.\n\nThe demo is the heart of this talk. Keep the explanation short and run the code."
   },
   {
-    "objectID": "slide/slide.html#demo-hello-sjulia",
-    "href": "slide/slide.html#demo-hello-sjulia",
+    "objectID": "slide/slide.html#hello-sjulia",
+    "href": "slide/slide.html#hello-sjulia",
     "title": "Let’s run Julia everywhere from mobile to web",
-    "section": "Demo · Hello, sjulia",
-    "text": "Demo · Hello, sjulia"
+    "section": "Hello, sjulia",
+    "text": "Hello, sjulia"
   },
   {
-    "objectID": "slide/slide.html#demo-plotly-via-plots",
-    "href": "slide/slide.html#demo-plotly-via-plots",
+    "objectID": "slide/slide.html#plotly-via-plots",
+    "href": "slide/slide.html#plotly-via-plots",
     "title": "Let’s run Julia everywhere from mobile to web",
-    "section": "Demo · Plotly via Plots",
-    "text": "Demo · Plotly via Plots"
+    "section": "Plotly via Plots",
+    "text": "Plotly via Plots"
   },
   {
-    "objectID": "slide/slide.html#demo-mandelbrot-heatmap",
-    "href": "slide/slide.html#demo-mandelbrot-heatmap",
+    "objectID": "slide/slide.html#mandelbrot-heatmap",
+    "href": "slide/slide.html#mandelbrot-heatmap",
     "title": "Let’s run Julia everywhere from mobile to web",
-    "section": "Demo · Mandelbrot heatmap",
-    "text": "Demo · Mandelbrot heatmap"
+    "section": "Mandelbrot heatmap",
+    "text": "Mandelbrot heatmap"
   },
   {
-    "objectID": "slide/slide.html#demo-lorenz-attractor-ordinarydiffeq",
-    "href": "slide/slide.html#demo-lorenz-attractor-ordinarydiffeq",
+    "objectID": "slide/slide.html#lorenz-attractor-ordinarydiffeq",
+    "href": "slide/slide.html#lorenz-attractor-ordinarydiffeq",
     "title": "Let’s run Julia everywhere from mobile to web",
-    "section": "Demo · Lorenz attractor (OrdinaryDiffEq)",
-    "text": "Demo · Lorenz attractor (OrdinaryDiffEq)"
+    "section": "Lorenz attractor (OrdinaryDiffEq)",
+    "text": "Lorenz attractor (OrdinaryDiffEq)"
   },
   {
     "objectID": "slide/slide.html#try-sjulia",
@@ -88,7 +109,7 @@
     "href": "slide/slide.html#performance-julia-vs.-subsetjuliavm",
     "title": "Let’s run Julia everywhere from mobile to web",
     "section": "Performance: Julia vs. SubsetJuliaVM",
-    "text": "Performance: Julia vs. SubsetJuliaVM\nMandelbrot set benchmark (Apple Silicon macOS, measured 2026-07):\n\n\nfunction mandel_point(c::ComplexF64,\n                      maxiter::Int64)::Int64\n    z = 0.0 + 0.0im\n    for k in 1:maxiter\n        abs2(z) &gt; 4.0 && return k - 1\n        z = z * z + c\n    end\n    return maxiter\nend\n\nfunction mandel_count(width, height, maxiter)\n    total = 0\n    for y in 1:height\n        ci = -1.2 + 2.4 * (y - 1) / (height - 1)\n        for x in 1:width\n            cr = -2.0 + 3.0 * (x - 1) / (width - 1)\n            total += mandel_point(cr + ci * im, maxiter)\n        end\n    end\n    total\nend\n\nmandel_count(1500, 1500, 500)  # same source for all implementations\n\n\n\n\nRuntime\nTime\n\n\n\n\nUpstream Julia\n0.50 s\n\n\njuliars (AoT)\n0.52 s\n\n\nsjulia VM\n4.0 s\n\n\nPython 3.14\n20.8 s\n\n\n\n\nAoT is about as fast as upstream Julia"
+    "text": "Performance: Julia vs. SubsetJuliaVM\nMandelbrot set benchmark (Apple Silicon macOS, measured 2026-07):\n\n\nfunction mandel_point(c::ComplexF64,\n                      maxiter::Int64)::Int64\n    z = 0.0 + 0.0im\n    for k in 1:maxiter\n        abs2(z) &gt; 4.0 && return k - 1\n        z = z * z + c\n    end\n    return maxiter\nend\n\nfunction mandel_count(width, height, maxiter)\n    total = 0\n    for y in 1:height\n        ci = -1.2 + 2.4 * (y - 1) / (height - 1)\n        for x in 1:width\n            cr = -2.0 + 3.0 * (x - 1) / (width - 1)\n            total += mandel_point(cr + ci * im, maxiter)\n        end\n    end\n    total\nend\n\nmandel_count(1500, 1500, 500)  # same source for all implementations\n\n\n\n\nRuntime\nTime\n\n\n\n\nOfficial Julia\n0.50 s\n\n\njuliars (AoT)\n0.52 s\n\n\nsjulia VM\n4.0 s\n\n\nPython 3.14\n20.8 s\n\n\n\n\nAoT is about as fast as official Julia"
   },
   {
     "objectID": "slide/slide.html#interested-in-the-android-app",
@@ -116,6 +137,258 @@
     "href": "index.html#appendix",
     "title": "Let’s run Julia everywhere from mobile to web",
     "section": "Appendix",
-    "text": "Appendix\n\nThis page is built using Quarto. The qmd files are maintained at this repository. Readers are free to use these materials for educational and research purposes."
+    "text": "Appendix\n\nAppendix — Q&A\n\nAnticipated questions and answers about SubsetJuliaVM: what a stack-based VM is, how multiple dispatch works without a JIT, how packages like Plots.jl are bundled, W^X and App Store constraints, juliars (AoT), and more.\n\nThis page is built using Quarto. The qmd files are maintained at this repository. Readers are free to use these materials for educational and research purposes."
+  },
+  {
+    "objectID": "slide/appendix.html#about-this-appendix",
+    "href": "slide/appendix.html#about-this-appendix",
+    "title": "Appendix — Q&A",
+    "section": "About this appendix",
+    "text": "About this appendix\nAnticipated questions about SubsetJuliaVM (sjulia), with answers grounded in the actual implementation."
+  },
+  {
+    "objectID": "slide/appendix.html#q.-what-is-subsetjuliavm-sjulia",
+    "href": "slide/appendix.html#q.-what-is-subsetjuliavm-sjulia",
+    "title": "Appendix — Q&A",
+    "section": "Q. What is SubsetJuliaVM (sjulia)?",
+    "text": "Q. What is SubsetJuliaVM (sjulia)?\nA. A clean-room implementation of a subset of the Julia language, written in Rust — built to run Julia code where the official runtime cannot go.\n\nOne pipeline, no JIT: a pure-Rust parser, lowering, and bytecode compiler feed a stack-based bytecode VM (source → CST → Core IR → bytecode). All code generation stays in data (bytecode), so it runs on iOS (W^X), Android, WASM, and desktop.\nShips with a reimplemented Base subset (~46k lines of pure Julia + Rust builtins) and ~34 bundled packages (Plots, OrdinaryDiffEq surface, AbstractAlgebra, …).\nSame core, many faces: the sjulia CLI, an iOS/iPadOS App Store app, an Android (Flutter) app, and a browser playground — plus juliars, an experimental Julia→Rust AoT transpiler.\nIt is a subset: behavior is checked against official Julia 1.12 fixture-by-fixture, but it is not, and does not claim to be, a full Julia implementation."
+  },
+  {
+    "objectID": "slide/appendix.html#q.-what-is-a-stack-based-vm",
+    "href": "slide/appendix.html#q.-what-is-a-stack-based-vm",
+    "title": "Appendix — Q&A",
+    "section": "Q. What is a “stack-based VM”?",
+    "text": "Q. What is a “stack-based VM”?\nA. An interpreter that executes bytecode using an operand stack instead of registers.\n\nExpressions like 1 + 2 * 3 compile (before optimization) to instructions such as PushI64(1), PushI64(2), PushI64(3), MulI64, AddI64 — each operation pops its operands from the stack and pushes the result.\nThe VM core is a plain Rust loop: fetch code[ip], match on the opcode, execute, advance ip (plus fast paths: pre-decoded straight-line blocks and specialized call sites bypass the generic loop).\nThe instruction set (enum Instr) has 400+ opcodes: typed arithmetic (AddI64, MulF64), dynamic fallbacks (DynamicAdd), control flow (Jump, JumpIfZero), calls, array ops, etc.\nFunction calls push a Frame (locals, captured variables, entry stack height) onto a call-frame stack.\nNo machine code is ever generated at runtime — that is why it satisfies iOS’s W^X policy."
+  },
+  {
+    "objectID": "slide/appendix.html#q.-how-does-println1-2-3-actually-run-12",
+    "href": "slide/appendix.html#q.-how-does-println1-2-3-actually-run-12",
+    "title": "Appendix — Q&A",
+    "section": "Q. How does println(1 + 2 * 3) actually run? (1/2)",
+    "text": "Q. How does println(1 + 2 * 3) actually run? (1/2)\nA. Everything up to bytecode happens before execution:\n1. Parse — the pure-Rust parser builds a CST; precedence makes * bind tighter than +:\ncall println( binary+ ( 1, binary* (2, 3) ) )\n2. Lower — CST → Core IR: Call(\"println\", [BinaryOp(+, 1, BinaryOp(*, 2, 3))])\n3. Compile — for this literal expression, constant propagation already finishes the math at compile time. The actual emitted bytecode (sjulia --dump-bytecode):\nPushI64(7)  PrintI64NoNewline  PrintNewline\nThe VM never multiplies — and println of an inferred Int64 compiles to specialized print opcodes, not even a function call."
+  },
+  {
+    "objectID": "slide/appendix.html#q.-how-does-println1-2-3-actually-run-22",
+    "href": "slide/appendix.html#q.-how-does-println1-2-3-actually-run-22",
+    "title": "Appendix — Q&A",
+    "section": "Q. How does println(1 + 2 * 3) actually run? (2/2)",
+    "text": "Q. How does println(1 + 2 * 3) actually run? (2/2)\nA. To watch the stack machine work, hide the constants behind an argument. f(x::Int64) = println(1 + x * 3) compiles to (verified with --dump-bytecode):\n\n\n\nstep\ninstruction\noperand stack after (x = 2)\n\n\n\n\n1\nPushI64(1)\n[1]\n\n\n2\nLoadSlotI64(0)\n[1, 2] — load x from its typed slot\n\n\n3\nPushI64(3)\n[1, 2, 3]\n\n\n4\nMulI64\n[1, 6] — pops 2 and 3, pushes 6\n\n\n5\nAddI64\n[7] — pops 1 and 6, pushes 7\n\n\n6\nPrintI64NoNewline\n[] — pops 7, prints 7\n\n\n7\nPrintNewline\n[]\n\n\n\n\nThe VM loop is: fetch code[ip] → match on the opcode → push/pop the stack (optimized straight-line blocks can bypass this generic loop).\nMulI64 is plain Rust: pop two i64s, multiply, push — no type check, no boxing.\nNo machine code was generated at any point: bytecode is data, interpreted by the same VM on iOS, Android, and WASM."
+  },
+  {
+    "objectID": "slide/appendix.html#q.-stack-vm-vs.-register-vm-vs.-tree-walking-interpreter",
+    "href": "slide/appendix.html#q.-stack-vm-vs.-register-vm-vs.-tree-walking-interpreter",
+    "title": "Appendix — Q&A",
+    "section": "Q. Stack VM vs. register VM vs. tree-walking interpreter?",
+    "text": "Q. Stack VM vs. register VM vs. tree-walking interpreter?\nA. Three classic interpreter designs:\n\n\n\n\n\n\n\n\nDesign\nHow it works\nTrade-off\n\n\n\n\nTree-walking\nRecursively evaluate the AST\nSimplest, slowest\n\n\nStack VM (sjulia today)\nLinear bytecode + operand stack\nCompact bytecode, simple compiler; CPython/older JVMs work this way\n\n\nRegister VM\nBytecode operates on virtual registers\nFewer instructions dispatched; Lua-style"
+  },
+  {
+    "objectID": "slide/appendix.html#q.-which-design-does-sjulia-use",
+    "href": "slide/appendix.html#q.-which-design-does-sjulia-use",
+    "title": "Appendix — Q&A",
+    "section": "Q. Which design does sjulia use?",
+    "text": "Q. Which design does sjulia use?\nA. A stack VM today; a register VM is being evaluated.\n\nsjulia compiles to bytecode first, so the main execution path is not a tree-walker (a small tree-walking evaluator exists only for runtime eval of Expr values).\nA register VM prototype exists behind a flag; the stack VM stays the default until side-by-side parity and performance are proven.\nEither way it is ordinary ahead-of-time-compiled Rust — no executable memory needed."
+  },
+  {
+    "objectID": "slide/appendix.html#q.-what-happens-between-julia-source-and-execution",
+    "href": "slide/appendix.html#q.-what-happens-between-julia-source-and-execution",
+    "title": "Appendix — Q&A",
+    "section": "Q. What happens between Julia source and execution?",
+    "text": "Q. What happens between Julia source and execution?\nA. Data are nouns, stages are arrows:\nSource ─[parse]→ CST ─[lower]→ Core IR ─[compile]→ Bytecode ─[VM interprets]→ result\n\nParser: pure Rust, producing a tree-sitter-compatible CST, validated against official Julia’s parser. Pure Rust means the same parser runs natively, on iOS, and on wasm32-unknown-unknown.\nLowering: CST → Core IR; expands macros and desugars syntax (some closure-capture analysis finishes later, in the compiler).\nCompiler: Core IR → bytecode, with abstract-interpretation type inference, constant propagation, SSA-based optimization, and peephole fusion (e.g. a counted-loop back-edge becomes one fused “add-const-and-jump” superinstruction).\nVM: executes the bytecode; the compiled Base library is cached and embedded, so startup skips recompiling the prelude."
+  },
+  {
+    "objectID": "slide/appendix.html#q.-what-does-the-software-architecture-look-like",
+    "href": "slide/appendix.html#q.-what-does-the-software-architecture-look-like",
+    "title": "Appendix — Q&A",
+    "section": "Q. What does the software architecture look like?",
+    "text": "Q. What does the software architecture look like?\nA. A layered Cargo workspace: one core pipeline, thin per-platform bindings.\n\n\n\n\n\nflowchart LR\n  SRC[\"Julia&lt;br/&gt;source\"] --&gt; PARSER\n  subgraph CORE[\"Core pipeline crates\"]\n    direction LR\n    PARSER[\"parser&lt;br/&gt;→ CST\"] --&gt; LOWER[\"lowering&lt;br/&gt;→ Core IR\"] --&gt; COMPILE[\"compile&lt;br/&gt;inference · opt\"] --&gt; BC[\"bytecode\"] --&gt; VM[\"vm&lt;br/&gt;(stack VM)\"]\n  end\n  style CORE fill:#2b2b2b,stroke:#777,color:#ddd\n\n\n\n\n\n\nparser / lowering / compile / bytecode / vm — each stage is a separate crate with its own tests and a well-defined output (CST / Core IR / bytecode)."
+  },
+  {
+    "objectID": "slide/appendix.html#q.-architecture-cont.-how-does-it-reach-each-platform",
+    "href": "slide/appendix.html#q.-architecture-cont.-how-does-it-reach-each-platform",
+    "title": "Appendix — Q&A",
+    "section": "Q. Architecture (cont.): how does it reach each platform?",
+    "text": "Q. Architecture (cont.): how does it reach each platform?\nA. Thin per-platform bindings around the same core:\n\n\n\n\n\nflowchart LR\n  FE[\"front end&lt;br/&gt;parser → lowering → Core IR\"] --&gt; VM[\"bytecode compiler&lt;br/&gt;+ stack VM\"]\n  FE --&gt; AOT[\"aot: juliars&lt;br/&gt;Core IR → Rust source + runtime crate\"]\n  VM --&gt; FFI[\"ffi&lt;br/&gt;hand-written C ABI\"]\n  VM --&gt; WEB[\"web&lt;br/&gt;wasm-bindgen\"]\n  FFI --&gt; MOB[\"iOS (Swift)&lt;br/&gt;Android (Flutter)\"]\n  WEB --&gt; JS[\"Browser&lt;br/&gt;playground (JS)\"]\n\n\n\n\n\n\n\nThe bundled pure-Julia Base (~46k lines) and ~34 packages are compiled by the same pipeline.\nThe C ABI carries a version constant checked from Swift and Dart — mismatches fail fast. (The Web build ships JS glue and WASM as one bundle, so no runtime ABI check is needed.)"
+  },
+  {
+    "objectID": "slide/appendix.html#q.-what-is-core-ir",
+    "href": "slide/appendix.html#q.-what-is-core-ir",
+    "title": "Appendix — Q&A",
+    "section": "Q. What is Core IR?",
+    "text": "Q. What is Core IR?\nA. The tree-shaped intermediate representation at the center of the pipeline — “Julia after desugaring.”\nCST ─[lowering]→ Core IR ─[bytecode compiler]→ bytecode → stack VM\n                     └────[aot: juliars]─────→ Rust source\n\nProduced by lowering: macros are expanded and syntax desugared (quoted code is kept as data for metaprogramming; some closure-capture analysis finishes later, in the compiler).\nWhat remains is a plain tree: Assign, For/ForEach, While, Literal, Var, BinaryOp, Call, ArrayLiteral, … E.g. println(1 + x * 3) becomes Call(\"println\", [BinaryOp(+, 1, BinaryOp(*, Var(x), 3))]).\nLoosely analogous to official Julia’s lowered form (@code_lowered) — but still a tree, not SSA; SSA appears later, inside the compiler’s optimizer.\nExpression/statement nodes carry a Span for precise error locations; hot identifier positions are interned; Call carries kwargs and splat masks, so Julia’s calling convention survives lowering.\nIt is serializable: sjulia --compile f.jl -o f.sjir saves it, --run-ir executes it, and juliars accepts it directly — the shared input of both back ends."
+  },
+  {
+    "objectID": "slide/appendix.html#q.-what-does-static-pipeline-mean-here",
+    "href": "slide/appendix.html#q.-what-does-static-pipeline-mean-here",
+    "title": "Appendix — Q&A",
+    "section": "Q. What does “static pipeline” mean here?",
+    "text": "Q. What does “static pipeline” mean here?\nA. Code generation happens up front — and anything generated later is still only bytecode.\n\nParse → lower → macro-expand → infer types → optimize → emit bytecode: done before execution; at run time the VM mostly just interprets data.\nOfficial Julia interleaves these with execution — methods are LLVM-compiled at run time, on first call per type signature. That is the part iOS forbids.\nIn sjulia the runtime never creates new executable code; even lazy specialization (CallSpecialize) only emits more bytecode — data, not machine code."
+  },
+  {
+    "objectID": "slide/appendix.html#q.-what-does-the-static-pipeline-buy-you",
+    "href": "slide/appendix.html#q.-what-does-the-static-pipeline-buy-you",
+    "title": "Appendix — Q&A",
+    "section": "Q. What does the static pipeline buy you?",
+    "text": "Q. What does the static pipeline buy you?\nA. Portability and predictability:\n\nThe Base library is compiled once at build time and embedded as a cache — apps start without recompiling the prelude.\nThe same bytecode format and interpreter run on macOS, iOS, Android, and WASM.\nPredictable startup and memory — no JIT compilation pauses (first-use bytecode specialization still warms some caches).\nAnd it removes the App Store conflict at the design level: there is no runtime machine-code generation left to forbid."
+  },
+  {
+    "objectID": "slide/appendix.html#q.-how-do-you-implement-multiple-dispatch-without-a-jit",
+    "href": "slide/appendix.html#q.-how-do-you-implement-multiple-dispatch-without-a-jit",
+    "title": "Appendix — Q&A",
+    "section": "Q. How do you implement multiple dispatch without a JIT?",
+    "text": "Q. How do you implement multiple dispatch without a JIT?\nA. Method tables + two-level dispatch:\n\nEach function has a MethodTable of signatures (Tuple{argtypes...}, incl. where params).\nCompile time: when inference knows the argument types, the call is resolved statically to a direct call — or even a type-specialized one (CallSpecialize compiles a per-type-signature specialized bytecode version of the callee on first use and caches it).\nRuntime: Any-typed call sites use dynamic dispatch opcodes with a most-specific-match search, accelerated by dispatch caches (including negative caching) and a first-argument-type index (for primitive first arguments) — the interpreter analogue of inline caches."
+  },
+  {
+    "objectID": "slide/appendix.html#q.-is-there-a-garbage-collector",
+    "href": "slide/appendix.html#q.-is-there-a-garbage-collector",
+    "title": "Appendix — Q&A",
+    "section": "Q. Is there a garbage collector?",
+    "text": "Q. Is there a garbage collector?\nA. A hybrid scheme, tuned for a single-threaded, no-JIT VM:\n\nScalars live inline in the Value enum; strings and other shared immutable data use Rust reference counting (Rc — cloning is a refcount bump, not a copy).\nMutable structs live on a VM-managed heap (Vec&lt;StructInstance&gt;), referenced by index.\nA stop-the-world mark & compact pass runs only at safe points (e.g. after a top-level evaluation): mark reachable objects from all VM roots (stack, frames, globals, tasks, …), rebuild the heap densely, rewrite indices.\nThis avoids per-assignment refcount traffic in hot loops, and cross-eval compaction keeps long REPL sessions bounded."
+  },
+  {
+    "objectID": "slide/appendix.html#q.-why-is-the-vm-8-slower-than-julia",
+    "href": "slide/appendix.html#q.-why-is-the-vm-8-slower-than-julia",
+    "title": "Appendix — Q&A",
+    "section": "Q. Why is the VM ~8× slower than Julia?",
+    "text": "Q. Why is the VM ~8× slower than Julia?\nA. That is the price of “no JIT”:\n\nEvery operation pays bytecode-dispatch overhead — fetch an instruction, branch on its opcode, execute, repeat.\nNo native code is specialized for your types at runtime, which is exactly where official Julia’s LLVM JIT gets its speed.\nWhen top speed matters, juliars (AoT → Rust) removes interpretation entirely and matches official Julia.\n(The ~8× and ~5× ratios are from the scalar Mandelbrot benchmark in the main slides; the gap varies by workload.)"
+  },
+  {
+    "objectID": "slide/appendix.html#q.-then-why-is-the-vm-still-5-faster-than-python",
+    "href": "slide/appendix.html#q.-then-why-is-the-vm-still-5-faster-than-python",
+    "title": "Appendix — Q&A",
+    "section": "Q. Then why is the VM still ~5× faster than Python?",
+    "text": "Q. Then why is the VM still ~5× faster than Python?\nA. sjulia claws a lot back before execution, at compile time:\n\ntype inference → typed opcodes and typed local slots (AddI64, LoadSlotF64) instead of boxed generic ops\npeephole superinstructions (fused compare-and-jump, load-add, loop back-edge)\nmethod dispatch caches and lazy per-signature specialization\nstraight-line typed block execution that bypasses the generic dispatch loop"
+  },
+  {
+    "objectID": "slide/appendix.html#q.-isnt-python-also-a-stack-based-vm",
+    "href": "slide/appendix.html#q.-isnt-python-also-a-stack-based-vm",
+    "title": "Appendix — Q&A",
+    "section": "Q. Isn’t Python also a stack-based VM?",
+    "text": "Q. Isn’t Python also a stack-based VM?\nA. Yes — CPython compiles to bytecode and interprets it on an operand stack, same family as sjulia.\n\nCPython: .py → .pyc bytecode → the eval loop interprets it. Same architecture “family”.\nSo the difference is not stack VM vs. something else — it is how much work is done before execution starts.\nCPython resolves almost everything at run time; sjulia front-loads it at compile time (type inference, specialization, fusion).\nThat gap is what the benchmark shows: sjulia VM 4.0 s vs. Python 20.8 s on Mandelbrot."
+  },
+  {
+    "objectID": "slide/appendix.html#q.-sjulia-vs.-cpython-1-bytecode",
+    "href": "slide/appendix.html#q.-sjulia-vs.-cpython-1-bytecode",
+    "title": "Appendix — Q&A",
+    "section": "Q. sjulia vs. CPython (1): bytecode",
+    "text": "Q. sjulia vs. CPython (1): bytecode\nA. Typed instructions vs. generic instructions.\n\nCPython emits generic opcodes like BINARY_OP; every execution inspects the operand types to decide what “+” means (3.11+ adaptive specialization rewrites hot sites — but still at run time).\nsjulia runs abstract-interpretation type inference before execution and emits typed opcodes directly: AddI64, MulF64, LoadSlotF64 — no type checks, no boxing in hot loops.\nPeephole fusion then merges sequences into superinstructions (compare-and-jump, add-const-and-jump loop back-edges)."
+  },
+  {
+    "objectID": "slide/appendix.html#q.-what-does-boxed-boxing-mean",
+    "href": "slide/appendix.html#q.-what-does-boxed-boxing-mean",
+    "title": "Appendix — Q&A",
+    "section": "Q. What does “boxed” / “boxing” mean?",
+    "text": "Q. What does “boxed” / “boxing” mean?\nA. Wrapping a raw machine value in a heap object so it can be handled generically.\n\nA raw (unboxed) Int64 is just 8 bytes — it fits in a CPU register or on the stack.\nA boxed value is heap-allocated with a header (type tag, refcount/GC info), and the program passes a pointer to it.\nBoxing is what makes “any variable can hold any type” easy — but it costs: heap allocation per value, pointer chasing (cache misses) per use, and GC/refcount pressure per assignment.\nIn CPython, adding two ints means: follow two pointers, read type tags, then produce a result object — allocated on the heap unless it falls in the small-int cache (−5…256).\nOfficial Julia avoids this via JIT-compiled type-specialized code (boxing only appears at type-unstable / Any boundaries); sjulia does it by inferring types ahead of execution and keeping scalars inline in its Value enum (I64(i64), F64(f64)) and in typed local slots."
+  },
+  {
+    "objectID": "slide/appendix.html#q.-sjulia-vs.-cpython-2-values-memory",
+    "href": "slide/appendix.html#q.-sjulia-vs.-cpython-2-values-memory",
+    "title": "Appendix — Q&A",
+    "section": "Q. sjulia vs. CPython (2): values & memory",
+    "text": "Q. sjulia vs. CPython (2): values & memory\nA. Unboxed enum variants vs. everything-is-a-PyObject.\n\nCPython: even an integer is a heap-allocated, reference-counted PyObject; 1 + 2 involves pointer dereferences and refcount traffic.\nsjulia: Value is a Rust enum — I64(i64), F64(f64) are stored inline, unboxed; type-stable locals live in typed slots.\nGC: CPython counts references on every assignment (+ a cycle detector); sjulia uses Rc for immutable values and a mark & compact pass that runs only at safe points — hot loops pay no per-assignment bookkeeping."
+  },
+  {
+    "objectID": "slide/appendix.html#q.-sjulia-vs.-cpython-3-dispatch-semantics",
+    "href": "slide/appendix.html#q.-sjulia-vs.-cpython-3-dispatch-semantics",
+    "title": "Appendix — Q&A",
+    "section": "Q. sjulia vs. CPython (3): dispatch semantics",
+    "text": "Q. sjulia vs. CPython (3): dispatch semantics\nA. Multiple dispatch vs. single dispatch.\n\nPython picks a method from the receiver’s type alone (obj.method(...)).\nsjulia implements Julia’s multiple dispatch — most-specific match over all argument types — via method tables, dispatch caches (with negative caching), and lazy per-signature specialization (CallSpecialize).\nSummary: same VM family, different philosophy — CPython resolves at run time; sjulia resolves as much as possible before running, which is how it recovers speed without a JIT."
+  },
+  {
+    "objectID": "slide/appendix.html#q.-does-using-plots-download-the-real-plots.jl",
+    "href": "slide/appendix.html#q.-does-using-plots-download-the-real-plots.jl",
+    "title": "Appendix — Q&A",
+    "section": "Q. Does using Plots download the real Plots.jl?",
+    "text": "Q. Does using Plots download the real Plots.jl?\nA. No — nothing is ever downloaded (also an App Store requirement).\n\nAll packages are pure-Julia-subset reimplementations bundled into the binary (~34 packages: Plots, OrdinaryDiffEq/SciMLBase, AbstractAlgebra, Distributions, StaticArrays, Symbolics, Optim, QuadGK, …), embedded via include_str! and loaded from virtual paths, since iOS/WASM have no package filesystem.\nThey cover a practical subset of each package’s API, not the full package.\nBase itself is split: performance-critical primitives in Rust builtins, the rest (~46k lines) as pure-Julia base/ + 10 stdlib modules — mirroring official Julia’s layout."
+  },
+  {
+    "objectID": "slide/appendix.html#q.-how-does-plotting-actually-render",
+    "href": "slide/appendix.html#q.-how-does-plotting-actually-render",
+    "title": "Appendix — Q&A",
+    "section": "Q. How does plotting actually render?",
+    "text": "Q. How does plotting actually render?\nA. Plots.jl output renders as Plotly JSON on every host.\n\nThe bundled Plots subset builds a Plot value; the VM serializes it to an artifact with MIME application/vnd.plotly+json.\nThe web playground, the slides, and the iOS app all feed that JSON to a bundled plotly.min.js viewer — same interactive plots on every platform, including offline.\nSupported: line/scatter/bar/histogram/heatmap/contour/surface/3D paths, plus @animate/@gif (Plotly frames). A second artifact type, JSXGraph JSON, serves interactive geometry."
+  },
+  {
+    "objectID": "slide/appendix.html#q.-how-close-is-it-to-real-julia-how-do-you-verify-that",
+    "href": "slide/appendix.html#q.-how-close-is-it-to-real-julia-how-do-you-verify-that",
+    "title": "Appendix — Q&A",
+    "section": "Q. How close is it to real Julia? How do you verify that?",
+    "text": "Q. How close is it to real Julia? How do you verify that?\nA. Parity with official Julia 1.12 is enforced mechanically:\n\n~3,100 registered test fixtures across 114 categories, checked against expected outputs (floats within 1e-10); a separate parity sweep runs eligible fixtures under both real julia and sjulia and compares.\nPlus differential fuzzing, official-test-suite sweeps, and subtype/dispatch parity tests.\nImplemented (as a subset): parametric types, multiple dispatch, user-defined macros with hygiene, broadcasting, closures, comprehensions, exceptions, modules, eval/Expr, BigInt/BigFloat/Rational/Complex, Tasks & Channels (via VM-level continuations).\nKnown gaps: no real threads (single-threaded by design), partial LinearAlgebra/views, some macros are no-ops (@inbounds, @inline), and Dict-heavy hot loops are unoptimized."
+  },
+  {
+    "objectID": "slide/appendix.html#q.-why-test-compatibility-this-way-isnt-there-a-julia-spec",
+    "href": "slide/appendix.html#q.-why-test-compatibility-this-way-isnt-there-a-julia-spec",
+    "title": "Appendix — Q&A",
+    "section": "Q. Why test compatibility this way — isn’t there a Julia spec?",
+    "text": "Q. Why test compatibility this way — isn’t there a Julia spec?\nA. No. Julia has no complete, normative, implementation-independent language specification — so “fully Julia-compatible” can only be defined operationally, not as conformance to a standard.\n\nPython has a mature Language Reference and accepted PEPs, giving alternative implementations (PyPy, MicroPython, …) a much clearer compatibility target — though even there, CPython remains the de-facto reference for the gaps.\nJulia has nothing comparable: the docs describe behavior informally, and for corner cases (scope rules, promotion, printing, dispatch ambiguities) the official implementation is the ultimate de-facto reference.\nConsequence: with no conformance suite to pass, sjulia defines compatibility operationally — thousands of small differential tests: run a snippet under official julia and sjulia, demand identical output, and pin a concrete version (Julia 1.12) as the target.\nDifferential fuzzing and official-test-suite sweeps extend the same idea: for undocumented behavior, running the reference implementation is the strongest practical oracle."
+  },
+  {
+    "objectID": "slide/appendix.html#q.-which-julia-syntax-is-supported-12",
+    "href": "slide/appendix.html#q.-which-julia-syntax-is-supported-12",
+    "title": "Appendix — Q&A",
+    "section": "Q. Which Julia syntax is supported? (1/2)",
+    "text": "Q. Which Julia syntax is supported? (1/2)\nA. The everyday core of the language (every item on these two slides was verified by running it on the sjulia binary):\n\nControl flow — if/elseif/else, for (ranges, in over iterables, tuple destructuring), while, break/continue, try/catch/finally, &&/|| short-circuits, ternary ?:, let (even official Julia’s soft-scope rules for top-level loops are reproduced)\nFunctions — function/short-form/anonymous (x -&gt; x^2), recursion, do blocks, keyword arguments, varargs & splat (f(args...), ; kwargs...), return-type annotations, first-class functions and higher-order functions\nModules — module/baremodule, using/import (incl. using M: f), qualified calls M.f, export\nLiterals — Int/Float/Bool/Char/String, im (Complex), // (Rational), BigInt/BigFloat, string interpolation \"$(x)\", raw/regex/byte string macros, juxtaposition (2x, 3.0im)"
+  },
+  {
+    "objectID": "slide/appendix.html#q.-which-julia-syntax-is-supported-22",
+    "href": "slide/appendix.html#q.-which-julia-syntax-is-supported-22",
+    "title": "Appendix — Q&A",
+    "section": "Q. Which Julia syntax is supported? (2/2)",
+    "text": "Q. Which Julia syntax is supported? (2/2)\nA. Including the parts that make Julia Julia:\n\nTypes & dispatch — struct / mutable struct, inner constructors, parametric types (Point{T}, where clauses, Type{T} dispatch), abstract types, Union types, multiple dispatch with most-specific selection\nArrays & broadcast — 1D/2D arrays, typed arrays, comprehensions & generators (with filters), dot broadcasting (x .+ y, f.(xs)), views/SubArray (a representative subset), the full iterate protocol\nCollections & strings — Dict, Set, tuples, named tuples, ranges; string operations and PCRE-style regex\nMacros & metaprogramming — user-defined macro with hygiene and esc(), quote/$ interpolation, Expr/QuoteNode, eval, macroexpand; built-ins like @test/@testset, @time, @show, @assert, @enum, @kwdef\nTasks & Channels — cooperative, via VM-level continuations\nBundled stdlib subset: Statistics, Random, Dates, Test, Printf, Iterators, LinearAlgebra (partial), and more\nGaps are tracked openly in docs/vm/UNIMPLEMENTED.md — see also the next slide"
+  },
+  {
+    "objectID": "slide/appendix.html#q.-what-does-subsetjuliavm-not-provide",
+    "href": "slide/appendix.html#q.-what-does-subsetjuliavm-not-provide",
+    "title": "Appendix — Q&A",
+    "section": "Q. What does SubsetJuliaVM not provide?",
+    "text": "Q. What does SubsetJuliaVM not provide?\nA. Everything that would break the sandboxed, offline, no-downloaded-code model:\n\nPkg.jl / package management — no Pkg.add, no registry, no downloads. using X only reaches the ~34 packages bundled into the binary (App Store apps may not download code, and the design is offline-first).\nNetwork I/O — no Sockets, no Downloads/HTTP, no download.\nFilesystem access — path/file operations (pwd, mkdir, rm, stat, …) are unimplemented; iOS/WASM have no free filesystem, so include resolves through virtual embedded paths instead.\nExternal processes — no run(cmd), environment control, or signals.\nC interface — no @ccall/@cfunction/pointer/unsafe_*: arbitrary native code would defeat the whole sandbox/no-JIT story.\nReal parallelism — single-threaded by design; Threads API exists as stubs, Tasks/Channels are cooperative continuations, no Distributed.\nNative-code reflection — no @code_llvm/@code_native (there is no LLVM); use --dump-bytecode instead."
+  },
+  {
+    "objectID": "slide/appendix.html#q.-how-does-the-rust-vm-get-into-an-ios-app-the-browser",
+    "href": "slide/appendix.html#q.-how-does-the-rust-vm-get-into-an-ios-app-the-browser",
+    "title": "Appendix — Q&A",
+    "section": "Q. How does the Rust VM get into an iOS app / the browser?",
+    "text": "Q. How does the Rust VM get into an iOS app / the browser?\nA. One core, three thin bindings — iOS and Android share a versioned hand-written C ABI; Web has its own wasm-bindgen API:\n\niOS: cargo build --target aarch64-apple-ios → static lib → SubsetJuliaVM.xcframework; SwiftUI calls compile_and_run_detailed, repl_session_eval, etc. directly.\nAndroid: same FFI crate built with cargo-ndk for each ABI, loaded from a Flutter app through dart:ffi.\nWeb: a separate wasm-bindgen crate built with wasm-pack (size-optimized profile: opt-level=\"s\", LTO); JS calls run_from_source(code, seed).\nThe C ABI version constant is checked on the Swift and Dart sides — mismatched binaries fail fast instead of corrupting memory. (Web bundles JS glue and WASM together, so no runtime check is needed.)"
+  },
+  {
+    "objectID": "slide/appendix.html#q.-how-does-juliars-aot-work-and-why-no-libjulia",
+    "href": "slide/appendix.html#q.-how-does-juliars-aot-work-and-why-no-libjulia",
+    "title": "Appendix — Q&A",
+    "section": "Q. How does juliars (AoT) work, and why no libjulia?",
+    "text": "Q. How does juliars (AoT) work, and why no libjulia?\nA. It transpiles the Core IR to Rust source, then rustc compiles it:\n\nPipeline: parse → lower → dead-code elimination → static type inference → AoT IR → optimizer → Rust codegen → rustc -O.\nThe generated code depends at most on a small Rust runtime crate (dynamic Value, dispatch helpers) — never on Julia’s C runtime, because the whole toolchain is pure Rust.\nFully static programs (--pure-rust) compile to standalone binaries; scalar entry points can be exported as a C ABI.\n“Experimental” because the guaranteed subset is deliberately narrow (scalar numerics, loops, 1D arrays, structs; more constructs are partially implemented); the bundled package ecosystem remains the VM’s job.\nOn the Mandelbrot benchmark it matches official Julia’s speed."
+  },
+  {
+    "objectID": "slide/appendix.html#q.-what-are-writable-executable-pages",
+    "href": "slide/appendix.html#q.-what-are-writable-executable-pages",
+    "title": "Appendix — Q&A",
+    "section": "Q. What are “writable + executable pages”?",
+    "text": "Q. What are “writable + executable pages”?\nA. Memory pages that can be both written to and executed — the thing a JIT needs.\n\nThe OS manages memory in pages (e.g. 16 KB on iOS), each with permissions: Read / Write / eXecute.\nA JIT compiler works by writing machine code into memory (needs W) and then jumping into it (needs X) — so it needs a page that is, at some point, both.\nW^X (“write XOR execute”): a page may be writable or executable, never both at once. This blocks a classic attack — inject bytes into writable memory, then run them."
+  },
+  {
+    "objectID": "slide/appendix.html#q.-how-does-ios-enforce-wx-and-why-is-sjulia-fine",
+    "href": "slide/appendix.html#q.-how-does-ios-enforce-wx-and-why-is-sjulia-fine",
+    "title": "Appendix — Q&A",
+    "section": "Q. How does iOS enforce W^X, and why is sjulia fine?",
+    "text": "Q. How does iOS enforce W^X, and why is sjulia fine?\nA. Runtime code generation is reserved for Apple; interpreting data is not.\n\nPer Apple’s Platform Security guide (cited in the main slides), requesting W+X memory (mmap with MAP_JIT) requires an entitlement that ordinary distributed apps cannot obtain — Apple reserves it for its own apps like Safari’s JS engine (exceptions: approved alternative browser engines, debugger-attached dev builds).\nAll code in an App Store app must be signed ahead of time; Guidelines §2.5.2 also forbids downloading, installing, or executing code that introduces or changes app functionality.\nsjulia never needs X on data: bytecode is just data interpreted by an already-signed Rust binary — only ordinary read-only executable pages are used."
+  },
+  {
+    "objectID": "slide/appendix.html#q.-couldnt-you-just-run-real-julia-on-ios-some-other-way",
+    "href": "slide/appendix.html#q.-couldnt-you-just-run-real-julia-on-ios-some-other-way",
+    "title": "Appendix — Q&A",
+    "section": "Q. Couldn’t you just run real Julia on iOS some other way?",
+    "text": "Q. Couldn’t you just run real Julia on iOS some other way?\nA. The constraints rule out the usual options:\n\nOfficial Julia normally relies on the LLVM JIT — writable+executable pages need an entitlement ordinary apps cannot obtain, and §2.5.2 forbids downloading or executing code that changes app functionality.\nJulia’s interpreter mode still ships the full JIT-capable runtime, and libjulia is not built for iOS targets.\nServer-side execution (Binder/Colab-style) breaks offline and adds latency.\nAn interpreter compiled ahead of time to ordinary ARM code sidesteps all of this — the same reason Pythonista (Python) and Carnets (Jupyter) can exist on the App Store."
+  },
+  {
+    "objectID": "slide/appendix.html#q.-how-big-is-the-sjulia-codebase",
+    "href": "slide/appendix.html#q.-how-big-is-the-sjulia-codebase",
+    "title": "Appendix — Q&A",
+    "section": "Q. How big is the sjulia codebase?",
+    "text": "Q. How big is the sjulia codebase?\nA. Roughly 570k lines of Rust (src/ code, excluding tests), plus a large pure-Julia layer:\n\nA Cargo workspace of 12 crates — parser, lowering, IR, compiler, bytecode, VM, FFI, web/WASM, AoT runtime, …\nThe bytecode instruction set alone has 400+ opcodes.\nThe AoT pipeline (juliars) is ~53k lines — roughly 9–10% of the Rust code.\nOn top of that, Base is reimplemented as ~46k lines of pure-Julia subset code (74 files mirroring official Julia’s base/, plus 10 stdlib modules), and ~34 bundled packages (Plots, Distributions, AbstractAlgebra, …).\nVerified by ~3,100 registered fixtures across 114 categories, with a parity sweep against real julia.\nMost of it was written with AI coding agents in the loop — the parity suite is what kept that tractable."
+  },
+  {
+    "objectID": "slide/appendix.html#q.-why-rust-and-not-ccswiftjulia-itself",
+    "href": "slide/appendix.html#q.-why-rust-and-not-ccswiftjulia-itself",
+    "title": "Appendix — Q&A",
+    "section": "Q. Why Rust (and not C/C++/Swift/Julia itself)?",
+    "text": "Q. Why Rust (and not C/C++/Swift/Julia itself)?\nA.\n\nOne codebase targets macOS/Linux, iOS (staticlib), Android (cdylib), and WASM — wasm32-unknown-unknown support with no C toolchain involved was decisive (it is also why the parser was rewritten from tree-sitter’s generated C into pure Rust).\nMemory safety without a runtime GC of its own; enum + match fit a bytecode interpreter naturally (tagged Value, exhaustive opcode dispatch).\nThe project is ratcheting toward a panic-free VM policy — user code should raise Julia exceptions, not Rust panics/aborts, which matters inside an app process.\nDevelopment leaned heavily on AI coding agents; a strict compiler + ~3,100 parity fixtures made that loop safe."
   }
 ]
