@@ -48,7 +48,10 @@ format:
 - I wanted to run Julia on my iPad.
   - **iOS / iPadOS** (no JIT allowed, strict App Store review)
   - W^X (Write XOR Execute) policy
-- What about Binder or Google Colab?
+    - [Apple Platform Security — Security of runtime process](https://support.apple.com/guide/security/security-of-runtime-process-sec15bfe098e/web): writable **and** executable pages require an Apple-only entitlement (Safari's JS JIT)
+    - [App Store Review Guidelines §2.5.2](https://developer.apple.com/app-store/review/guidelines/#2.5.2): apps may not download or execute code
+
+## What about Binder or Google Colab?
   - Unusable where the internet connection is unreliable
   - Installing external packages takes a long time
 
