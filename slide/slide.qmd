@@ -59,11 +59,22 @@ format:
 
 - Apps like Pythonista and Carnets do run on iOS.
   - So why not build a virtual machine that accepts Julia syntax?!
-- Let's actually build it!
+- I don't have an ability to create this
+  - Let's use AI
+  - Built with heavy use of AI tools: Claude Code, Codex, Cursor, DeepSeek, Kimi, etc.
+
+## Let's actually build it!
   - A stack-based bytecode interpreter (**no JIT**)
-  - `Julia source ─parse→ CST ─lower→ IR ─compile→ bytecode ─→ VM interprets`
-  - Built with heavy use of AI tools: Claude Code, Codex, Cursor, Kimi, etc.
-  - Result: [AtelierArith/julia-vm-oss](https://github.com/AtelierArith/julia-vm-oss)
+
+::: {.mermaid-big}
+```{mermaid}
+%%{init: {"flowchart": {"useMaxWidth": false, "nodeSpacing": 25, "rankSpacing": 32, "padding": 10}}}%%
+flowchart LR
+  SRC["Julia source"] -- parse --> CST["CST"] -- lower --> IR["Core IR"] -- compile --> BC["bytecode"] -- "stack VM interprets" --> OUT["result"]
+```
+:::
+
+Result: [AtelierArith/julia-vm-oss](https://github.com/AtelierArith/julia-vm-oss)
 
 ## How sjulia differs from upstream Julia {.smaller}
 
