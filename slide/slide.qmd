@@ -160,7 +160,7 @@ The demo is the heart of this talk. Keep the explanation short and run the code.
 ![](assets/julia-vm-oss.png){.absolute top="0" right="0" width="170"}
 
 - Try `sjulia` (SubsetJuliaVM) on your machine!!!
-- Install Rust
+- [Install Rust](https://rust-lang.org/tools/install/)
 - Run the following commands:
 
 ```sh
