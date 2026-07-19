@@ -131,25 +131,25 @@ Edit the code and run it with **Ctrl+Enter** / **⌘+Enter** (or **Run**). Press
 The demo is the heart of this talk. Keep the explanation short and run the code.
 :::
 
-## Demo · Hello, sjulia
+## Hello, sjulia
 
 ```{=html}
 <div class="sjulia-executor" data-code="println(&quot;Hello from WebAssembly!&quot;)\nprintln(1 + 2 * 3)"></div>
 ```
 
-## Demo · Plotly via Plots
+## Plotly via Plots
 
 ```{=html}
 <div class="sjulia-executor" data-code="using Plots\nx = 0:0.1:2π\nplot(x, sin.(x), label=&quot;sin&quot;)\nplot!(x, cos.(x), label=&quot;cos&quot;)\ntitle!(&quot;Running in your browser&quot;)"></div>
 ```
 
-## Demo · Mandelbrot heatmap
+## Mandelbrot heatmap
 
 ```{=html}
 <div class="sjulia-executor" data-code="using Plots\nfunction kernel(c, n)\n  z = 0.0+0.0im\n  for k in 1:n\n    abs2(z) > 4 && return k\n    z = z^2 + c\n  end; n\nend\nxs = range(-2, 1; length=80)\nys = range(\n  -1.2, 1.2;length=60\n)\ncs = xs' .+ im .* ys\nzs = kernel.(cs, Ref(40))\nheatmap(xs, ys, zs)"></div>
 ```
 
-## Demo · Lorenz attractor (OrdinaryDiffEq)
+## Lorenz attractor (OrdinaryDiffEq)
 
 ```{=html}
 <div class="sjulia-executor" data-code="using OrdinaryDiffEq\nfunction lorenz!(du, u, p, t)\n    du[1] = 10.0 * (u[2] - u[1])\n    du[2] = u[1] * (28.0 - u[3]) - u[2]\n    du[3] = u[1] * u[2] - (8 / 3) * u[3]\nend\nu0 = [1.0, 0.0, 0.0]\ntspan = (0.0, 60.0)\nprob = ODEProblem(lorenz!, u0, tspan)\nsol = solve(prob, Tsit5(), dt=0.05, saveat=0.05)\nusing Plots\nplot(sol, idxs=(1, 2, 3), title=&quot;Lorenz attractor&quot;)"></div>
