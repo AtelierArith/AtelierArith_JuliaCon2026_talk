@@ -250,3 +250,5 @@ mandel_count(1500, 1500, 500)  # same source for all implementations
 ---
 
 # Thank you!!!
+
+Q&A material: see the [Appendix slides](appendix.html)

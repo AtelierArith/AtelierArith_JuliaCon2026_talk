@@ -11,4 +11,6 @@ This webpage serves as a repository for the presentation materials and links I w
 
 ## Appendix
 
+- [Appendix — Q&A](slide/appendix.html)
+  - Anticipated questions and answers about SubsetJuliaVM: what a stack-based VM is, how multiple dispatch works without a JIT, how packages like Plots.jl are bundled, W^X and App Store constraints, `juliars` (AoT), and more.
 - This page is built using [Quarto](https://quarto.org/). The `qmd` files are maintained at [this repository](https://github.com/AtelierArith/AtelierArith_JuliaCon2026_talk). Readers are free to use these materials for educational and research purposes.

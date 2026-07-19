@@ -1,0 +1,214 @@
+---
+title: "Appendix — Q&A"
+subtitle: "Let’s run Julia everywhere from mobile to web"
+author: "Satoshi Terasaki@AtelierArith"
+format:
+  revealjs:
+    theme: dark
+    slide-number: true
+    preview-links: auto
+---
+
+## About this appendix
+
+Anticipated questions about SubsetJuliaVM (`sjulia`), with answers grounded in the actual implementation.
+
+## Q. What is a "stack-based VM"? {.smaller}
+
+**A.** An interpreter that executes bytecode using an operand stack instead of registers.
+
+- Expressions like `1 + 2 * 3` compile to instructions such as
+  `PushI64(1)`, `PushI64(2)`, `PushI64(3)`, `MulI64`, `AddI64`
+  — each operation pops its operands from the stack and pushes the result.
+- The VM core is a plain Rust loop: fetch `code[ip]`, `match` on the opcode, execute, advance `ip`.
+- The instruction set (`enum Instr`) has **400+ opcodes**: typed arithmetic (`AddI64`, `MulF64`),
+  dynamic fallbacks (`DynamicAdd`), control flow (`Jump`, `JumpIfZero`), calls, array ops, etc.
+- Function calls push a `Frame` (locals, captured variables, return info) onto a call-frame stack.
+- No machine code is ever generated at runtime — that is why it satisfies iOS's W^X policy.
+
+## Q. Stack VM vs. register VM vs. tree-walking interpreter? {.smaller}
+
+**A.** Three classic interpreter designs:
+
+| Design | How it works | Trade-off |
+|---|---|---|
+| Tree-walking | Recursively evaluate the AST | Simplest, slowest |
+| **Stack VM** (sjulia today) | Linear bytecode + operand stack | Compact bytecode, simple compiler; CPython/older JVMs work this way |
+| Register VM | Bytecode operates on virtual registers | Fewer instructions dispatched; Lua-style |
+
+## Q. Which design does sjulia use? {.smaller}
+
+**A.** A stack VM today; a register VM is being evaluated.
+
+- sjulia compiles to bytecode first, so it is **not** a tree-walker.
+- A register VM prototype exists behind a flag; the stack VM stays the default until
+  side-by-side parity and performance are proven.
+- Either way it is ordinary ahead-of-time-compiled Rust — no executable memory needed.
+
+## Q. What happens between Julia source and execution? {.smaller}
+
+**A.** `Source → Parser → Lowering → Core IR → Compiler → Bytecode → VM`
+
+- **Parser**: pure Rust (a faithful reimplementation of tree-sitter-julia grammar) → CST.
+  Pure Rust means the same parser runs natively, on iOS, and on `wasm32-unknown-unknown`.
+- **Lowering**: CST → Core IR; desugars closures, scoping rules, macros, quote/unquote.
+- **Compiler**: Core IR → bytecode, with abstract-interpretation **type inference**,
+  constant propagation, SSA-based optimization, and peephole fusion
+  (e.g. a counted-loop back-edge becomes one fused "add-const-and-jump" superinstruction).
+- **VM**: executes the bytecode; the compiled Base library is cached and embedded, so startup skips recompiling the prelude.
+
+## Q. How do you implement multiple dispatch without a JIT? {.smaller}
+
+**A.** Method tables + two-level dispatch:
+
+- Each function has a `MethodTable` of signatures (`Tuple{argtypes...}`, incl. `where` params).
+- **Compile time**: when inference knows the argument types, the call is resolved statically
+  to a direct call — or even a type-specialized one (`CallSpecialize` compiles a
+  monomorphized version of the callee on first use and caches it).
+- **Runtime**: `Any`-typed call sites use dynamic dispatch opcodes with a most-specific-match
+  search, accelerated by dispatch caches (including negative caching) and a
+  first-argument-type index — the interpreter analogue of inline caches.
+
+## Q. Is there a garbage collector? {.smaller}
+
+**A.** A hybrid scheme, tuned for a single-threaded, no-JIT VM:
+
+- Immutable values (strings, tuples, immutable structs) use Rust reference counting (`Rc`).
+- Mutable structs live on a VM-managed heap (`Vec<StructInstance>`), referenced by index.
+- A **stop-the-world mark & compact pass runs only at safe points** (e.g. after a top-level
+  evaluation): mark reachable objects from the stack/frames/globals, rebuild the heap densely,
+  rewrite indices.
+- This avoids per-assignment refcount traffic in hot loops, and cross-eval compaction keeps
+  long REPL sessions bounded.
+
+## Q. Why is the VM ~8× slower than Julia? {.smaller}
+
+**A.** That is the price of "no JIT":
+
+- Every operation pays bytecode-dispatch overhead — fetch an instruction, branch on its
+  opcode, execute, repeat.
+- No native code is specialized for your types at runtime, which is exactly where
+  upstream Julia's LLVM JIT gets its speed.
+- When top speed matters, `juliars` (AoT → Rust) removes interpretation entirely and
+  matches upstream Julia.
+
+## Q. Then why is the VM still ~5× faster than Python? {.smaller}
+
+**A.** sjulia claws a lot back **before** execution, at compile time:
+
+- type inference → **typed opcodes and typed local slots** (`AddI64`, `LoadSlotF64`)
+  instead of boxed generic ops
+- peephole **superinstructions** (fused compare-and-jump, load-add, loop back-edge)
+- method **dispatch caches** and lazy per-signature specialization
+- straight-line typed block execution that bypasses the generic dispatch loop
+
+## Q. Does `using Plots` download the real Plots.jl? {.smaller}
+
+**A.** No — nothing is ever downloaded (also an App Store requirement).
+
+- All packages are **pure-Julia-subset reimplementations bundled into the binary**
+  (~34 packages: Plots, OrdinaryDiffEq/SciMLBase, AbstractAlgebra, Distributions,
+  StaticArrays, Symbolics, Optim, QuadGK, …), embedded via `include_str!` and loaded from
+  virtual paths, since iOS/WASM have no package filesystem.
+- They cover a practical subset of each package's API, not the full package.
+- Base itself is split: performance-critical primitives in Rust builtins,
+  the rest (~45k lines) as pure-Julia `base/` + 10 stdlib modules — mirroring upstream's layout.
+
+## Q. How does plotting actually render? {.smaller}
+
+**A.** One backend everywhere: **Plotly JSON**.
+
+- The bundled Plots subset builds a `Plot` value; the VM serializes it to an artifact with
+  MIME `application/vnd.plotly+json`.
+- The web playground, the slides, and the iOS app all feed that JSON to a bundled
+  `plotly.min.js` viewer — same interactive plots on every platform, including offline.
+- Supported: line/scatter/bar/histogram/heatmap/contour/surface/3D paths, plus
+  `@animate`/`@gif` (Plotly frames). JSXGraph is available for interactive geometry.
+
+## Q. How close is it to real Julia? How do you verify that? {.smaller}
+
+**A.** Parity with **upstream Julia 1.12** is enforced mechanically:
+
+- ~**3,100 test fixtures** across 130+ categories, each executed under both real `julia`
+  and `sjulia` — outputs must match exactly (floats within `1e-10`).
+- Plus differential fuzzing, upstream-test-suite sweeps, and subtype/dispatch parity tests.
+- Supported: parametric types, multiple dispatch, user-defined macros with hygiene,
+  broadcasting, closures, comprehensions, exceptions, modules, `eval`/`Expr`,
+  BigInt/BigFloat/Rational/Complex, Tasks & Channels (via VM-level continuations).
+- Known gaps: no real threads (single-threaded by design), partial LinearAlgebra/views,
+  some macros are no-ops (`@inbounds`, `@inline`), and `Dict`-heavy hot loops are unoptimized.
+
+## Q. How does the Rust VM get into an iOS app / the browser? {.smaller}
+
+**A.** One core, three thin bindings — all sharing a versioned **hand-written C ABI**:
+
+- **iOS**: `cargo build --target aarch64-apple-ios` → static lib → `SubsetVM.xcframework`;
+  SwiftUI calls `compile_and_run_detailed`, `repl_session_eval`, etc. directly.
+- **Android**: same FFI crate built with `cargo-ndk` for each ABI, loaded from a
+  Flutter app through `dart:ffi`.
+- **Web**: a separate `wasm-bindgen` crate built with `wasm-pack`
+  (size-optimized profile: `opt-level="s"`, LTO); JS calls `run_from_source(code)`.
+- The ABI version constant is checked on the Swift, Dart, and JS sides — mismatched
+  binaries fail fast instead of corrupting memory.
+
+## Q. How does `juliars` (AoT) work, and why no `libjulia`? {.smaller}
+
+**A.** It transpiles the **Core IR to Rust source**, then `rustc` compiles it:
+
+- Pipeline: parse → lower → dead-code elimination → static type inference → AoT IR →
+  optimizer → Rust codegen → `rustc -O`.
+- The generated code depends at most on a small Rust runtime crate (dynamic `Value`, dispatch
+  helpers) — never on Julia's C runtime, because the whole toolchain is pure Rust.
+- Fully static programs (`--pure-rust`) compile to standalone binaries; scalar entry points
+  can be exported as a C ABI.
+- "Experimental" because the guaranteed subset is deliberately narrow (scalar numerics, loops,
+  1D arrays, structs); loading bundled packages remains the VM's job.
+- On the Mandelbrot benchmark it matches upstream Julia's speed.
+
+## Q. What are "writable + executable pages"? {.smaller}
+
+**A.** Memory pages that can be both written to *and* executed — the thing a JIT needs.
+
+- The OS manages memory in **pages** (e.g. 16 KB on iOS), each with permissions:
+  **R**ead / **W**rite / e**X**ecute.
+- A JIT compiler works by *writing* machine code into memory (needs **W**) and then
+  *jumping into it* (needs **X**) — so it needs a page that is, at some point, both.
+- **W^X ("write XOR execute")**: a page may be writable or executable, **never both at once**.
+  This blocks a classic attack — inject bytes into writable memory, then run them.
+
+## Q. How does iOS enforce W^X, and why is sjulia fine? {.smaller}
+
+**A.** Runtime code generation is reserved for Apple; interpreting data is not.
+
+- Requesting W+X memory (`mmap` with `MAP_JIT`) requires the `dynamic-codesigning`
+  entitlement, which Apple grants only to its own apps (Safari's JS JIT).
+- All code in an App Store app must be **signed ahead of time**; code generated at runtime
+  has no signature, which is also why Guidelines §2.5.2 bans downloading/executing code.
+- sjulia never needs **X** on data: bytecode is just *data* interpreted by an
+  already-signed Rust binary — only ordinary read-only executable pages are used.
+
+## Q. Couldn't you just run real Julia on iOS some other way? {.smaller}
+
+**A.** The constraints rule out the usual options:
+
+- Upstream Julia requires LLVM **JIT** — writable+executable pages need an
+  Apple-only entitlement, and App Store apps may not generate or download code (§2.5.2).
+- Julia's interpreter mode still ships the full JIT-capable runtime, and `libjulia`
+  is not built for iOS targets.
+- Server-side execution (Binder/Colab-style) breaks offline and adds latency.
+- An interpreter compiled ahead of time to ordinary ARM code sidesteps all of this —
+  the same reason Pythonista (Python) and Carnets (Jupyter) can exist on the App Store.
+
+## Q. Why Rust (and not C/C++/Swift/Julia itself)? {.smaller}
+
+**A.**
+
+- One codebase targets **macOS/Linux, iOS (staticlib), Android (cdylib), and WASM** —
+  `wasm32-unknown-unknown` support with no C toolchain involved was decisive
+  (it is also why the parser was rewritten from tree-sitter's generated C into pure Rust).
+- Memory safety without a runtime GC of its own; `enum` + `match` fit a
+  bytecode interpreter naturally (tagged `Value`, exhaustive opcode dispatch).
+- The project also enforces a **panic-free VM policy** — user code must produce Julia
+  exceptions, never a Rust panic/abort, which matters inside an app process.
+- Development leaned heavily on AI coding agents; a strict compiler + ~3,100 parity
+  fixtures made that loop safe.
