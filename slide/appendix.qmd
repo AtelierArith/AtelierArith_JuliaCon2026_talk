@@ -361,6 +361,44 @@ CST ─[lowering]→ Core IR ─[bytecode compiler]→ bytecode → stack VM
 - Known gaps: no real threads (single-threaded by design), partial LinearAlgebra/views,
   some macros are no-ops (`@inbounds`, `@inline`), and `Dict`-heavy hot loops are unoptimized.
 
+## Q. Which Julia syntax is supported? (1/2) {.smaller}
+
+**A.** The everyday core of the language
+(every item on these two slides was verified by running it on the `sjulia` binary):
+
+- **Control flow** — `if/elseif/else`, `for` (ranges, `in` over iterables, tuple
+  destructuring), `while`, `break`/`continue`, `try/catch/finally`, `&&`/`||`
+  short-circuits, ternary `?:`, `let`
+  (even official Julia's soft-scope rules for top-level loops are reproduced)
+- **Functions** — `function`/short-form/anonymous (`x -> x^2`), recursion,
+  `do` blocks, keyword arguments, varargs & splat (`f(args...)`, `; kwargs...`),
+  return-type annotations, first-class functions and higher-order functions
+- **Modules** — `module`/`baremodule`, `using`/`import` (incl. `using M: f`),
+  qualified calls `M.f`, `export`
+- **Literals** — Int/Float/Bool/Char/String, `im` (Complex), `//` (Rational),
+  BigInt/BigFloat, string interpolation `"$(x)"`, raw/regex/byte string macros,
+  juxtaposition (`2x`, `3.0im`)
+
+## Q. Which Julia syntax is supported? (2/2) {.smaller}
+
+**A.** Including the parts that make Julia *Julia*:
+
+- **Types & dispatch** — `struct` / `mutable struct`, inner constructors,
+  **parametric types** (`Point{T}`, `where` clauses, `Type{T}` dispatch),
+  abstract types, Union types, **multiple dispatch** with most-specific selection
+- **Arrays & broadcast** — 1D/2D arrays, typed arrays, comprehensions &
+  generators (with filters), **dot broadcasting** (`x .+ y`, `f.(xs)`),
+  views/SubArray (a representative subset), the full `iterate` protocol
+- **Collections & strings** — `Dict`, `Set`, tuples, named tuples, ranges;
+  string operations and PCRE-style regex
+- **Macros & metaprogramming** — user-defined `macro` with hygiene and `esc()`,
+  `quote`/`$` interpolation, `Expr`/`QuoteNode`, `eval`, `macroexpand`;
+  built-ins like `@test`/`@testset`, `@time`, `@show`, `@assert`, `@enum`, `@kwdef`
+- **Tasks & Channels** — cooperative, via VM-level continuations
+- Bundled stdlib subset: `Statistics`, `Random`, `Dates`, `Test`, `Printf`,
+  `Iterators`, `LinearAlgebra` (partial), and more
+- Gaps are tracked openly in `docs/vm/UNIMPLEMENTED.md` — see also the next slide
+
 ## Q. What does SubsetJuliaVM *not* provide? {.smaller}
 
 **A.** Everything that would break the sandboxed, offline, no-downloaded-code model:
