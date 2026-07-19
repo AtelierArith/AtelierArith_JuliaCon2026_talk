@@ -55,6 +55,11 @@ import { registerJuliaLanguage, setWasmModule } from './julia-language.js';
     runBtn.textContent = 'Run';
     runBtn.disabled = true;
 
+    const clearBtn = document.createElement('button');
+    clearBtn.className = 'sjulia-clear-btn';
+    clearBtn.textContent = 'Clear';
+    clearBtn.type = 'button';
+
     const output = document.createElement('pre');
     output.className = 'sjulia-output';
 
@@ -70,6 +75,7 @@ import { registerJuliaLanguage, setWasmModule } from './julia-language.js';
 
     const controls = document.createElement('div');
     controls.className = 'sjulia-controls';
+    controls.appendChild(clearBtn);
     controls.appendChild(runBtn);
 
     container.appendChild(code);
@@ -78,7 +84,14 @@ import { registerJuliaLanguage, setWasmModule } from './julia-language.js';
     container.appendChild(output);
     container.appendChild(plot);
 
-    return { container, code, divider, runBtn, output, plot, editor: null };
+    return { container, code, divider, runBtn, clearBtn, output, plot, editor: null };
+  }
+
+  function clearOutput(ui) {
+    ui.output.textContent = '';
+    ui.output.classList.remove('sjulia-error');
+    ui.plot.classList.add('hidden');
+    ui.plot.innerHTML = '';
   }
 
   function showOutput(ui, text, isError) {
@@ -295,6 +308,7 @@ import { registerJuliaLanguage, setWasmModule } from './julia-language.js';
     setupDivider(ui);
     setupRunShortcut(ui);
     ui.runBtn.addEventListener('click', () => runCode(ui));
+    ui.clearBtn.addEventListener('click', () => clearOutput(ui));
     attachEditor(ui).catch((e) => {
       showOutput(ui, `[Monaco editor failed to load: ${e.message}]`, true);
     });

@@ -10,76 +10,64 @@ format:
     include-after-body: assets/after-body.html
 ---
 
-## JuliaCon 2026 · ショートトーク
+## What I created
 
-**Let’s run Julia everywhere — from mobile to web**
+- SubsetJuliaVM (a.k.a `sjulia`)
+  - Julia の一部の文法をサポート
+  - Rust 実装の Stack based VM (Virtual Machine)
+- iOS, Android が搭載したマシンで動作ができる
+  - 作った Virtual Machine は WebAssembly に変換できるので，Web 上でも実行可能
+- Plots.jl, OrdinaryDiffEq.jl, AbstractAlgebra.jl などの一部の機能をサポート
 
-公式ランタイムを載せにくい環境でも動く、
-Julia サブセット向けの Rust 製 VM の話です。
+## 成果物 {.smaller}
 
-::: {.notes}
-ライブデモ込みで約10分。枠は15分なので Q&A 用に余裕を残す。
+**iOS / iPadOS** — JIT なしのネイティブアプリ、App Store 準拠
+
+::: {.columns}
+::: {.column width="33%"}
+**iOS アプリ**<br>[App Store](https://apps.apple.com/us/app/subsetjuliavm/id6757257182)
+
+![](assets/ios-app.png){width="240"}
+:::
+::: {.column width="33%"}
+**ソースコード**<br>[julia-vm-oss](https://github.com/AtelierArith/julia-vm-oss)
+
+![](assets/julia-vm-oss.png){width="240"}
+:::
+::: {.column width="33%"}
+**Web playground**<br>[subset_julia](https://terasakisatoshi.github.io/subset_julia/)
+
+![](assets/web_playground.png){width="240"}
+:::
 :::
 
-## 動機
+### Google it `SubsetJuliaVM`
 
-Julia の Tier‑1 プラットフォームは、多くの利用者をカバーしています。
+## Why I created
 
-それでも欲張りたい。もっと先へ行きたい。
+- Julia を iPad で動作させたい．
+  - **iOS / iPadOS**（JIT 不可、審査が厳しい）
+  - W^X (Write XOR Execute) policy
+- Binder, Google Colab?
+  - インターネット環境が不安定なところでは使えない
+  - 外部パッケージの導入に時間がかかる．
 
-- 機内モードのモバイル
-- 長い TTFX のないブラウザ
-- 古い ARMv7 デバイス
-- **iOS / iPadOS**（JIT 不可、審査が厳しい）
+## How I created
 
-## なぜ `libjulia` では足りないか
-
-公式 Julia は **LLVM JIT** に大きく依存しています。
-
-次の条件では相性が悪いです。
-
-- 書き込み可能かつ実行可能なメモリが禁じられる（iOS）
-- 冷起動やバイナリサイズを小さくしたい（Web / モバイル）
-- ホスト側で **静的リンク** したい（Swift / Flutter）
-
-JIT に依存しない、持ち運びやすいランタイムが必要です。
-
-## 方針
-
-**SubsetJuliaVM（sjulia）** — Julia の厳密なサブセットを実行する Rust 製 VM。
-
-```
-Julia source → Parser → Lowering → Compiler → VM
-```
-
-- Pure Rust のパーサ / パイプライン（tree-sitter 実行時なし）
-- スタック型バイトコードインタプリタ（**JIT なし**）
-- native・**WASM**・**iOS** で同じサブセット
-
-OSS の中核: [AtelierArith/julia-vm-oss](https://github.com/AtelierArith/julia-vm-oss)
-
-## 設計の約束
-
-1. 上流 Julia との **出力パリティ**（fixture と oracle）
-2. **上流駆動** — 近道を作る前に `julia/` を読む
-3. **Pure Julia 優先** — Base/stdlib 形のコードは Julia、no-JIT のホットパスは Rust
-
-パリティ対象系列: Julia **1.12**
-
-## 届け先
-
-| 対象 | 方法 |
-|------|------|
-| Web / 教育 | WASM + ブラウザ playground |
-| iOS / iPadOS | C ABI → SwiftUI アプリ（App Store） |
-| Flutter / モバイル | 同じ C ABI による静的リンク |
-| AoT 実験 | サブセット Julia → Rust バイナリへ変換 |
+- Pythonista, Carnets などのようなアプリは動かせる．
+  - Julia の文法を受け付ける仮想マシンを作ればよい？！
+- 実際に作ろう!
+  - スタック型バイトコードインタプリタ（**JIT なし**）
+  - `Julia source → Parser → Lowering → Compiler → VM`
+  - Claude Code, Codex, Cursor, Kimi など AI をフル活用
+  - 成果物 [AtelierArith/julia-vm-oss](https://github.com/AtelierArith/julia-vm-oss)
 
 ## ライブデモ（このスライド内）
 
-次のスライドには、**同じ WASM VM** が埋め込まれています。
+- 百聞は一見にしかず
+- 次のスライドには、**同じ WASM VM** が埋め込まれています。
 
-コードを編集し、**Ctrl+Enter** / **⌘+Enter**（または **Run**）で実行できます。
+コードを編集し、**Ctrl+Enter** / **⌘+Enter**（または **Run**）で実行できます。**Clear** で出力を消します。
 
 ::: {.notes}
 デモが本編の中心。説明は短くし、コードを動かす。
@@ -91,12 +79,6 @@ OSS の中核: [AtelierArith/julia-vm-oss](https://github.com/AtelierArith/julia
 <div class="sjulia-executor" data-code="println(&quot;Hello from WebAssembly!&quot;)\nprintln(1 + 2 * 3)"></div>
 ```
 
-## デモ · 多重ディスパッチ
-
-```{=html}
-<div class="sjulia-executor" data-code="area(r::Real) = π * r^2\narea(w::Real, h::Real) = w * h\n\nprintln(area(2.0))\nprintln(area(3, 4))"></div>
-```
-
 ## デモ · Plots 経由の Plotly
 
 ```{=html}
@@ -106,52 +88,161 @@ OSS の中核: [AtelierArith/julia-vm-oss](https://github.com/AtelierArith/julia
 ## デモ · Mandelbrot ヒートマップ
 
 ```{=html}
-<div class="sjulia-executor" data-code="using Plots\nfunction esc(c, n)\n  z = 0.0+0.0im\n  for k in 1:n\n    abs2(z) > 4 && return k\n    z = z^2 + c\n  end; n\nend\nxs = range(-2, 1; length=80)\nys = range(-1.2, 1.2; length=60)\nheatmap(xs, ys, esc.(xs' .+ im .* ys, Ref(40)))"></div>
+<div class="sjulia-executor" data-code="using Plots\nfunction kernel(c, n)\n  z = 0.0+0.0im\n  for k in 1:n\n    abs2(z) > 4 && return k\n    z = z^2 + c\n  end; n\nend\nxs = range(-2, 1; length=80)\nys = range(\n  -1.2, 1.2;length=60\n)\ncs = xs' .+ im .* ys\nzs = kernel.(cs, Ref(40))\nheatmap(xs, ys, zs)"></div>
 ```
 
-## ブラウザの外へ
+## デモ · Lorenz アトラクタ(OrdinaryDiffEq)
 
-**iOS / iPadOS** — JIT なしのネイティブアプリ、App Store 準拠
+```{=html}
+<div class="sjulia-executor" data-code="using OrdinaryDiffEq\nfunction lorenz!(du, u, p, t)\n    du[1] = 10.0 * (u[2] - u[1])\n    du[2] = u[1] * (28.0 - u[3]) - u[2]\n    du[3] = u[1] * u[2] - (8 / 3) * u[3]\nend\nu0 = [1.0, 0.0, 0.0]\ntspan = (0.0, 60.0)\nprob = ODEProblem(lorenz!, u0, tspan)\nsol = solve(prob, Tsit5(), dt=0.05, saveat=0.05)\nusing Plots\nplot(sol, idxs=(1, 2, 3), title=&quot;Lorenz attractor&quot;)"></div>
+```
 
-- [App Store の SubsetJuliaVM](https://apps.apple.com/us/app/subsetjuliavm/id6757257182)
+## Julia 本家と sjulia の違い {.smaller}
 
-**Web playground**
+コードがどう解釈・実行されるか:
 
-- [terasakisatoshi.github.io/subset_julia](https://terasakisatoshi.github.io/subset_julia/)
+| 段階 | Julia 本家 | SubsetJuliaVM |
+|------|-----------|---------------|
+| Parser | flisp / JuliaSyntax.jl | pure Rust parser → CST |
+| Lowering | lowered IR | Rust 実装 → Core IR |
+| コード生成 | LLVM **JIT** で実行時にネイティブ化 | bytecode compiler(**実行前に完了**) |
+| 実行 | ネイティブコード | スタック型 VM(バイトコード解釈) |
+| ランタイム | C runtime + pure Julia `base/` | Rust builtins + pure Julia サブセット |
 
-同じ C ABI で Flutter / Swift ホストへ静的リンクもできます。
+- SubsetJuliaVM は JIT がないので **iOS(W^X)や WASM でも動く**
 
-## パッケージはどうするのか
+## Try `sjulia` (SubsetJuliaVM)
 
-フルな Pkg エコシステムではありません。
-教育・デモ向けの **同梱サブセット** で、上流ツリーをパリティ oracle に使います。例:
+![](assets/julia-vm-oss.png){.absolute top="0" right="0" width="170"}
 
-- Plots.jl · Distributions.jl · OrdinaryDiffEq.jl
-- Symbolics.jl · DataStructures.jl · Rotations.jl · …
+- Install Rust
+- Run the following commands:
 
-目標は `libjulia` の代替ではなく、
-**普段 Julia を動かせない場所で使える Julia** です。
+```sh
+$ git clone https://github.com/AtelierArith/julia-vm-oss.git
+$ cd julia-vm-oss
+$ ./scripts/sjulia_install.sh
+$ sjulia examples/mandelbrot.jl
+  0.40394 seconds
+Mandelbrot Set (50x25):
 
-## どう作ったか
+                              .
+                              . .
+                              .+
+                             ###+.
+                        .   .####.
+                       .#++#########....
+                      ..##############.
+            .        ..################..
+             ...... .##################.
+            .#######.###################
+          ...##########################.
+#####################################..
+          ...##########################.
+            .#######.###################
+             ...... .##################.
+            .        ..################..
+                      ..##############.
+                       .#++#########....
+                        .   .####.
+                             ###+.
+                              .+
+                              . .
+                              .
 
-VM の多くは **Claude Code / Codex / Cursor** で書いています。
+```
 
-人の役割:
+## `juliars`
 
-- 設計を上流 Julia に揃える
-- 可能なところは Pure Julia を優先する
-- パリティ fixture と監査で正しさをゲートする
+![](assets/julia-vm-oss.png){.absolute top="80" right="0" width="170"}
 
-## まとめ
+- Julia から Rust へのトランスパイラ(試験段階)
+- JuliaC とは異なり `libjulia` は不要
 
-- **no-JIT の Rust VM** で、iOS と Web 上に Julia 構文を載せられる
-- このデッキの WASM デモと App Store アプリは、同じパイプラインを共有する
-- `libjulia` 埋め込みより持ち運びやすい選択肢になる
+```sh
+$ cargo build --release -p subset_julia_vm \
+    --features aot --bin juliars
+$ target/release/juliars --minimal-prelude examples/mandelbrot.jl \
+    --emit-binary target/mandelbrot_aot
+$ target/mandelbrot_aot
+  9.4e-5 seconds
+Mandelbrot Set (50x25):
 
-**試す:** [julia-vm-oss](https://github.com/AtelierArith/julia-vm-oss) · [web playground](https://terasakisatoshi.github.io/subset_julia/) · [App Store](https://apps.apple.com/us/app/subsetjuliavm/id6757257182)
+                              .
+                              . .
+                              .+
+                             ###+.
+                        .   .####.
+                       .#++#########....
+                      ..##############.
+            .        ..################..
+             ...... .##################.
+            .#######.###################
+          ...##########################.
+#####################################..
+          ...##########################.
+            .#######.###################
+             ...... .##################.
+            .        ..################..
+                      ..##############.
+                       .#++#########....
+                        .   .####.
+                             ###+.
+                              .+
+                              . .
+                              .
+```
 
-## ありがとうございました
+## Julia, SubsetJuliaVM のパフォーマンス {.smaller}
 
-ご質問をどうぞ。
+マンデルブロー集合ベンチマーク(Apple Silicon macOS、2026-07 計測):
 
-資料はこのリポジトリの Quarto サイト / スライドにあります。
+::: {.columns}
+::: {.column width="55%"}
+```julia
+function mandel_point(c::ComplexF64,
+                      maxiter::Int64)::Int64
+    z = 0.0 + 0.0im
+    for k in 1:maxiter
+        abs2(z) > 4.0 && return k - 1
+        z = z * z + c
+    end
+    return maxiter
+end
+
+function mandel_count(width, height, maxiter)
+    total = 0
+    for y in 1:height
+        ci = -1.2 + 2.4 * (y - 1) / (height - 1)
+        for x in 1:width
+            cr = -2.0 + 3.0 * (x - 1) / (width - 1)
+            total += mandel_point(cr + ci * im, maxiter)
+        end
+    end
+    total
+end
+
+mandel_count(1500, 1500, 500)  # 全実装共通ソース
+```
+:::
+::: {.column width="45%"}
+| ランタイム | 時間 |
+|-----------|-----:|
+| Julia 本家 | 0.50 s |
+| `juliars`(AoT) | 0.52 s |
+| sjulia **VM** | 4.0 s |
+| Python 3.14 | 20.8 s |
+
+- AoT は **本家とほぼ同速**
+:::
+:::
+
+## Android アプリに興味はありますか？
+
+- 準備中．テスターを募集しています．
+- `s.terasaki@atelier-arith.jp` にメールを送ってください．
+![](assets/google_play.png)
+
+---
+
+# Thank you!!!

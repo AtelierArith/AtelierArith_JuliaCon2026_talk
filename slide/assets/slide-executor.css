@@ -38,15 +38,15 @@
 .sjulia-controls {
   display: flex;
   justify-content: flex-end;
+  gap: 0.5rem;
 }
 
 .sjulia-divider {
   display: none;
 }
 
-.sjulia-run-btn {
-  background: #66d9ef;
-  color: #1e1f1c;
+.sjulia-run-btn,
+.sjulia-clear-btn {
   border: none;
   border-radius: 4px;
   padding: 0.4rem 1rem;
@@ -55,10 +55,24 @@
   cursor: pointer;
 }
 
+.sjulia-run-btn {
+  background: #66d9ef;
+  color: #1e1f1c;
+}
+
 .sjulia-run-btn:disabled {
   background: #4a4a40;
   color: #888;
   cursor: not-allowed;
+}
+
+.sjulia-clear-btn {
+  background: #4a4a40;
+  color: #f8f8f2;
+}
+
+.sjulia-clear-btn:hover {
+  background: #5a5a50;
 }
 
 .sjulia-output {
