@@ -1,6 +1,6 @@
 ---
 title: "Let’s run Julia everywhere from mobile to web"
-author: "terasakisatoshi"
+author: "Satoshi Terasaki@AtelierArith"
 format:
   revealjs:
     theme: dark
