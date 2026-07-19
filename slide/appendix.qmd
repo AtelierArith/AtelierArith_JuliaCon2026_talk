@@ -258,6 +258,26 @@ CST ─[lowering]→ Core IR ─[bytecode compiler]→ bytecode → stack VM
 - method **dispatch caches** and lazy per-signature specialization
 - straight-line typed block execution that bypasses the generic dispatch loop
 
+## Q. Does sjulia have a TTFX (time-to-first-plot) problem? {.smaller}
+
+**A.** The phenomenon exists, but it is ~0.1-second bytecode work — not the
+second-scale native-compilation latency associated with Julia TTFP workloads.
+
+- Official Julia's TTFX/TTFP can include **type inference + LLVM native codegen**
+  for method specializations not covered by caches. Julia 1.9+ **pkgimages** cache
+  native code as well as precompilation results; compilation still occurs for
+  specializations those caches miss.
+- sjulia has none of that: no LLVM, no native codegen. The Base library is compiled
+  **once at build time** and embedded as a cache, so startup skips the prelude —
+  measured on this machine: `sjulia -e 'println(1)'` finishes in **~0.1 s** total.
+- What remains is what we call **TTFL** ("time to first load"): bundled packages
+  ship as Julia **source** and are bytecode-compiled on first `using`. Measured
+  (total process time, baseline 0.05 s): `using Plots` 0.29 s,
+  `OrdinaryDiffEq` 0.16 s, `AbstractAlgebra` 0.59 s, `Distributions` 0.72 s.
+  Lazy per-signature **bytecode** specialization adds a minor first-call warmup on top.
+- The web playground hides even that: it pre-warms `using Plots; plot(sin)` once
+  during startup, before the Run button is enabled.
+
 ## Q. Isn't Python also a stack-based VM? {.smaller}
 
 **A.** Yes — CPython compiles to bytecode and interprets it on an operand stack, same family as sjulia.
