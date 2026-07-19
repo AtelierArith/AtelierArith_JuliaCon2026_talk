@@ -43,13 +43,23 @@ format:
 
 ### Google it `SubsetJuliaVM`
 
-## Why I created it
+## Why I created it {.smaller}
 
-- I wanted to run Julia on my iPad.
-  - **iOS / iPadOS** (no JIT allowed, strict App Store review)
-  - W^X (Write XOR Execute) policy
-    - [Apple Platform Security — Security of runtime process](https://support.apple.com/guide/security/security-of-runtime-process-sec15bfe098e/web): writable **and** executable pages require an Apple-only entitlement (Safari's JS JIT)
-    - [App Store Review Guidelines §2.5.2](https://developer.apple.com/app-store/review/guidelines/#2.5.2): apps may not download or execute code
+- I wanted to run Julia on my iPad
+- But Julia normally relies on **JIT** compilation — and iOS blocks JIT twice:
+  - **The OS blocks it** — W^X: memory is writable **xor** executable
+    - A JIT *writes* machine code, then *executes* it
+    - → it needs pages it can write **and** then execute
+    - **General-purpose JIT is unavailable to ordinary distributed apps** —
+      Apple reserves it for its own apps like Safari's JS engine
+      (exceptions: approved browser engines, debugger-attached dev builds) —
+      [Apple Platform Security](https://support.apple.com/guide/security/security-of-runtime-process-sec15bfe098e/web)
+  - **The store forbids it**
+    - Apps may not download, install, or execute code that introduces or changes
+      app functionality —
+      [App Store Review Guidelines §2.5.2](https://developer.apple.com/app-store/review/guidelines/#2.5.2)
+- A **bundled interpreter** is fine: bytecode is just *data* read by an
+  already-signed app (downloaded code would still fall under §2.5.2)
 
 ## What about Binder or Google Colab?
   - Unusable where the internet connection is unreliable
@@ -91,6 +101,24 @@ Each cell: *who does it* → *what it produces*
 | Runtime library | C runtime + pure-Julia `base/` | Rust builtins + a pure-Julia subset |
 
 - With no JIT, SubsetJuliaVM **runs even on iOS (W^X) and WASM**
+
+## What SubsetJuliaVM does *not* provide {.smaller}
+
+Everything that would break the sandboxed, offline, no-downloaded-code model:
+
+- **Pkg.jl / package management** — no `Pkg.add`, no registry, no downloads;
+  `using X` only reaches the ~34 packages bundled into the binary
+- **Network I/O** — no Sockets, no Downloads/HTTP
+- **Filesystem access** — file operations are unimplemented;
+  `include` resolves through virtual embedded paths
+- **External processes** — no `run(cmd)`
+- **C interface** — no `@ccall`/`pointer`/`unsafe_*`
+- **Real parallelism** — single-threaded by design;
+  Tasks/Channels are cooperative continuations
+- **Native-code reflection** — no `@code_llvm`/`@code_native` (there is no LLVM);
+  use `sjulia --dump-bytecode` instead
+
+More details: see the [Appendix slides](appendix.html)
 
 ## Live demo (inside these slides)
 

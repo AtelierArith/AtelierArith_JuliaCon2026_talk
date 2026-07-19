@@ -426,10 +426,12 @@ CST ─[lowering]→ Core IR ─[bytecode compiler]→ bytecode → stack VM
 **A.** Runtime code generation is reserved for Apple; interpreting data is not.
 
 - Per Apple's Platform Security guide (cited in the main slides), requesting W+X memory
-  (`mmap` with `MAP_JIT`) requires the `dynamic-codesigning` entitlement,
-  which Apple grants only to its own apps (Safari's JS JIT).
-- All code in an App Store app must be **signed ahead of time**; code generated at runtime
-  has no signature, which is also why Guidelines §2.5.2 bans downloading/executing code.
+  (`mmap` with `MAP_JIT`) requires an entitlement that **ordinary distributed apps
+  cannot obtain** — Apple reserves it for its own apps like Safari's JS engine
+  (exceptions: approved alternative browser engines, debugger-attached dev builds).
+- All code in an App Store app must be **signed ahead of time**; Guidelines §2.5.2
+  also forbids downloading, installing, or executing code that introduces or
+  changes app functionality.
 - sjulia never needs **X** on data: bytecode is just *data* interpreted by an
   already-signed Rust binary — only ordinary read-only executable pages are used.
 
@@ -437,8 +439,9 @@ CST ─[lowering]→ Core IR ─[bytecode compiler]→ bytecode → stack VM
 
 **A.** The constraints rule out the usual options:
 
-- Upstream Julia requires LLVM **JIT** — writable+executable pages need an
-  Apple-only entitlement, and App Store apps may not generate or download code (§2.5.2).
+- Upstream Julia normally relies on the LLVM **JIT** — writable+executable pages need an
+  entitlement ordinary apps cannot obtain, and §2.5.2 forbids downloading or executing
+  code that changes app functionality.
 - Julia's interpreter mode still ships the full JIT-capable runtime, and `libjulia`
   is not built for iOS targets.
 - Server-side execution (Binder/Colab-style) breaks offline and adds latency.
