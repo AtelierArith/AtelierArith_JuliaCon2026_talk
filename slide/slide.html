@@ -213,25 +213,25 @@ terasakisatoshi
 <ul>
 <li>SubsetJuliaVM (a.k.a <code>sjulia</code>)
 <ul>
-<li>Julia の一部の文法をサポート</li>
-<li>Rust 実装の Stack based VM (Virtual Machine)</li>
+<li>Supports a subset of Julia’s syntax</li>
+<li>A stack-based VM (Virtual Machine) implemented in Rust</li>
 </ul></li>
-<li>iOS, Android が搭載したマシンで動作ができる
+<li>Runs on iOS and Android devices
 <ul>
-<li>作った Virtual Machine は WebAssembly に変換できるので，Web 上でも実行可能</li>
+<li>The VM compiles to WebAssembly, so it also runs in the browser</li>
 </ul></li>
-<li>Plots.jl, OrdinaryDiffEq.jl, AbstractAlgebra.jl などの一部の機能をサポート</li>
+<li>Supports parts of Plots.jl, OrdinaryDiffEq.jl, AbstractAlgebra.jl, and more</li>
 </ul>
 </section>
-<section id="成果物" class="slide level2 smaller">
-<h2>成果物</h2>
-<p><strong>iOS / iPadOS</strong> — JIT なしのネイティブアプリ、App Store 準拠</p>
+<section id="deliverables" class="slide level2 smaller">
+<h2>Deliverables</h2>
+<p><strong>iOS / iPadOS</strong> — a native app with no JIT, fully App Store compliant</p>
 <div class="columns">
 <div class="column" style="width:33%;">
-<p><strong>iOS アプリ</strong><br><a href="https://apps.apple.com/us/app/subsetjuliavm/id6757257182">App Store</a></p>
+<p><strong>iOS app</strong><br><a href="https://apps.apple.com/us/app/subsetjuliavm/id6757257182">App Store</a></p>
 <p><img data-src="assets/ios-app.png" width="240"></p>
 </div><div class="column" style="width:33%;">
-<p><strong>ソースコード</strong><br><a href="https://github.com/AtelierArith/julia-vm-oss">julia-vm-oss</a></p>
+<p><strong>Source code</strong><br><a href="https://github.com/AtelierArith/julia-vm-oss">julia-vm-oss</a></p>
 <p><img data-src="assets/julia-vm-oss.png" width="240"></p>
 </div><div class="column" style="width:33%;">
 <p><strong>Web playground</strong><br><a href="https://terasakisatoshi.github.io/subset_julia/">subset_julia</a></p>
@@ -239,77 +239,40 @@ terasakisatoshi
 </div></div>
 <h3 id="google-it-subsetjuliavm">Google it <code>SubsetJuliaVM</code></h3>
 </section>
-<section id="why-i-created" class="slide level2">
-<h2>Why I created</h2>
+<section id="why-i-created-it" class="slide level2">
+<h2>Why I created it</h2>
 <ul>
-<li>Julia を iPad で動作させたい．
+<li>I wanted to run Julia on my iPad.
 <ul>
-<li><strong>iOS / iPadOS</strong>（JIT 不可、審査が厳しい）</li>
+<li><strong>iOS / iPadOS</strong> (no JIT allowed, strict App Store review)</li>
 <li>W^X (Write XOR Execute) policy</li>
 </ul></li>
-<li>Binder, Google Colab?
+<li>What about Binder or Google Colab?
 <ul>
-<li>インターネット環境が不安定なところでは使えない</li>
-<li>外部パッケージの導入に時間がかかる．</li>
+<li>Unusable where the internet connection is unreliable</li>
+<li>Installing external packages takes a long time</li>
 </ul></li>
 </ul>
 </section>
-<section id="how-i-created" class="slide level2">
-<h2>How I created</h2>
+<section id="how-i-created-it" class="slide level2">
+<h2>How I created it</h2>
 <ul>
-<li>Pythonista, Carnets などのようなアプリは動かせる．
+<li>Apps like Pythonista and Carnets do run on iOS.
 <ul>
-<li>Julia の文法を受け付ける仮想マシンを作ればよい？！</li>
+<li>So why not build a virtual machine that accepts Julia syntax?!</li>
 </ul></li>
-<li>実際に作ろう!
+<li>Let’s actually build it!
 <ul>
-<li>スタック型バイトコードインタプリタ（<strong>JIT なし</strong>）</li>
+<li>A stack-based bytecode interpreter (<strong>no JIT</strong>)</li>
 <li><code>Julia source → Parser → Lowering → Compiler → VM</code></li>
-<li>Claude Code, Codex, Cursor, Kimi など AI をフル活用</li>
-<li>成果物 <a href="https://github.com/AtelierArith/julia-vm-oss">AtelierArith/julia-vm-oss</a></li>
+<li>Built with heavy use of AI tools: Claude Code, Codex, Cursor, Kimi, etc.</li>
+<li>Result: <a href="https://github.com/AtelierArith/julia-vm-oss">AtelierArith/julia-vm-oss</a></li>
 </ul></li>
 </ul>
 </section>
-<section id="ライブデモこのスライド内" class="slide level2">
-<h2>ライブデモ（このスライド内）</h2>
-<ul>
-<li>百聞は一見にしかず</li>
-<li>次のスライドには、<strong>同じ WASM VM</strong> が埋め込まれています。</li>
-</ul>
-<p>コードを編集し、<strong>Ctrl+Enter</strong> / <strong>⌘+Enter</strong>（または <strong>Run</strong>）で実行できます。<strong>Clear</strong> で出力を消します。</p>
-<aside class="notes">
-<p>デモが本編の中心。説明は短くし、コードを動かす。</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="デモ-hello-sjulia" class="slide level2">
-<h2>デモ · Hello, sjulia</h2>
-<div class="sjulia-executor" data-code="println(&quot;Hello from WebAssembly!&quot;)\nprintln(1 + 2 * 3)"></div>
-</section>
-<section id="デモ-plots-経由の-plotly" class="slide level2">
-<h2>デモ · Plots 経由の Plotly</h2>
-<div class="sjulia-executor" data-code="using Plots\nx = 0:0.1:2π\nplot(x, sin.(x), label=&quot;sin&quot;)\nplot!(x, cos.(x), label=&quot;cos&quot;)\ntitle!(&quot;ブラウザ上で実行&quot;)"></div>
-</section>
-<section id="デモ-mandelbrot-ヒートマップ" class="slide level2">
-<h2>デモ · Mandelbrot ヒートマップ</h2>
-<div class="sjulia-executor" data-code="using Plots\nfunction kernel(c, n)\n  z = 0.0+0.0im\n  for k in 1:n\n    abs2(z) > 4 &amp;&amp; return k\n    z = z^2 + c\n  end; n\nend\nxs = range(-2, 1; length=80)\nys = range(\n  -1.2, 1.2;length=60\n)\ncs = xs' .+ im .* ys\nzs = kernel.(cs, Ref(40))\nheatmap(xs, ys, zs)"></div>
-</section>
-<section id="デモ-lorenz-アトラクタordinarydiffeq" class="slide level2">
-<h2>デモ · Lorenz アトラクタ(OrdinaryDiffEq)</h2>
-<div class="sjulia-executor" data-code="using OrdinaryDiffEq\nfunction lorenz!(du, u, p, t)\n    du[1] = 10.0 * (u[2] - u[1])\n    du[2] = u[1] * (28.0 - u[3]) - u[2]\n    du[3] = u[1] * u[2] - (8 / 3) * u[3]\nend\nu0 = [1.0, 0.0, 0.0]\ntspan = (0.0, 60.0)\nprob = ODEProblem(lorenz!, u0, tspan)\nsol = solve(prob, Tsit5(), dt=0.05, saveat=0.05)\nusing Plots\nplot(sol, idxs=(1, 2, 3), title=&quot;Lorenz attractor&quot;)"></div>
-</section>
-<section id="julia-本家と-sjulia-の違い" class="slide level2 smaller">
-<h2>Julia 本家と sjulia の違い</h2>
-<p>コードがどう解釈・実行されるか:</p>
+<section id="how-sjulia-differs-from-upstream-julia" class="slide level2 smaller">
+<h2>How sjulia differs from upstream Julia</h2>
+<p>How code is interpreted and executed:</p>
 <table class="caption-top">
 <colgroup>
 <col style="width: 18%">
@@ -318,8 +281,8 @@ terasakisatoshi
 </colgroup>
 <thead>
 <tr class="header">
-<th>段階</th>
-<th>Julia 本家</th>
+<th>Stage</th>
+<th>Upstream Julia</th>
 <th>SubsetJuliaVM</th>
 </tr>
 </thead>
@@ -332,31 +295,68 @@ terasakisatoshi
 <tr class="even">
 <td>Lowering</td>
 <td>lowered IR</td>
-<td>Rust 実装 → Core IR</td>
+<td>Rust implementation → Core IR</td>
 </tr>
 <tr class="odd">
-<td>コード生成</td>
-<td>LLVM <strong>JIT</strong> で実行時にネイティブ化</td>
-<td>bytecode compiler(<strong>実行前に完了</strong>)</td>
+<td>Code generation</td>
+<td>native code via LLVM <strong>JIT</strong> at runtime</td>
+<td>bytecode compiler (<strong>done before execution</strong>)</td>
 </tr>
 <tr class="even">
-<td>実行</td>
-<td>ネイティブコード</td>
-<td>スタック型 VM(バイトコード解釈)</td>
+<td>Execution</td>
+<td>native code</td>
+<td>stack-based VM (bytecode interpretation)</td>
 </tr>
 <tr class="odd">
-<td>ランタイム</td>
+<td>Runtime</td>
 <td>C runtime + pure Julia <code>base/</code></td>
-<td>Rust builtins + pure Julia サブセット</td>
+<td>Rust builtins + a pure Julia subset</td>
 </tr>
 </tbody>
 </table>
 <ul>
-<li>SubsetJuliaVM は JIT がないので <strong>iOS(W^X)や WASM でも動く</strong></li>
+<li>With no JIT, SubsetJuliaVM <strong>runs even on iOS (W^X) and WASM</strong></li>
 </ul>
 </section>
-<section id="try-sjulia-subsetjuliavm" class="slide level2">
-<h2>Try <code>sjulia</code> (SubsetJuliaVM)</h2>
+<section id="live-demo-inside-these-slides" class="slide level2">
+<h2>Live demo (inside these slides)</h2>
+<ul>
+<li>Seeing is believing</li>
+<li>The next slides embed <strong>the very same WASM VM</strong>.</li>
+</ul>
+<p>Edit the code and run it with <strong>Ctrl+Enter</strong> / <strong>⌘+Enter</strong> (or <strong>Run</strong>). Press <strong>Clear</strong> to clear the output.</p>
+<aside class="notes">
+<p>The demo is the heart of this talk. Keep the explanation short and run the code.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="demo-hello-sjulia" class="slide level2">
+<h2>Demo · Hello, sjulia</h2>
+<div class="sjulia-executor" data-code="println(&quot;Hello from WebAssembly!&quot;)\nprintln(1 + 2 * 3)"></div>
+</section>
+<section id="demo-plotly-via-plots" class="slide level2">
+<h2>Demo · Plotly via Plots</h2>
+<div class="sjulia-executor" data-code="using Plots\nx = 0:0.1:2π\nplot(x, sin.(x), label=&quot;sin&quot;)\nplot!(x, cos.(x), label=&quot;cos&quot;)\ntitle!(&quot;Running in your browser&quot;)"></div>
+</section>
+<section id="demo-mandelbrot-heatmap" class="slide level2">
+<h2>Demo · Mandelbrot heatmap</h2>
+<div class="sjulia-executor" data-code="using Plots\nfunction kernel(c, n)\n  z = 0.0+0.0im\n  for k in 1:n\n    abs2(z) > 4 &amp;&amp; return k\n    z = z^2 + c\n  end; n\nend\nxs = range(-2, 1; length=80)\nys = range(\n  -1.2, 1.2;length=60\n)\ncs = xs' .+ im .* ys\nzs = kernel.(cs, Ref(40))\nheatmap(xs, ys, zs)"></div>
+</section>
+<section id="demo-lorenz-attractor-ordinarydiffeq" class="slide level2">
+<h2>Demo · Lorenz attractor (OrdinaryDiffEq)</h2>
+<div class="sjulia-executor" data-code="using OrdinaryDiffEq\nfunction lorenz!(du, u, p, t)\n    du[1] = 10.0 * (u[2] - u[1])\n    du[2] = u[1] * (28.0 - u[3]) - u[2]\n    du[3] = u[1] * u[2] - (8 / 3) * u[3]\nend\nu0 = [1.0, 0.0, 0.0]\ntspan = (0.0, 60.0)\nprob = ODEProblem(lorenz!, u0, tspan)\nsol = solve(prob, Tsit5(), dt=0.05, saveat=0.05)\nusing Plots\nplot(sol, idxs=(1, 2, 3), title=&quot;Lorenz attractor&quot;)"></div>
+</section>
+<section id="try-sjulia-subsetjuliavm-on-your-machine" class="slide level2">
+<h2>Try <code>sjulia</code> (SubsetJuliaVM) on your machine!!!</h2>
 <p><img data-src="assets/julia-vm-oss.png" class="absolute" style="top: 0px; right: 0px; width: 170px; "></p>
 <ul>
 <li>Install Rust</li>
@@ -397,8 +397,8 @@ terasakisatoshi
 <h2><code>juliars</code></h2>
 <p><img data-src="assets/julia-vm-oss.png" class="absolute" style="top: 80px; right: 0px; width: 170px; "></p>
 <ul>
-<li>Julia から Rust へのトランスパイラ(試験段階)</li>
-<li>JuliaC とは異なり <code>libjulia</code> は不要</li>
+<li>A Julia-to-Rust transpiler (experimental)</li>
+<li>Unlike JuliaC, it does not require <code>libjulia</code></li>
 </ul>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a></a><span class="ex">$</span> cargo build <span class="at">--release</span> <span class="at">-p</span> subset_julia_vm <span class="dt">\</span></span>
 <span id="cb2-2"><a></a>    <span class="at">--features</span> aot <span class="at">--bin</span> juliars</span>
@@ -432,9 +432,9 @@ terasakisatoshi
 <span id="cb2-30"><a></a>                              <span class="bu">.</span> .</span>
 <span id="cb2-31"><a></a>                              <span class="bu">.</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
-<section id="julia-subsetjuliavm-のパフォーマンス" class="slide level2 smaller">
-<h2>Julia, SubsetJuliaVM のパフォーマンス</h2>
-<p>マンデルブロー集合ベンチマーク(Apple Silicon macOS、2026-07 計測):</p>
+<section id="performance-julia-vs.-subsetjuliavm" class="slide level2 smaller">
+<h2>Performance: Julia vs.&nbsp;SubsetJuliaVM</h2>
+<p>Mandelbrot set benchmark (Apple Silicon macOS, measured 2026-07):</p>
 <div class="columns">
 <div class="column" style="width:55%;">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode numberSource julia number-lines code-with-copy"><code class="sourceCode julia"><span id="cb3-1"><a></a><span class="kw">function</span> <span class="fu">mandel_point</span>(c<span class="op">::</span><span class="dt">ComplexF64</span>,</span>
@@ -459,22 +459,22 @@ terasakisatoshi
 <span id="cb3-20"><a></a>    total</span>
 <span id="cb3-21"><a></a><span class="kw">end</span></span>
 <span id="cb3-22"><a></a></span>
-<span id="cb3-23"><a></a><span class="fu">mandel_count</span>(<span class="fl">1500</span>, <span class="fl">1500</span>, <span class="fl">500</span>)  <span class="co"># 全実装共通ソース</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb3-23"><a></a><span class="fu">mandel_count</span>(<span class="fl">1500</span>, <span class="fl">1500</span>, <span class="fl">500</span>)  <span class="co"># same source for all implementations</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div><div class="column" style="width:45%;">
 <table class="caption-top">
 <thead>
 <tr class="header">
-<th>ランタイム</th>
-<th style="text-align: right;">時間</th>
+<th>Runtime</th>
+<th style="text-align: right;">Time</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>Julia 本家</td>
+<td>Upstream Julia</td>
 <td style="text-align: right;">0.50 s</td>
 </tr>
 <tr class="even">
-<td><code>juliars</code>(AoT)</td>
+<td><code>juliars</code> (AoT)</td>
 <td style="text-align: right;">0.52 s</td>
 </tr>
 <tr class="odd">
@@ -488,15 +488,15 @@ terasakisatoshi
 </tbody>
 </table>
 <ul>
-<li>AoT は <strong>本家とほぼ同速</strong></li>
+<li>AoT is <strong>about as fast as upstream Julia</strong></li>
 </ul>
 </div></div>
 </section>
-<section id="android-アプリに興味はありますか" class="slide level2">
-<h2>Android アプリに興味はありますか？</h2>
+<section id="interested-in-the-android-app" class="slide level2">
+<h2>Interested in the Android app?</h2>
 <ul>
-<li>準備中．テスターを募集しています．</li>
-<li><code>s.terasaki@atelier-arith.jp</code> にメールを送ってください． <img data-src="assets/google_play.png"></li>
+<li>Coming soon — we are looking for testers.</li>
+<li>Send an email to <code>s.terasaki@atelier-arith.jp</code>. <img data-src="assets/google_play.png"></li>
 </ul>
 </section>
 <section class="slide level2">
