@@ -1,6 +1,4 @@
 /_site/
 /.quarto/
-/pkg/
-/assets/plotly.min.js
 
 **/*.quarto_ipynb

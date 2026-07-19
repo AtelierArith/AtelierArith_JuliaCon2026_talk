@@ -1,7 +1,7 @@
 // slide/assets/sjulia-runtime.js
 // Load the SubsetJuliaVM WASM runtime once per presentation and warm it up.
 
-import init, * as sjulia from './pkg/subset_julia_vm_web.js';
+import init, * as sjulia from './assets/pkg/subset_julia_vm_web.js';
 
 async function bootSjulia() {
   try {
