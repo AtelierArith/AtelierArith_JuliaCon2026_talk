@@ -20,7 +20,8 @@ Anticipated questions about SubsetJuliaVM (`sjulia`), with answers grounded in t
 - Expressions like `1 + 2 * 3` compile (before optimization) to instructions such as
   `PushI64(1)`, `PushI64(2)`, `PushI64(3)`, `MulI64`, `AddI64`
   — each operation pops its operands from the stack and pushes the result.
-- The VM core is a plain Rust loop: fetch `code[ip]`, `match` on the opcode, execute, advance `ip`.
+- The VM core is a plain Rust loop: fetch `code[ip]`, `match` on the opcode, execute, advance `ip`
+  (plus fast paths: pre-decoded straight-line blocks and specialized call sites bypass the generic loop).
 - The instruction set (`enum Instr`) has **400+ opcodes**: typed arithmetic (`AddI64`, `MulF64`),
   dynamic fallbacks (`DynamicAdd`), control flow (`Jump`, `JumpIfZero`), calls, array ops, etc.
 - Function calls push a `Frame` (locals, captured variables, entry stack height) onto a call-frame stack.
@@ -63,10 +64,11 @@ specialized print opcodes, not even a function call.
 | 6 | `PrintI64NoNewline` | `[]` — pops 7, prints `7` |
 | 7 | `PrintNewline` | `[]` |
 
-- The VM loop is: fetch `code[ip]` → `match` on the opcode → push/pop the stack.
+- The VM loop is: fetch `code[ip]` → `match` on the opcode → push/pop the stack
+  (optimized straight-line blocks can bypass this generic loop).
 - `MulI64` is plain Rust: pop two `i64`s, multiply, push — no type check, no boxing.
-- No machine code was generated at any point: bytecode is **data**, so the same
-  program runs on iOS, Android, and WASM unchanged.
+- No machine code was generated at any point: bytecode is **data**, interpreted by
+  the same VM on iOS, Android, and WASM.
 
 ## Q. Stack VM vs. register VM vs. tree-walking interpreter? {.smaller}
 
@@ -82,7 +84,8 @@ specialized print opcodes, not even a function call.
 
 **A.** A stack VM today; a register VM is being evaluated.
 
-- sjulia compiles to bytecode first, so it is **not** a tree-walker.
+- sjulia compiles to bytecode first, so the main execution path is **not** a tree-walker
+  (a small tree-walking evaluator exists only for runtime `eval` of `Expr` values).
 - A register VM prototype exists behind a flag; the stack VM stays the default until
   side-by-side parity and performance are proven.
 - Either way it is ordinary ahead-of-time-compiled Rust — no executable memory needed.
@@ -91,9 +94,11 @@ specialized print opcodes, not even a function call.
 
 **A.** `Source → Parser → Lowering → Core IR → Compiler → Bytecode → VM`
 
-- **Parser**: pure Rust (a faithful reimplementation of tree-sitter-julia grammar) → CST.
-  Pure Rust means the same parser runs natively, on iOS, and on `wasm32-unknown-unknown`.
-- **Lowering**: CST → Core IR; desugars closures, scoping rules, macros, quote/unquote.
+- **Parser**: pure Rust, producing a tree-sitter-compatible CST, validated against
+  upstream Julia's parser. Pure Rust means the same parser runs natively, on iOS,
+  and on `wasm32-unknown-unknown`.
+- **Lowering**: CST → Core IR; expands macros and desugars syntax
+  (some closure-capture analysis finishes later, in the compiler).
 - **Compiler**: Core IR → bytecode, with abstract-interpretation **type inference**,
   constant propagation, SSA-based optimization, and peephole fusion
   (e.g. a counted-loop back-edge becomes one fused "add-const-and-jump" superinstruction).
@@ -114,7 +119,7 @@ flowchart LR
   style CORE fill:#2b2b2b,stroke:#777,color:#ddd
 ```
 
-`parser / lowering / compile / bytecode / vm` — each stage is a separate crate with its own tests; lower layers never depend on upper ones.
+`parser / lowering / compile / bytecode / vm` — each stage is a separate crate with its own tests and a well-defined output (CST / Core IR / bytecode).
 
 ## Q. Architecture (cont.): how does it reach each platform? {.smaller}
 
@@ -131,7 +136,8 @@ flowchart LR
 ```
 
 - The bundled pure-Julia Base (~46k lines) and ~34 packages are compiled by the same pipeline.
-- The C ABI carries a version constant checked from Swift/Dart/JS — mismatches fail fast.
+- The C ABI carries a version constant checked from Swift and Dart — mismatches fail fast.
+  (The Web build ships JS glue and WASM as one bundle, so no runtime ABI check is needed.)
 
 ## Q. What is Core IR? {.smaller}
 
@@ -143,15 +149,17 @@ CST ─[lowering]→ Core IR ─[bytecode compiler]→ bytecode → stack VM
                      └────[aot: juliars]─────→ Rust source
 ```
 
-- Produced by lowering: **macros are already expanded**, quote/unquote resolved,
-  closure captures and scope rules settled.
+- Produced by lowering: **macros are expanded** and syntax desugared
+  (quoted code is kept as data for metaprogramming; some closure-capture
+  analysis finishes later, in the compiler).
 - What remains is a plain tree: `Assign`, `For`/`ForEach`, `While`,
   `Literal`, `Var`, `BinaryOp`, `Call`, `ArrayLiteral`, …
   E.g. `println(1 + x * 3)` becomes
   `Call("println", [BinaryOp(+, 1, BinaryOp(*, Var(x), 3))])`.
-- Roughly the counterpart of upstream Julia's `@code_lowered` output
-  (still a tree, not SSA — SSA appears later, inside the compiler's optimizer).
-- Every node carries a **`Span`** for precise error locations; identifiers are interned;
+- Loosely analogous to upstream Julia's lowered form (`@code_lowered`) —
+  but still a tree, not SSA; SSA appears later, inside the compiler's optimizer.
+- Expression/statement nodes carry a **`Span`** for precise error locations;
+  hot identifier positions are interned;
   `Call` carries kwargs and splat masks, so Julia's calling convention survives lowering.
 - It is **serializable**: `sjulia --compile f.jl -o f.sjir` saves it,
   `--run-ir` executes it, and `juliars` accepts it directly —
@@ -159,10 +167,10 @@ CST ─[lowering]→ Core IR ─[bytecode compiler]→ bytecode → stack VM
 
 ## Q. What does "static pipeline" mean here? {.smaller}
 
-**A.** Every stage that *generates code* finishes **before** execution begins.
+**A.** Code generation happens up front — and anything generated later is still only *bytecode*.
 
 - Parse → lower → macro-expand → infer types → optimize → emit bytecode:
-  all done up front; at run time the VM only *interprets* data.
+  done before execution; at run time the VM mostly just *interprets* data.
 - Upstream Julia interleaves these with execution — methods are LLVM-compiled
   **at run time**, on first call per type signature. That is the part iOS forbids.
 - In sjulia the runtime never creates new executable code; even lazy
@@ -174,10 +182,11 @@ CST ─[lowering]→ Core IR ─[bytecode compiler]→ bytecode → stack VM
 
 - The Base library is compiled once at build time and embedded as a **cache** —
   apps start without recompiling the prelude.
-- The same bytecode + interpreter pair runs unchanged on macOS, iOS, Android, and WASM.
-- Predictable startup and memory — no warm-up, no JIT compilation pauses.
-- And it is what makes the app **App Store compliant by construction**:
-  there is simply no code generation left to forbid.
+- The same bytecode format and interpreter run on macOS, iOS, Android, and WASM.
+- Predictable startup and memory — no JIT compilation pauses
+  (first-use bytecode specialization still warms some caches).
+- And it removes the App Store conflict at the design level:
+  there is no runtime *machine-code* generation left to forbid.
 
 ## Q. How do you implement multiple dispatch without a JIT? {.smaller}
 
@@ -186,10 +195,11 @@ CST ─[lowering]→ Core IR ─[bytecode compiler]→ bytecode → stack VM
 - Each function has a `MethodTable` of signatures (`Tuple{argtypes...}`, incl. `where` params).
 - **Compile time**: when inference knows the argument types, the call is resolved statically
   to a direct call — or even a type-specialized one (`CallSpecialize` compiles a
-  monomorphized version of the callee on first use and caches it).
+  per-type-signature specialized *bytecode* version of the callee on first use and caches it).
 - **Runtime**: `Any`-typed call sites use dynamic dispatch opcodes with a most-specific-match
   search, accelerated by dispatch caches (including negative caching) and a
-  first-argument-type index — the interpreter analogue of inline caches.
+  first-argument-type index (for primitive first arguments) —
+  the interpreter analogue of inline caches.
 
 ## Q. Is there a garbage collector? {.smaller}
 
@@ -199,8 +209,8 @@ CST ─[lowering]→ Core IR ─[bytecode compiler]→ bytecode → stack VM
   Rust reference counting (`Rc` — cloning is a refcount bump, not a copy).
 - Mutable structs live on a VM-managed heap (`Vec<StructInstance>`), referenced by index.
 - A **stop-the-world mark & compact pass runs only at safe points** (e.g. after a top-level
-  evaluation): mark reachable objects from the stack/frames/globals, rebuild the heap densely,
-  rewrite indices.
+  evaluation): mark reachable objects from all VM roots (stack, frames, globals, tasks, …),
+  rebuild the heap densely, rewrite indices.
 - This avoids per-assignment refcount traffic in hot loops, and cross-eval compaction keeps
   long REPL sessions bounded.
 
@@ -214,6 +224,8 @@ CST ─[lowering]→ Core IR ─[bytecode compiler]→ bytecode → stack VM
   upstream Julia's LLVM JIT gets its speed.
 - When top speed matters, `juliars` (AoT → Rust) removes interpretation entirely and
   matches upstream Julia.
+- (The ~8× and ~5× ratios are from the scalar Mandelbrot benchmark in the main slides;
+  the gap varies by workload.)
 
 ## Q. Then why is the VM still ~5× faster than Python? {.smaller}
 
@@ -304,23 +316,25 @@ CST ─[lowering]→ Core IR ─[bytecode compiler]→ bytecode → stack VM
 
 ## Q. How does plotting actually render? {.smaller}
 
-**A.** One backend everywhere: **Plotly JSON**.
+**A.** Plots.jl output renders as **Plotly JSON** on every host.
 
 - The bundled Plots subset builds a `Plot` value; the VM serializes it to an artifact with
   MIME `application/vnd.plotly+json`.
 - The web playground, the slides, and the iOS app all feed that JSON to a bundled
   `plotly.min.js` viewer — same interactive plots on every platform, including offline.
 - Supported: line/scatter/bar/histogram/heatmap/contour/surface/3D paths, plus
-  `@animate`/`@gif` (Plotly frames). JSXGraph is available for interactive geometry.
+  `@animate`/`@gif` (Plotly frames). A second artifact type, JSXGraph JSON,
+  serves interactive geometry.
 
 ## Q. How close is it to real Julia? How do you verify that? {.smaller}
 
 **A.** Parity with **upstream Julia 1.12** is enforced mechanically:
 
-- ~**3,100 test fixtures** across 130+ categories, each executed under both real `julia`
-  and `sjulia` — outputs must match exactly (floats within `1e-10`).
+- ~**3,100 registered test fixtures** across 114 categories, checked against expected
+  outputs (floats within `1e-10`); a separate **parity sweep** runs eligible fixtures
+  under both real `julia` and `sjulia` and compares.
 - Plus differential fuzzing, upstream-test-suite sweeps, and subtype/dispatch parity tests.
-- Supported: parametric types, multiple dispatch, user-defined macros with hygiene,
+- Implemented (as a subset): parametric types, multiple dispatch, user-defined macros with hygiene,
   broadcasting, closures, comprehensions, exceptions, modules, `eval`/`Expr`,
   BigInt/BigFloat/Rational/Complex, Tasks & Channels (via VM-level continuations).
 - Known gaps: no real threads (single-threaded by design), partial LinearAlgebra/views,
@@ -328,16 +342,18 @@ CST ─[lowering]→ Core IR ─[bytecode compiler]→ bytecode → stack VM
 
 ## Q. How does the Rust VM get into an iOS app / the browser? {.smaller}
 
-**A.** One core, three thin bindings — all sharing a versioned **hand-written C ABI**:
+**A.** One core, three thin bindings — iOS and Android share a versioned
+**hand-written C ABI**; Web has its own wasm-bindgen API:
 
-- **iOS**: `cargo build --target aarch64-apple-ios` → static lib → `SubsetVM.xcframework`;
+- **iOS**: `cargo build --target aarch64-apple-ios` → static lib → `SubsetJuliaVM.xcframework`;
   SwiftUI calls `compile_and_run_detailed`, `repl_session_eval`, etc. directly.
 - **Android**: same FFI crate built with `cargo-ndk` for each ABI, loaded from a
   Flutter app through `dart:ffi`.
 - **Web**: a separate `wasm-bindgen` crate built with `wasm-pack`
-  (size-optimized profile: `opt-level="s"`, LTO); JS calls `run_from_source(code)`.
-- The ABI version constant is checked on the Swift, Dart, and JS sides — mismatched
+  (size-optimized profile: `opt-level="s"`, LTO); JS calls `run_from_source(code, seed)`.
+- The C ABI version constant is checked on the Swift and Dart sides — mismatched
   binaries fail fast instead of corrupting memory.
+  (Web bundles JS glue and WASM together, so no runtime check is needed.)
 
 ## Q. How does `juliars` (AoT) work, and why no `libjulia`? {.smaller}
 
@@ -349,8 +365,9 @@ CST ─[lowering]→ Core IR ─[bytecode compiler]→ bytecode → stack VM
   helpers) — never on Julia's C runtime, because the whole toolchain is pure Rust.
 - Fully static programs (`--pure-rust`) compile to standalone binaries; scalar entry points
   can be exported as a C ABI.
-- "Experimental" because the guaranteed subset is deliberately narrow (scalar numerics, loops,
-  1D arrays, structs); loading bundled packages remains the VM's job.
+- "Experimental" because the *guaranteed* subset is deliberately narrow (scalar numerics,
+  loops, 1D arrays, structs; more constructs are partially implemented);
+  the bundled package ecosystem remains the VM's job.
 - On the Mandelbrot benchmark it matches upstream Julia's speed.
 
 ## Q. What are "writable + executable pages"? {.smaller}
@@ -368,8 +385,9 @@ CST ─[lowering]→ Core IR ─[bytecode compiler]→ bytecode → stack VM
 
 **A.** Runtime code generation is reserved for Apple; interpreting data is not.
 
-- Requesting W+X memory (`mmap` with `MAP_JIT`) requires the `dynamic-codesigning`
-  entitlement, which Apple grants only to its own apps (Safari's JS JIT).
+- Per Apple's Platform Security guide (cited in the main slides), requesting W+X memory
+  (`mmap` with `MAP_JIT`) requires the `dynamic-codesigning` entitlement,
+  which Apple grants only to its own apps (Safari's JS JIT).
 - All code in an App Store app must be **signed ahead of time**; code generated at runtime
   has no signature, which is also why Guidelines §2.5.2 bans downloading/executing code.
 - sjulia never needs **X** on data: bytecode is just *data* interpreted by an
@@ -389,17 +407,17 @@ CST ─[lowering]→ Core IR ─[bytecode compiler]→ bytecode → stack VM
 
 ## Q. How big is the sjulia codebase? {.smaller}
 
-**A.** Roughly **370k lines of Rust**, plus a large pure-Julia layer:
+**A.** Roughly **570k lines of Rust** (`src/` code, excluding tests), plus a large pure-Julia layer:
 
 - A Cargo workspace of **12 crates** — parser, lowering, IR, compiler, bytecode,
   VM, FFI, web/WASM, AoT runtime, …
 - The bytecode instruction set alone has **400+ opcodes**.
-- The AoT pipeline (`juliars`) is ~50k lines — about **13%** of the Rust code.
+- The AoT pipeline (`juliars`) is ~53k lines — roughly **9–10%** of the Rust code.
 - On top of that, Base is reimplemented as **~46k lines of pure-Julia subset code**
   (74 files mirroring upstream `base/`, plus 10 stdlib modules),
   and **~34 bundled packages** (Plots, Distributions, AbstractAlgebra, …).
-- Verified by **~3,100 parity fixtures** (run under both `julia` and `sjulia`)
-  across 130+ categories.
+- Verified by **~3,100 registered fixtures** across 114 categories,
+  with a parity sweep against real `julia`.
 - Most of it was written with AI coding agents in the loop —
   the parity suite is what kept that tractable.
 
@@ -412,7 +430,7 @@ CST ─[lowering]→ Core IR ─[bytecode compiler]→ bytecode → stack VM
   (it is also why the parser was rewritten from tree-sitter's generated C into pure Rust).
 - Memory safety without a runtime GC of its own; `enum` + `match` fit a
   bytecode interpreter naturally (tagged `Value`, exhaustive opcode dispatch).
-- The project also enforces a **panic-free VM policy** — user code must produce Julia
-  exceptions, never a Rust panic/abort, which matters inside an app process.
+- The project is ratcheting toward a **panic-free VM policy** — user code should raise
+  Julia exceptions, not Rust panics/aborts, which matters inside an app process.
 - Development leaned heavily on AI coding agents; a strict compiler + ~3,100 parity
   fixtures made that loop safe.
