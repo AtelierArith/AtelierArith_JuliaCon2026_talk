@@ -111,10 +111,11 @@ The demo is the heart of this talk. Keep the explanation short and run the code.
 <div class="sjulia-executor" data-code="using OrdinaryDiffEq\nfunction lorenz!(du, u, p, t)\n    du[1] = 10.0 * (u[2] - u[1])\n    du[2] = u[1] * (28.0 - u[3]) - u[2]\n    du[3] = u[1] * u[2] - (8 / 3) * u[3]\nend\nu0 = [1.0, 0.0, 0.0]\ntspan = (0.0, 60.0)\nprob = ODEProblem(lorenz!, u0, tspan)\nsol = solve(prob, Tsit5(), dt=0.05, saveat=0.05)\nusing Plots\nplot(sol, idxs=(1, 2, 3), title=&quot;Lorenz attractor&quot;)"></div>
 ```
 
-## Try `sjulia` (SubsetJuliaVM) on your machine!!!
+## Try `sjulia`
 
 ![](assets/julia-vm-oss.png){.absolute top="0" right="0" width="170"}
 
+- Try `sjulia` (SubsetJuliaVM) on your machine!!!
 - Install Rust
 - Run the following commands:
 
