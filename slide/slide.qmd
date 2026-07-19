@@ -86,13 +86,13 @@ flowchart LR
 
 Result: [AtelierArith/julia-vm-oss](https://github.com/AtelierArith/julia-vm-oss)
 
-## How sjulia differs from upstream Julia {.smaller}
+## How sjulia differs from official Julia {.smaller}
 
 How code is interpreted and executed:
 
 Each cell: *who does it* → *what it produces*
 
-| Stage | Upstream Julia | SubsetJuliaVM |
+| Stage | Official Julia | SubsetJuliaVM |
 |------|-----------|---------------|
 | Parsing | flisp / JuliaSyntax.jl → AST | pure-Rust parser → CST |
 | Lowering | Julia's lowering → lowered IR | Rust lowering → Core IR |
@@ -273,12 +273,12 @@ mandel_count(1500, 1500, 500)  # same source for all implementations
 ::: {.column width="45%"}
 | Runtime | Time |
 |-----------|-----:|
-| Upstream Julia | 0.50 s |
+| Official Julia | 0.50 s |
 | `juliars` (AoT) | 0.52 s |
 | sjulia **VM** | 4.0 s |
 | Python 3.14 | 20.8 s |
 
-- AoT is **about as fast as upstream Julia**
+- AoT is **about as fast as official Julia**
 :::
 :::
 

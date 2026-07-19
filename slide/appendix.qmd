@@ -27,7 +27,7 @@ built to run Julia code where the official runtime cannot go.
 - Same core, many faces: the `sjulia` CLI, an iOS/iPadOS App Store app,
   an Android (Flutter) app, and a browser playground — plus `juliars`,
   an experimental Julia→Rust AoT transpiler.
-- It is a **subset**: behavior is checked against upstream Julia 1.12 fixture-by-fixture,
+- It is a **subset**: behavior is checked against official Julia 1.12 fixture-by-fixture,
   but it is not, and does not claim to be, a full Julia implementation.
 
 ## Q. What is a "stack-based VM"? {.smaller}
@@ -116,7 +116,7 @@ Source ─[parse]→ CST ─[lower]→ Core IR ─[compile]→ Bytecode ─[VM i
 ```
 
 - **Parser**: pure Rust, producing a tree-sitter-compatible CST, validated against
-  upstream Julia's parser. Pure Rust means the same parser runs natively, on iOS,
+  official Julia's parser. Pure Rust means the same parser runs natively, on iOS,
   and on `wasm32-unknown-unknown`.
 - **Lowering**: CST → Core IR; expands macros and desugars syntax
   (some closure-capture analysis finishes later, in the compiler).
@@ -177,7 +177,7 @@ CST ─[lowering]→ Core IR ─[bytecode compiler]→ bytecode → stack VM
   `Literal`, `Var`, `BinaryOp`, `Call`, `ArrayLiteral`, …
   E.g. `println(1 + x * 3)` becomes
   `Call("println", [BinaryOp(+, 1, BinaryOp(*, Var(x), 3))])`.
-- Loosely analogous to upstream Julia's lowered form (`@code_lowered`) —
+- Loosely analogous to official Julia's lowered form (`@code_lowered`) —
   but still a tree, not SSA; SSA appears later, inside the compiler's optimizer.
 - Expression/statement nodes carry a **`Span`** for precise error locations;
   hot identifier positions are interned;
@@ -192,7 +192,7 @@ CST ─[lowering]→ Core IR ─[bytecode compiler]→ bytecode → stack VM
 
 - Parse → lower → macro-expand → infer types → optimize → emit bytecode:
   done before execution; at run time the VM mostly just *interprets* data.
-- Upstream Julia interleaves these with execution — methods are LLVM-compiled
+- Official Julia interleaves these with execution — methods are LLVM-compiled
   **at run time**, on first call per type signature. That is the part iOS forbids.
 - In sjulia the runtime never creates new executable code; even lazy
   specialization (`CallSpecialize`) only emits more *bytecode* — data, not machine code.
@@ -242,9 +242,9 @@ CST ─[lowering]→ Core IR ─[bytecode compiler]→ bytecode → stack VM
 - Every operation pays bytecode-dispatch overhead — fetch an instruction, branch on its
   opcode, execute, repeat.
 - No native code is specialized for your types at runtime, which is exactly where
-  upstream Julia's LLVM JIT gets its speed.
+  official Julia's LLVM JIT gets its speed.
 - When top speed matters, `juliars` (AoT → Rust) removes interpretation entirely and
-  matches upstream Julia.
+  matches official Julia.
 - (The ~8× and ~5× ratios are from the scalar Mandelbrot benchmark in the main slides;
   the gap varies by workload.)
 
@@ -294,7 +294,7 @@ CST ─[lowering]→ Core IR ─[bytecode compiler]→ bytecode → stack VM
   and **GC/refcount pressure** per assignment.
 - In CPython, adding two ints means: follow two pointers, read type tags, then produce a
   result object — allocated on the heap unless it falls in the small-int cache (−5…256).
-- Upstream Julia avoids this via JIT-compiled type-specialized code
+- Official Julia avoids this via JIT-compiled type-specialized code
   (boxing only appears at type-unstable / `Any` boundaries);
   sjulia does it by inferring types ahead of execution and keeping scalars **inline**
   in its `Value` enum (`I64(i64)`, `F64(f64)`) and in typed local slots.
@@ -333,7 +333,7 @@ CST ─[lowering]→ Core IR ─[bytecode compiler]→ bytecode → stack VM
   virtual paths, since iOS/WASM have no package filesystem.
 - They cover a practical subset of each package's API, not the full package.
 - Base itself is split: performance-critical primitives in Rust builtins,
-  the rest (~46k lines) as pure-Julia `base/` + 10 stdlib modules — mirroring upstream's layout.
+  the rest (~46k lines) as pure-Julia `base/` + 10 stdlib modules — mirroring official Julia's layout.
 
 ## Q. How does plotting actually render? {.smaller}
 
@@ -349,12 +349,12 @@ CST ─[lowering]→ Core IR ─[bytecode compiler]→ bytecode → stack VM
 
 ## Q. How close is it to real Julia? How do you verify that? {.smaller}
 
-**A.** Parity with **upstream Julia 1.12** is enforced mechanically:
+**A.** Parity with **official Julia 1.12** is enforced mechanically:
 
 - ~**3,100 registered test fixtures** across 114 categories, checked against expected
   outputs (floats within `1e-10`); a separate **parity sweep** runs eligible fixtures
   under both real `julia` and `sjulia` and compares.
-- Plus differential fuzzing, upstream-test-suite sweeps, and subtype/dispatch parity tests.
+- Plus differential fuzzing, official-test-suite sweeps, and subtype/dispatch parity tests.
 - Implemented (as a subset): parametric types, multiple dispatch, user-defined macros with hygiene,
   broadcasting, closures, comprehensions, exceptions, modules, `eval`/`Expr`,
   BigInt/BigFloat/Rational/Complex, Tasks & Channels (via VM-level continuations).
@@ -408,7 +408,7 @@ CST ─[lowering]→ Core IR ─[bytecode compiler]→ bytecode → stack VM
 - "Experimental" because the *guaranteed* subset is deliberately narrow (scalar numerics,
   loops, 1D arrays, structs; more constructs are partially implemented);
   the bundled package ecosystem remains the VM's job.
-- On the Mandelbrot benchmark it matches upstream Julia's speed.
+- On the Mandelbrot benchmark it matches official Julia's speed.
 
 ## Q. What are "writable + executable pages"? {.smaller}
 
@@ -439,7 +439,7 @@ CST ─[lowering]→ Core IR ─[bytecode compiler]→ bytecode → stack VM
 
 **A.** The constraints rule out the usual options:
 
-- Upstream Julia normally relies on the LLVM **JIT** — writable+executable pages need an
+- Official Julia normally relies on the LLVM **JIT** — writable+executable pages need an
   entitlement ordinary apps cannot obtain, and §2.5.2 forbids downloading or executing
   code that changes app functionality.
 - Julia's interpreter mode still ships the full JIT-capable runtime, and `libjulia`
@@ -457,7 +457,7 @@ CST ─[lowering]→ Core IR ─[bytecode compiler]→ bytecode → stack VM
 - The bytecode instruction set alone has **400+ opcodes**.
 - The AoT pipeline (`juliars`) is ~53k lines — roughly **9–10%** of the Rust code.
 - On top of that, Base is reimplemented as **~46k lines of pure-Julia subset code**
-  (74 files mirroring upstream `base/`, plus 10 stdlib modules),
+  (74 files mirroring official Julia's `base/`, plus 10 stdlib modules),
   and **~34 bundled packages** (Plots, Distributions, AbstractAlgebra, …).
 - Verified by **~3,100 registered fixtures** across 114 categories,
   with a parity sweep against real `julia`.
