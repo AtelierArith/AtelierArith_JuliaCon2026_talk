@@ -259,6 +259,20 @@
     "text": "Q. Then why is the VM still ~5× faster than Python?\nA. sjulia claws a lot back before execution, at compile time:\n\ntype inference → typed opcodes and typed local slots (AddI64, LoadSlotF64) instead of boxed generic ops\npeephole superinstructions (fused compare-and-jump, load-add, loop back-edge)\nmethod dispatch caches and lazy per-signature specialization\nstraight-line typed block execution that bypasses the generic dispatch loop"
   },
   {
+    "objectID": "slide/appendix.html#q.-does-sjulia-have-a-ttfx-ttfl-ttfp-problem",
+    "href": "slide/appendix.html#q.-does-sjulia-have-a-ttfx-ttfl-ttfp-problem",
+    "title": "Appendix — Q&A",
+    "section": "Q. Does sjulia have a TTFX / TTFL / TTFP problem?",
+    "text": "Q. Does sjulia have a TTFX / TTFL / TTFP problem?\nA. The phenomena all exist — but for these measured workloads they are far lighter than in official Julia, because the first-use work is bytecode compilation, not the second-scale native-compilation latency associated with Julia TTFP workloads.\n\nOfficial Julia’s TTFX/TTFP can include type inference + LLVM native codegen for method specializations not covered by caches. Julia 1.9+ pkgimages cache native code as well as precompilation results; compilation still occurs for specializations those caches miss.\nsjulia has none of that: no LLVM, no native codegen. The Base library is compiled once at build time and embedded as a cache, so startup skips the prelude — measured on this machine: sjulia -e 'println(1)' finishes in ~0.1 s total.\nWhat remains is what we call TTFL (“time to first load”): bundled packages ship as Julia source and are bytecode-compiled on first using. Measured (total process time, baseline 0.05 s): using Plots 0.29 s, OrdinaryDiffEq 0.16 s, AbstractAlgebra 0.59 s, Distributions 0.72 s. Lazy per-signature bytecode specialization adds a minor first-call warmup on top.\nEnd-to-end TTFP is dominated by TTFL: after using Plots, the incremental first plot(...) call measures only ~3 ms (subsequent calls ~1 ms) — plotting just builds a Plot value and emits Plotly JSON, with no native-code generation.\nThe web playground hides even that: it pre-warms using Plots; plot(sin) once during startup, before the Run button is enabled."
+  },
+  {
+    "objectID": "slide/appendix.html#q.-is-there-an-equivalent-of-julias-pkgimages",
+    "href": "slide/appendix.html#q.-is-there-an-equivalent-of-julias-pkgimages",
+    "title": "Appendix — Q&A",
+    "section": "Q. Is there an equivalent of Julia’s pkgimages?",
+    "text": "Q. Is there an equivalent of Julia’s pkgimages?\nA. Two cache layers exist — complete for Base, shallower than pkgimages for packages:\n\nBase cache — the prelude is compiled at build time and the resulting bytecode is embedded in the binary (fingerprint-invalidated). This is why bare startup is ~0.1 s.\nPer-package loader cache — each bundled package’s lowered Module is cached on disk, keyed by source hash + metadata-schema fingerprint + OS/arch; the files are even named in homage to Julia’s .ji (Distributions.&lt;hash&gt;.ji.json, under a temp cache dir; disabled on iOS/WASM).\nThe difference from pkgimages: this caches only up to lowered IR — bytecode compilation still runs on every using. Measured accordingly: using Distributions cold 0.72 s vs. warm 0.71 s — parse+lower savings only.\nSo: Base gets the full pkgimage-style treatment (compiled artifact, embedded); packages currently get a partial one. Caching compiled package bytecode is the natural next step down the same road."
+  },
+  {
     "objectID": "slide/appendix.html#q.-isnt-python-also-a-stack-based-vm",
     "href": "slide/appendix.html#q.-isnt-python-also-a-stack-based-vm",
     "title": "Appendix — Q&A",
