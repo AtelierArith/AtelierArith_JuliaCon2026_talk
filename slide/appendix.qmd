@@ -13,6 +13,22 @@ format:
 
 Anticipated questions about SubsetJuliaVM (`sjulia`), with answers grounded in the actual implementation.
 
+## Q. What is SubsetJuliaVM (`sjulia`)? {.smaller}
+
+**A.** A clean-room implementation of a **subset of the Julia language**, written in Rust —
+built to run Julia code where the official runtime cannot go.
+
+- One pipeline, no JIT: pure-Rust parser → lowering → Core IR → bytecode compiler →
+  **stack-based bytecode VM**. All code generation stays in data (bytecode),
+  so it runs on iOS (W^X), Android, WASM, and desktop.
+- Ships with a reimplemented Base subset (~46k lines of pure Julia + Rust builtins)
+  and ~34 bundled packages (Plots, OrdinaryDiffEq surface, AbstractAlgebra, …).
+- Same core, many faces: the `sjulia` CLI, an iOS/iPadOS App Store app,
+  an Android (Flutter) app, and a browser playground — plus `juliars`,
+  an experimental Julia→Rust AoT transpiler.
+- It is a **subset**: behavior is checked against upstream Julia 1.12 fixture-by-fixture,
+  but it is not, and does not claim to be, a full Julia implementation.
+
 ## Q. What is a "stack-based VM"? {.smaller}
 
 **A.** An interpreter that executes bytecode using an operand stack instead of registers.
@@ -339,6 +355,25 @@ CST ─[lowering]→ Core IR ─[bytecode compiler]→ bytecode → stack VM
   BigInt/BigFloat/Rational/Complex, Tasks & Channels (via VM-level continuations).
 - Known gaps: no real threads (single-threaded by design), partial LinearAlgebra/views,
   some macros are no-ops (`@inbounds`, `@inline`), and `Dict`-heavy hot loops are unoptimized.
+
+## Q. What does SubsetJuliaVM *not* provide? {.smaller}
+
+**A.** Everything that would break the sandboxed, offline, no-downloaded-code model:
+
+- **Pkg.jl / package management** — no `Pkg.add`, no registry, no downloads.
+  `using X` only reaches the ~34 packages bundled into the binary
+  (App Store apps may not download code, and the design is offline-first).
+- **Network I/O** — no Sockets, no Downloads/HTTP, no `download`.
+- **Filesystem access** — path/file operations (`pwd`, `mkdir`, `rm`, `stat`, …) are
+  unimplemented; iOS/WASM have no free filesystem, so `include` resolves through
+  virtual embedded paths instead.
+- **External processes** — no `run(cmd)`, environment control, or signals.
+- **C interface** — no `@ccall`/`@cfunction`/`pointer`/`unsafe_*`:
+  arbitrary native code would defeat the whole sandbox/no-JIT story.
+- **Real parallelism** — single-threaded by design; `Threads` API exists as stubs,
+  Tasks/Channels are cooperative continuations, no Distributed.
+- **Native-code reflection** — no `@code_llvm`/`@code_native` (there is no LLVM);
+  use `--dump-bytecode` instead.
 
 ## Q. How does the Rust VM get into an iOS app / the browser? {.smaller}
 
