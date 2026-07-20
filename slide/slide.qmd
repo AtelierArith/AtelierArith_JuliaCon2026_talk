@@ -45,21 +45,14 @@ format:
 
 ## Why I created it {.smaller}
 
-- I wanted to run Julia on my iPad
-- But Julia normally relies on **JIT** compilation — and iOS blocks JIT twice:
-  - **The OS blocks it** — W^X: memory is writable **xor** executable
-    - A JIT *writes* machine code, then *executes* it
-    - → it needs pages it can write **and** then execute
-    - **General-purpose JIT is unavailable to ordinary distributed apps** —
-      Apple reserves it for its own apps like Safari's JS engine
-      (exceptions: approved browser engines, debugger-attached dev builds) —
-      [Apple Platform Security](https://support.apple.com/guide/security/security-of-runtime-process-sec15bfe098e/web)
-  - **The store forbids it**
-    - Apps may not download, install, or execute code that introduces or changes
-      app functionality —
-      [App Store Review Guidelines §2.5.2](https://developer.apple.com/app-store/review/guidelines/#2.5.2)
-- A **bundled interpreter** is fine: bytecode is just *data* read by an
-  already-signed app (downloaded code would still fall under §2.5.2)
+- I wanted to run Julia on my iPad — **offline**
+- Official Julia relies on **JIT compilation**
+- Ordinary iOS apps cannot freely generate and execute native code at runtime
+  ([W^X](https://support.apple.com/guide/security/security-of-runtime-process-sec15bfe098e/web))
+- App Store rules also restrict downloaded code that changes app functionality
+  ([Review Guidelines §2.5.2](https://developer.apple.com/app-store/review/guidelines/#2.5.2))
+- SubsetJuliaVM uses a **bundled interpreter** instead:
+  bytecode stays data, and the signed app interprets it
 
 ## What about Binder or Google Colab?
   - Unusable where the internet connection is unreliable
