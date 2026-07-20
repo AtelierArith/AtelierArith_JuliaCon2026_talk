@@ -18,7 +18,7 @@
     "href": "slide/slide.html#why-i-created-it",
     "title": "Let’s run Julia everywhere from mobile to web",
     "section": "Why I created it",
-    "text": "Why I created it\n\nI wanted to run Julia on my iPad\nBut Julia normally relies on JIT compilation — and iOS blocks JIT twice:\n\nThe OS blocks it — W^X: memory is writable xor executable\n\nA JIT writes machine code, then executes it\n→ it needs pages it can write and then execute\nGeneral-purpose JIT is unavailable to ordinary distributed apps — Apple reserves it for its own apps like Safari’s JS engine (exceptions: approved browser engines, debugger-attached dev builds) — Apple Platform Security\n\nThe store forbids it\n\nApps may not download, install, or execute code that introduces or changes app functionality — App Store Review Guidelines §2.5.2\n\n\nA bundled interpreter is fine: bytecode is just data read by an already-signed app (downloaded code would still fall under §2.5.2)"
+    "text": "Why I created it\n\nI wanted to run Julia on my iPad — offline\nOfficial Julia relies on JIT compilation\nOrdinary iOS apps cannot freely generate and execute native code at runtime (W^X)\nApp Store rules also restrict downloaded code that changes app functionality (Review Guidelines §2.5.2)\nSubsetJuliaVM uses a bundled interpreter instead: bytecode stays data, and the signed app interprets it"
   },
   {
     "objectID": "slide/slide.html#what-about-binder-or-google-colab",

@@ -245,21 +245,11 @@ Satoshi Terasaki@AtelierArith
 <section id="why-i-created-it" class="slide level2 smaller">
 <h2>Why I created it</h2>
 <ul>
-<li>I wanted to run Julia on my iPad</li>
-<li>But Julia normally relies on <strong>JIT</strong> compilation — and iOS blocks JIT twice:
-<ul>
-<li><strong>The OS blocks it</strong> — W^X: memory is writable <strong>xor</strong> executable
-<ul>
-<li>A JIT <em>writes</em> machine code, then <em>executes</em> it</li>
-<li>→ it needs pages it can write <strong>and</strong> then execute</li>
-<li><strong>General-purpose JIT is unavailable to ordinary distributed apps</strong> — Apple reserves it for its own apps like Safari’s JS engine (exceptions: approved browser engines, debugger-attached dev builds) — <a href="https://support.apple.com/guide/security/security-of-runtime-process-sec15bfe098e/web">Apple Platform Security</a></li>
-</ul></li>
-<li><strong>The store forbids it</strong>
-<ul>
-<li>Apps may not download, install, or execute code that introduces or changes app functionality — <a href="https://developer.apple.com/app-store/review/guidelines/#2.5.2">App Store Review Guidelines §2.5.2</a></li>
-</ul></li>
-</ul></li>
-<li>A <strong>bundled interpreter</strong> is fine: bytecode is just <em>data</em> read by an already-signed app (downloaded code would still fall under §2.5.2)</li>
+<li>I wanted to run Julia on my iPad — <strong>offline</strong></li>
+<li>Official Julia relies on <strong>JIT compilation</strong></li>
+<li>Ordinary iOS apps cannot freely generate and execute native code at runtime (<a href="https://support.apple.com/guide/security/security-of-runtime-process-sec15bfe098e/web">W^X</a>)</li>
+<li>App Store rules also restrict downloaded code that changes app functionality (<a href="https://developer.apple.com/app-store/review/guidelines/#2.5.2">Review Guidelines §2.5.2</a>)</li>
+<li>SubsetJuliaVM uses a <strong>bundled interpreter</strong> instead: bytecode stays data, and the signed app interprets it</li>
 </ul>
 </section>
 <section id="what-about-binder-or-google-colab" class="slide level2">
