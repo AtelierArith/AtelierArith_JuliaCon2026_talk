@@ -191,9 +191,6 @@
       margin-right: 0; 
     }
   </style>
-  <script src="../site_libs/quarto-diagram/mermaid.min.js"></script>
-  <script src="../site_libs/quarto-diagram/mermaid-init.js"></script>
-  <link href="../site_libs/quarto-diagram/mermaid.css" rel="stylesheet">
 </head>
 <body class="quarto-dark">
   <div class="reveal">
@@ -214,16 +211,16 @@ Satoshi Terasaki@AtelierArith
 <section id="what-i-created" class="slide level2">
 <h2>What I created</h2>
 <ul>
-<li>SubsetJuliaVM (a.k.a <code>sjulia</code>)
+<li><strong>SubsetJuliaVM</strong> — a stack-based VM for a subset of Julia
 <ul>
-<li>Supports a subset of Julia’s syntax</li>
-<li>A stack-based VM (Virtual Machine) implemented in Rust</li>
+<li>CLI binary name: <code>sjulia</code> (think “subset Julia”)</li>
+<li>Implemented in Rust</li>
 </ul></li>
 <li>Runs on iOS and Android devices
 <ul>
 <li>The VM compiles to WebAssembly, so it also runs in the browser</li>
 </ul></li>
-<li>Supports parts of Plots.jl, OrdinaryDiffEq.jl, AbstractAlgebra.jl, and more</li>
+<li>Supports parts of Plots.jl, OrdinaryDiffEq.jl, Symbolics.jl, AbstractAlgebra.jl, and more</li>
 </ul>
 </section>
 <section id="deliverables" class="slide level2 smaller">
@@ -267,7 +264,7 @@ Satoshi Terasaki@AtelierArith
 <ul>
 <li>So why not build a virtual machine that accepts Julia syntax?!</li>
 </ul></li>
-<li>I don’t have an ability to create this
+<li>I don’t have the ability to create this
 <ul>
 <li>Let’s use AI</li>
 <li>Built with heavy use of AI tools: Claude Code, Codex, Cursor, DeepSeek, Kimi, etc.</li>
@@ -279,26 +276,21 @@ Satoshi Terasaki@AtelierArith
 <ul>
 <li>A stack-based bytecode interpreter (<strong>no JIT</strong>)</li>
 </ul>
-<div class="mermaid-big">
-<div class="cell" data-reveal="true" data-layout-align="default">
-<div class="cell-output-display">
-<div>
-<p></p><figure class=""><p></p>
-<div>
-<pre class="mermaid mermaid-js">%%{init: {"flowchart": {"useMaxWidth": false, "nodeSpacing": 25, "rankSpacing": 32, "padding": 10}}}%%
-flowchart LR
-  SRC["Julia source"] -- parse --&gt; CST["CST"] -- lower --&gt; IR["Core IR"] -- compile --&gt; BC["bytecode"] -- "stack VM interprets" --&gt; OUT["result"]
-</pre>
-</div>
-<p></p></figure><p></p>
-</div>
-</div>
-</div>
+<div class="pipeline">
+  <div class="pipeline-node">Julia source</div>
+  <div class="pipeline-arrow">→</div>
+  <div class="pipeline-node">parse → CST</div>
+  <div class="pipeline-arrow">→</div>
+  <div class="pipeline-node">lower → Core IR</div>
+  <div class="pipeline-arrow">→</div>
+  <div class="pipeline-node">compile → bytecode</div>
+  <div class="pipeline-arrow">→</div>
+  <div class="pipeline-node">stack VM → result</div>
 </div>
 <p>Result: <a href="https://github.com/AtelierArith/julia-vm-oss">AtelierArith/julia-vm-oss</a></p>
 </section>
-<section id="how-sjulia-differs-from-official-julia" class="slide level2 smaller">
-<h2>How sjulia differs from official Julia</h2>
+<section id="how-subsetjuliavm-differs-from-official-julia" class="slide level2 smaller">
+<h2>How SubsetJuliaVM differs from official Julia</h2>
 <p>How code is interpreted and executed:</p>
 <p>Each cell: <em>who does it</em> → <em>what it produces</em></p>
 <table class="caption-top">
@@ -381,8 +373,8 @@ flowchart LR
           display:block!important;
       }</style></aside>
 </section>
-<section id="hello-sjulia" class="slide level2">
-<h2>Hello, sjulia</h2>
+<section id="hello-subsetjuliavm" class="slide level2">
+<h2>Hello, SubsetJuliaVM</h2>
 <div class="sjulia-executor" data-code="println(&quot;Hello from WebAssembly!&quot;)\nprintln(1 + 2 * 3)"></div>
 </section>
 <section id="plotly-via-plots" class="slide level2">
@@ -397,11 +389,45 @@ flowchart LR
 <h2>Lorenz attractor (OrdinaryDiffEq)</h2>
 <div class="sjulia-executor" data-code="using OrdinaryDiffEq\nfunction lorenz!(du, u, p, t)\n    du[1] = 10.0 * (u[2] - u[1])\n    du[2] = u[1] * (28.0 - u[3]) - u[2]\n    du[3] = u[1] * u[2] - (8 / 3) * u[3]\nend\nu0 = [1.0, 0.0, 0.0]\ntspan = (0.0, 60.0)\nprob = ODEProblem(lorenz!, u0, tspan)\nsol = solve(prob, Tsit5(), dt=0.05, saveat=0.05)\nusing Plots\nplot(sol, idxs=(1, 2, 3), title=&quot;Lorenz attractor&quot;)"></div>
 </section>
-<section id="try-sjulia" class="slide level2">
-<h2>Try <code>sjulia</code></h2>
+<section id="jacobian-conjecture-counterexample" class="slide level2 smaller">
+<h2>Jacobian conjecture counterexample</h2>
+<p>Alpöge · Jul 2026 — <span class="math inline">\(F=(f,g,h)\colon \mathbb{C}^3 \to \mathbb{C}^3\)</span> with <span class="math inline">\(u=1+xy\)</span>:</p>
+<p><span class="math display">\[
+\begin{aligned}
+f &amp;= u^3 z + y^2 u(4+3xy),\\
+g &amp;= y + 3x u^2 z + 3x y^2(4+3xy),\\
+h &amp;= 2x - 3x^2 y - x^3 z.
+\end{aligned}
+\]</span></p>
+<p><span class="math display">\[
+\det J_F \equiv -2,
+\qquad
+F\!\left(0,0,-\tfrac14\right)
+= F\!\left(1,-\tfrac32,\tfrac{13}2\right)
+= F\!\left(-1,\tfrac32,\tfrac{13}2\right)
+= \left(-\tfrac14,\,0,\,0\right).
+\]</span></p>
+<p>So <span class="math inline">\(F\)</span> has <span class="math inline">\(\det J_F\)</span> a nonzero constant, yet is <strong>not injective</strong> — a counterexample for <span class="math inline">\(n\ge 3\)</span>.</p>
+<p>Q&amp;A: does this contradict the inverse function theorem? → <a href="appendix.html#/jacobian-ift">Appendix</a></p>
+</section>
+<section id="the-announcement" class="slide level2">
+<h2>The announcement</h2>
+<div class="jacobian-tweet-slide">
+  <iframe class="tweet-frame" title="Tweet by levent (@__alpoge__)" src="https://platform.twitter.com/embed/Tweet.html?id=2079028340955197566&amp;theme=dark&amp;dnt=true" loading="lazy" allowfullscreen=""></iframe>
+  <p class="tweet-fallback">
+    <a href="https://x.com/__alpoge__/status/2079028340955197566" target="_blank" rel="noopener">Open on X ↗</a>
+  </p>
+</div>
+</section>
+<section id="verify-with-symbolics.jl" class="slide level2">
+<h2>Verify with Symbolics.jl</h2>
+<div class="sjulia-executor" data-timeout-ms="120000" data-code="using Symbolics, LinearAlgebra\n@variables x y z\nu = 1 + x*y\nf = expand(u^3*z + y^2*u*(4 + 3x*y))\ng = expand(y + 3x*u^2*z + 3x*y^2*(4 + 3x*y))\nh = expand(2x - 3x^2*y - x^3*z)\n\n# Build JF from partial derivatives, then det\nJ = [\n  expand(derivative(f, x)) expand(derivative(f, y)) expand(derivative(f, z))\n  expand(derivative(g, x)) expand(derivative(g, y)) expand(derivative(g, z))\n  expand(derivative(h, x)) expand(derivative(h, y)) expand(derivative(h, z))\n]\nprintln(&quot;det JF = &quot;, expand(det(J)))\n\n# Three distinct inputs share one image\npts = [\n  (x = 0, y = 0, z = -1//4),\n  (x = 1, y = -3//2, z = 13//2),\n  (x = -1, y = 3//2, z = 13//2),\n]\nfor p in pts\n  println(p)\n  d = Dict(x => p.x, y => p.y, z => p.z)\n  println(substitute.((f, g, h), Ref(d)))\nend"></div>
+</section>
+<section id="try-subsetjuliavm" class="slide level2">
+<h2>Try SubsetJuliaVM</h2>
 <p><img data-src="assets/julia-vm-oss.png" class="absolute" style="top: 0px; right: 0px; width: 170px; "></p>
 <ul>
-<li>Try <code>sjulia</code> (SubsetJuliaVM) on your machine!!!</li>
+<li>Try SubsetJuliaVM (<code>sjulia</code>) on your machine!!!</li>
 <li><a href="https://rust-lang.org/tools/install/">Install Rust</a></li>
 <li>Run the following commands:</li>
 </ul>
@@ -438,7 +464,7 @@ flowchart LR
 </section>
 <section id="juliars" class="slide level2">
 <h2><code>juliars</code></h2>
-<p><img data-src="assets/julia-vm-oss.png" class="absolute" style="top: 80px; right: 0px; width: 170px; "></p>
+<p><img data-src="assets/julia-vm-oss.png" class="absolute" style="top: 0px; right: 0px; width: 170px; "></p>
 <ul>
 <li>A Julia-to-Rust transpiler (experimental)</li>
 <li>Unlike JuliaC, it does not require <code>libjulia</code></li>
@@ -537,10 +563,12 @@ flowchart LR
 </section>
 <section id="interested-in-the-android-app" class="slide level2">
 <h2>Interested in the Android app?</h2>
+<p><img data-src="assets/email-qr.png" class="absolute" style="top: 0px; right: 0px; width: 220px; "></p>
 <ul>
 <li>Coming soon — we are looking for testers.</li>
-<li>Send an email to <code>s.terasaki@atelier-arith.jp</code>. <img data-src="assets/google_play.png"></li>
+<li>Scan the QR code to email <code>s.terasaki@atelier-arith.jp</code></li>
 </ul>
+<p><img data-src="assets/google_play.png" width="480"></p>
 </section>
 <section class="slide level2">
 

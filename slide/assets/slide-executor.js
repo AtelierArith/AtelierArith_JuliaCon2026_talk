@@ -4,7 +4,7 @@
 import { registerJuliaLanguage, setWasmModule } from './julia-language.js';
 
 (function () {
-  const RUN_TIMEOUT_MS = 5000;
+  const DEFAULT_RUN_TIMEOUT_MS = 5000;
   const MONACO_CDN = 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs';
   const MIN_EDITOR_RATIO = 0.35;
   const MAX_EDITOR_RATIO = 0.8;
@@ -175,7 +175,7 @@ import { registerJuliaLanguage, setWasmModule } from './julia-language.js';
     ui.divider.addEventListener('pointercancel', stopDrag);
     ui.divider.addEventListener('keydown', (event) => {
       const step = event.shiftKey ? 0.08 : 0.03;
-      const current = parseFloat(ui.container.style.getPropertyValue('--sjulia-editor-ratio')) || 0.5;
+      const current = parseFloat(ui.container.style.getPropertyValue('--sjulia-editor-ratio')) || 0.65;
       if (event.key === 'ArrowLeft') {
         event.preventDefault();
         setEditorRatio(ui, current - step);
@@ -213,13 +213,15 @@ import { registerJuliaLanguage, setWasmModule } from './julia-language.js';
     showOutput(ui, '', false);
 
     try {
+      const timeoutAttr = ui.container.getAttribute('data-timeout-ms');
+      const timeoutMs = timeoutAttr ? Number(timeoutAttr) : DEFAULT_RUN_TIMEOUT_MS;
       const result = await Promise.race([
         new Promise((resolve) => {
           // run_from_source is synchronous in the wasm-bindgen wrapper.
           resolve(window.sjulia.run_from_source(source, BigInt(42)));
         }),
         new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Execution timed out')), RUN_TIMEOUT_MS)
+          setTimeout(() => reject(new Error('Execution timed out')), timeoutMs)
         )
       ]);
 
