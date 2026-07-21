@@ -17,7 +17,7 @@ format:
   - Implemented in Rust
 - Runs on iOS and Android devices
   - The VM compiles to WebAssembly, so it also runs in the browser
-- Supports parts of Plots.jl, OrdinaryDiffEq.jl, AbstractAlgebra.jl, and more
+- Supports parts of Plots.jl, OrdinaryDiffEq.jl, Symbolics.jl, AbstractAlgebra.jl, and more
 
 ## Deliverables {.smaller}
 
@@ -71,16 +71,19 @@ format:
 ## Let's actually build it!
   - A stack-based bytecode interpreter (**no JIT**)
 
-::: {.mermaid-big}
-```{mermaid}
-%%{init: {"themeVariables": {"fontSize": "28px"}, "flowchart": {"useMaxWidth": false, "nodeSpacing": 40, "rankSpacing": 50, "padding": 16}}}%%
-flowchart TB
-  SRC["Julia source"] --> CST["parse → CST"]
-  CST --> IR["lower → Core IR"]
-  IR --> BC["compile → bytecode"]
-  BC --> OUT["stack VM interprets → result"]
+```{=html}
+<div class="pipeline">
+  <div class="pipeline-node">Julia source</div>
+  <div class="pipeline-arrow">→</div>
+  <div class="pipeline-node">parse → CST</div>
+  <div class="pipeline-arrow">→</div>
+  <div class="pipeline-node">lower → Core IR</div>
+  <div class="pipeline-arrow">→</div>
+  <div class="pipeline-node">compile → bytecode</div>
+  <div class="pipeline-arrow">→</div>
+  <div class="pipeline-node">stack VM → result</div>
+</div>
 ```
-:::
 
 Result: [AtelierArith/julia-vm-oss](https://github.com/AtelierArith/julia-vm-oss)
 
@@ -151,6 +154,54 @@ The demo is the heart of this talk. Keep the explanation short and run the code.
 
 ```{=html}
 <div class="sjulia-executor" data-code="using OrdinaryDiffEq\nfunction lorenz!(du, u, p, t)\n    du[1] = 10.0 * (u[2] - u[1])\n    du[2] = u[1] * (28.0 - u[3]) - u[2]\n    du[3] = u[1] * u[2] - (8 / 3) * u[3]\nend\nu0 = [1.0, 0.0, 0.0]\ntspan = (0.0, 60.0)\nprob = ODEProblem(lorenz!, u0, tspan)\nsol = solve(prob, Tsit5(), dt=0.05, saveat=0.05)\nusing Plots\nplot(sol, idxs=(1, 2, 3), title=&quot;Lorenz attractor&quot;)"></div>
+```
+
+## Jacobian conjecture counterexample {.smaller}
+
+Alpöge · Jul 2026 — $F=(f,g,h)\colon \mathbb{C}^3 \to \mathbb{C}^3$ with $u=1+xy$:
+
+$$
+\begin{aligned}
+f &= u^3 z + y^2 u(4+3xy),\\
+g &= y + 3x u^2 z + 3x y^2(4+3xy),\\
+h &= 2x - 3x^2 y - x^3 z.
+\end{aligned}
+$$
+
+$$
+\det J_F \equiv -2,
+\qquad
+F\!\left(0,0,-\tfrac14\right)
+= F\!\left(1,-\tfrac32,\tfrac{13}2\right)
+= F\!\left(-1,\tfrac32,\tfrac{13}2\right)
+= \left(-\tfrac14,\,0,\,0\right).
+$$
+
+So $F$ has $\det J_F$ a nonzero constant, yet is **not injective** — a counterexample for $n\ge 3$.
+
+Q&A: does this contradict the inverse function theorem? → [Appendix](appendix.html#/jacobian-ift)
+
+## The announcement
+
+```{=html}
+<div class="jacobian-tweet-slide">
+  <iframe
+    class="tweet-frame"
+    title="Tweet by levent (@__alpoge__)"
+    src="https://platform.twitter.com/embed/Tweet.html?id=2079028340955197566&amp;theme=dark&amp;dnt=true"
+    loading="lazy"
+    allowfullscreen
+  ></iframe>
+  <p class="tweet-fallback">
+    <a href="https://x.com/__alpoge__/status/2079028340955197566" target="_blank" rel="noopener">Open on X ↗</a>
+  </p>
+</div>
+```
+
+## Verify with Symbolics.jl
+
+```{=html}
+<div class="sjulia-executor" data-timeout-ms="120000" data-code="using Symbolics, LinearAlgebra\n@variables x y z\nu = 1 + x*y\nf = expand(u^3*z + y^2*u*(4 + 3x*y))\ng = expand(y + 3x*u^2*z + 3x*y^2*(4 + 3x*y))\nh = expand(2x - 3x^2*y - x^3*z)\n\n# Build JF from partial derivatives, then det\nJ = [\n  expand(derivative(f, x)) expand(derivative(f, y)) expand(derivative(f, z))\n  expand(derivative(g, x)) expand(derivative(g, y)) expand(derivative(g, z))\n  expand(derivative(h, x)) expand(derivative(h, y)) expand(derivative(h, z))\n]\nprintln(&quot;det JF = &quot;, expand(det(J)))\n\n# Three distinct inputs share one image\npts = [\n  (x = 0, y = 0, z = -1//4),\n  (x = 1, y = -3//2, z = 13//2),\n  (x = -1, y = 3//2, z = 13//2),\n]\nfor p in pts\n  println(p)\n  d = Dict(x => p.x, y => p.y, z => p.z)\n  println(substitute.((f, g, h), Ref(d)))\nend"></div>
 ```
 
 ## Try SubsetJuliaVM

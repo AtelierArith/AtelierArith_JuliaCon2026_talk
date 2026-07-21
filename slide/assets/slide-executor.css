@@ -1,7 +1,7 @@
 /* slide/assets/slide-executor.css */
 
 .sjulia-executor {
-  --sjulia-editor-ratio: 0.5;
+  --sjulia-editor-ratio: 0.65;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -165,9 +165,42 @@
   }
 }
 
+/* Single-row pipeline diagram (readable on dark reveal slides) */
+.reveal .pipeline {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 1.1rem 0 1.3rem;
+  font-size: 1.15rem;
+  line-height: 1.25;
+  width: max-content;
+  max-width: 100%;
+}
+.reveal .pipeline-node {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.55rem 0.8rem;
+  border: 2px solid #7dd3fc;
+  border-radius: 0.45rem;
+  background: #0f172a;
+  color: #f8fafc;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.reveal .pipeline-arrow {
+  color: #e2e8f0;
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1;
+  user-select: none;
+}
+
 /* Full-width mermaid diagrams: wrap a ```{mermaid} block in ::: {.mermaid-big} */
 .reveal .mermaid-big {
-  margin-top: 0.4em;
+  margin-top: 0.6em;
 }
 .reveal .mermaid-big .mermaid {
   width: 100%;
@@ -175,9 +208,29 @@
   justify-content: center;
 }
 .reveal .mermaid-big .mermaid svg {
-  width: min(100%, 52rem) !important;
+  width: 100% !important;
   max-width: none !important;
   height: auto !important;
-  transform: scale(1.15);
-  transform-origin: top center;
+}
+
+/* Tweet on its own slide */
+.reveal .jacobian-tweet-slide {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+  margin-top: 0.35rem;
+}
+.reveal .jacobian-tweet-slide .tweet-frame {
+  width: min(36rem, 100%);
+  height: min(58vh, 26rem);
+  border: 0;
+  border-radius: 12px;
+  background: #15202b;
+  box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.25);
+}
+.reveal .jacobian-tweet-slide .tweet-fallback {
+  margin: 0;
+  font-size: 0.85em;
+  opacity: 0.9;
 }

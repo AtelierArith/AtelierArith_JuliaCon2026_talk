@@ -12,6 +12,7 @@ format:
 ## About this appendix
 
 Anticipated questions about SubsetJuliaVM (`sjulia`), with answers grounded in the actual implementation.
+Also: a short Q&A on the **Jacobian-conjecture demo** (Symbolics.jl).
 
 ## Q. What is SubsetJuliaVM (`sjulia`)? {.smaller}
 
@@ -578,3 +579,29 @@ not as conformance to a standard.
   Julia exceptions, not Rust panics/aborts, which matters inside an app process.
 - Development leaned heavily on AI coding agents; a strict compiler + ~3,100 parity
   fixtures made that loop safe.
+
+---
+
+# Jacobian demo (Q&A)
+
+## Q. Doesn't this contradict the inverse function theorem? {#jacobian-ift .smaller}
+
+**A.** No. The inverse function theorem is **local**; the Jacobian conjecture is **global**.
+
+- **IFT:** if $\det J_F(p)\neq 0$, then $F$ is invertible in a neighborhood of $p$
+- Alpöge's $F$ has $\det J_F\equiv -2$ **everywhere**, so it is locally invertible at every finite point
+- But three distant inputs share one image, so $F$ is **not globally injective**
+- Local sheets do not collide at a finite critical point; a fiber can lose points when a preimage **escapes to infinity** (failure of properness)
+
+Local invertibility everywhere $\neq$ a global (polynomial) inverse.
+
+## Q. What did we check with Symbolics.jl? {.smaller}
+
+**A.** Exactly the two certificates that kill the conjecture:
+
+1. Build $J_F$ from partial derivatives and expand $\det J_F$ → the constant $-2$
+2. Evaluate $F$ at
+   $(0,0,-1/4)$, $(1,-3/2,13/2)$, $(-1,3/2,13/2)$
+   → all map to $(-1/4,0,0)$
+
+No floating-point approximation: rational arithmetic via `Symbolics` + `LinearAlgebra.det`.
