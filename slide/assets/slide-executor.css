@@ -166,11 +166,18 @@
 }
 
 /* Full-width mermaid diagrams: wrap a ```{mermaid} block in ::: {.mermaid-big} */
+.reveal .mermaid-big {
+  margin-top: 0.4em;
+}
 .reveal .mermaid-big .mermaid {
   width: 100%;
+  display: flex;
+  justify-content: center;
 }
 .reveal .mermaid-big .mermaid svg {
-  width: 100% !important;
+  width: min(100%, 52rem) !important;
   max-width: none !important;
   height: auto !important;
+  transform: scale(1.15);
+  transform-origin: top center;
 }

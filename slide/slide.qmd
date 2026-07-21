@@ -12,9 +12,9 @@ format:
 
 ## What I created
 
-- SubsetJuliaVM (a.k.a `sjulia`)
-  - Supports a subset of Julia's syntax
-  - A stack-based VM (Virtual Machine) implemented in Rust
+- **SubsetJuliaVM** — a stack-based VM for a subset of Julia
+  - CLI binary name: `sjulia` (think "subset Julia")
+  - Implemented in Rust
 - Runs on iOS and Android devices
   - The VM compiles to WebAssembly, so it also runs in the browser
 - Supports parts of Plots.jl, OrdinaryDiffEq.jl, AbstractAlgebra.jl, and more
@@ -64,7 +64,7 @@ format:
 
 - Apps like Pythonista and Carnets do run on iOS.
   - So why not build a virtual machine that accepts Julia syntax?!
-- I don't have an ability to create this
+- I don't have the ability to create this
   - Let's use AI
   - Built with heavy use of AI tools: Claude Code, Codex, Cursor, DeepSeek, Kimi, etc.
 
@@ -73,15 +73,18 @@ format:
 
 ::: {.mermaid-big}
 ```{mermaid}
-%%{init: {"flowchart": {"useMaxWidth": false, "nodeSpacing": 25, "rankSpacing": 32, "padding": 10}}}%%
-flowchart LR
-  SRC["Julia source"] -- parse --> CST["CST"] -- lower --> IR["Core IR"] -- compile --> BC["bytecode"] -- "stack VM interprets" --> OUT["result"]
+%%{init: {"themeVariables": {"fontSize": "28px"}, "flowchart": {"useMaxWidth": false, "nodeSpacing": 40, "rankSpacing": 50, "padding": 16}}}%%
+flowchart TB
+  SRC["Julia source"] --> CST["parse → CST"]
+  CST --> IR["lower → Core IR"]
+  IR --> BC["compile → bytecode"]
+  BC --> OUT["stack VM interprets → result"]
 ```
 :::
 
 Result: [AtelierArith/julia-vm-oss](https://github.com/AtelierArith/julia-vm-oss)
 
-## How sjulia differs from official Julia {.smaller}
+## How SubsetJuliaVM differs from official Julia {.smaller}
 
 How code is interpreted and executed:
 
@@ -126,7 +129,7 @@ Edit the code and run it with **Ctrl+Enter** / **⌘+Enter** (or **Run**). Press
 The demo is the heart of this talk. Keep the explanation short and run the code.
 :::
 
-## Hello, sjulia
+## Hello, SubsetJuliaVM
 
 ```{=html}
 <div class="sjulia-executor" data-code="println(&quot;Hello from WebAssembly!&quot;)\nprintln(1 + 2 * 3)"></div>
@@ -150,11 +153,11 @@ The demo is the heart of this talk. Keep the explanation short and run the code.
 <div class="sjulia-executor" data-code="using OrdinaryDiffEq\nfunction lorenz!(du, u, p, t)\n    du[1] = 10.0 * (u[2] - u[1])\n    du[2] = u[1] * (28.0 - u[3]) - u[2]\n    du[3] = u[1] * u[2] - (8 / 3) * u[3]\nend\nu0 = [1.0, 0.0, 0.0]\ntspan = (0.0, 60.0)\nprob = ODEProblem(lorenz!, u0, tspan)\nsol = solve(prob, Tsit5(), dt=0.05, saveat=0.05)\nusing Plots\nplot(sol, idxs=(1, 2, 3), title=&quot;Lorenz attractor&quot;)"></div>
 ```
 
-## Try `sjulia`
+## Try SubsetJuliaVM
 
 ![](assets/julia-vm-oss.png){.absolute top="0" right="0" width="170"}
 
-- Try `sjulia` (SubsetJuliaVM) on your machine!!!
+- Try SubsetJuliaVM (`sjulia`) on your machine!!!
 - [Install Rust](https://rust-lang.org/tools/install/)
 - Run the following commands:
 
@@ -194,7 +197,7 @@ Mandelbrot Set (50x25):
 
 ## `juliars`
 
-![](assets/julia-vm-oss.png){.absolute top="80" right="0" width="170"}
+![](assets/julia-vm-oss.png){.absolute top="0" right="0" width="170"}
 
 - A Julia-to-Rust transpiler (experimental)
 - Unlike JuliaC, it does not require `libjulia`
@@ -279,9 +282,12 @@ mandel_count(1500, 1500, 500)  # same source for all implementations
 
 ## Interested in the Android app?
 
+![](assets/email-qr.png){.absolute top="0" right="0" width="220"}
+
 - Coming soon — we are looking for testers.
-- Send an email to `s.terasaki@atelier-arith.jp`.
-![](assets/google_play.png)
+- Scan the QR code to email `s.terasaki@atelier-arith.jp`
+
+![](assets/google_play.png){width="480"}
 
 ---
 
