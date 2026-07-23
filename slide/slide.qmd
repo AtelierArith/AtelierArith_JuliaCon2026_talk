@@ -196,12 +196,12 @@ More details: see the [Appendix slides](appendix.html)
 
 - Basic Julia syntax (subset)
 - ~34 bundled 3rd-party packages (no download), including:
-  - These have been re-implemented specifically for SubsetJuliaVM.
-    - **Plots**, StatsPlots, JSXGraph, Interact
-    - **OrdinaryDiffEq**, SciMLBase
-    - **Symbolics**, AbstractAlgebra, Primes, Combinatorics
-    - **Distributions**, StatsBase, Optim, QuadGK, HCubature
-    - StaticArrays, SparseArrays, SpecialFunctions, Quaternions, Rotations, …
+  - **Plots**, StatsPlots, JSXGraph, Interact
+  - **OrdinaryDiffEq**, SciMLBase
+  - **Symbolics**, AbstractAlgebra, Primes, Combinatorics
+  - **Distributions**, StatsBase, Optim, QuadGK, HCubature
+  - StaticArrays, SparseArrays, SpecialFunctions, Quaternions, Rotations, …
+- These have been re-implemented specifically for SubsetJuliaVM.
 
 ---
 
