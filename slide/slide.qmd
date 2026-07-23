@@ -13,6 +13,7 @@ format:
 ## What I created
 
 - **SubsetJuliaVM** — a stack-based VM for a subset of Julia
+  - Looks like Julia and walks like Python
   - CLI binary name: `sjulia` (think "subset Julia")
   - Implemented in Rust
 - Runs on iOS and Android devices
@@ -43,9 +44,45 @@ format:
 
 ### Google it `SubsetJuliaVM`
 
-## Why I created it {.smaller}
+---
 
+## Live demo (inside these slides)
+
+- Seeing is believing
+- The next slides embed **the very same WASM VM**.
+
+Edit the code and run it with **Ctrl+Enter** / **⌘+Enter** (or **Run**). Press **Clear** to clear the output.
+
+::: {.notes}
+The demo is the heart of this talk. Keep the explanation short and run the code.
+:::
+
+## Hello, SubsetJuliaVM
+
+```{=html}
+<div class="sjulia-executor" data-code="println(&quot;Hello from WebAssembly!&quot;)\nprintln(1 + 2 * 3)"></div>
+```
+
+---
+
+## Why I created it
+
+- I loved Pythonista (iOS app)
 - I wanted to run Julia on my iPad — **offline**
+
+---
+
+## What about Binder or Google Colab?
+  - Unusable where the internet connection is unreliable
+  - Installing external packages takes a long time
+
+![](assets/colab.png)
+
+---
+
+## Can we run official Julia on iOS?
+
+- Maybe, No.
 - Official Julia relies on **JIT compilation**
 - Ordinary iOS apps cannot freely generate and execute native code at runtime
   ([W^X](https://support.apple.com/guide/security/security-of-runtime-process-sec15bfe098e/web))
@@ -54,18 +91,14 @@ format:
 - SubsetJuliaVM uses a **bundled interpreter** instead:
   bytecode stays data, and the signed app interprets it
 
-## What about Binder or Google Colab?
-  - Unusable where the internet connection is unreliable
-  - Installing external packages takes a long time
-
-![](assets/colab.png)
+---
 
 ## How I created it
 
 - Apps like Pythonista and Carnets do run on iOS.
   - So why not build a virtual machine that accepts Julia syntax?!
-- I don't have the ability to create this
-  - Let's use AI
+- I don't have the ability to create this 😭
+  - Let's use AI 🤖
   - Built with heavy use of AI tools: Claude Code, Codex, Cursor, DeepSeek, Kimi, etc.
 
 ## Let's actually build it!
@@ -86,6 +119,42 @@ format:
 ```
 
 Result: [AtelierArith/julia-vm-oss](https://github.com/AtelierArith/julia-vm-oss)
+
+```sh
+$ git clone https://github.com/AtelierArith/julia-vm-oss.git
+$ cd julia-vm-oss
+$ ./scripts/sjulia_install.sh   # Windows: pwsh -File scripts/sjulia_install.ps1
+$ sjulia examples/mandelbrot.jl
+  0.027875 seconds
+Mandelbrot Set (50x25):
+
+                              .
+                              . .
+                              .+
+                             ###+.
+                        .   .####.
+                       .#++#########....
+                      ..##############.
+            .        ..################..
+             ...... .##################.
+            .#######.###################
+          ...##########################.
+#####################################..
+          ...##########################.
+            .#######.###################
+             ...... .##################.
+            .        ..################..
+                      ..##############.
+                       .#++#########....
+                        .   .####.
+                             ###+.
+                              .+
+                              . .
+                              .
+
+```
+
+---
 
 ## How SubsetJuliaVM differs from official Julia {.smaller}
 
@@ -116,224 +185,71 @@ Everything that would break the sandboxed, offline, no-downloaded-code model:
 - **C interface** — no `@ccall`/`pointer`/`unsafe_*`
 - **Real parallelism** — single-threaded by design;
   Tasks/Channels are cooperative continuations
+- `@generated` macro
 - **Native-code reflection** — no `@code_llvm`/`@code_native` (there is no LLVM);
   use `sjulia --dump-bytecode` instead
-
 More details: see the [Appendix slides](appendix.html)
 
-## Live demo (inside these slides)
+---
 
-- Seeing is believing
-- The next slides embed **the very same WASM VM**.
+## What we support {.smaller}
 
-Edit the code and run it with **Ctrl+Enter** / **⌘+Enter** (or **Run**). Press **Clear** to clear the output.
+- Basic Julia syntax (subset)
+- ~34 bundled 3rd-party packages (no download), including:
+  - These have been re-implemented specifically for SubsetJuliaVM.
+    - **Plots**, StatsPlots, JSXGraph, Interact
+    - **OrdinaryDiffEq**, SciMLBase
+    - **Symbolics**, AbstractAlgebra, Primes, Combinatorics
+    - **Distributions**, StatsBase, Optim, QuadGK, HCubature
+    - StaticArrays, SparseArrays, SpecialFunctions, Quaternions, Rotations, …
 
-::: {.notes}
-The demo is the heart of this talk. Keep the explanation short and run the code.
-:::
-
-## Hello, SubsetJuliaVM
-
-```{=html}
-<div class="sjulia-executor" data-code="println(&quot;Hello from WebAssembly!&quot;)\nprintln(1 + 2 * 3)"></div>
-```
-
-## Plotly via Plots
-
-```{=html}
-<div class="sjulia-executor" data-code="using Plots\nx = 0:0.1:2π\nplot(x, sin.(x), label=&quot;sin&quot;)\nplot!(x, cos.(x), label=&quot;cos&quot;)\ntitle!(&quot;Running in your browser&quot;)"></div>
-```
-
-## Mandelbrot heatmap
-
-```{=html}
-<div class="sjulia-executor" data-code="using Plots\nfunction kernel(c, n)\n  z = 0.0+0.0im\n  for k in 1:n\n    abs2(z) > 4 && return k\n    z = z^2 + c\n  end; n\nend\nxs = range(-2, 1; length=80)\nys = range(\n  -1.2, 1.2;length=60\n)\ncs = xs' .+ im .* ys\nzs = kernel.(cs, Ref(40))\nheatmap(xs, ys, zs)"></div>
-```
-
-## Lorenz attractor (OrdinaryDiffEq)
-
-```{=html}
-<div class="sjulia-executor" data-code="using OrdinaryDiffEq\nfunction lorenz!(du, u, p, t)\n    du[1] = 10.0 * (u[2] - u[1])\n    du[2] = u[1] * (28.0 - u[3]) - u[2]\n    du[3] = u[1] * u[2] - (8 / 3) * u[3]\nend\nu0 = [1.0, 0.0, 0.0]\ntspan = (0.0, 60.0)\nprob = ODEProblem(lorenz!, u0, tspan)\nsol = solve(prob, Tsit5(), dt=0.05, saveat=0.05)\nusing Plots\nplot(sol, idxs=(1, 2, 3), title=&quot;Lorenz attractor&quot;)"></div>
-```
-
-## Jacobian conjecture counterexample {.smaller}
-
-Alpöge · Jul 2026 — $F=(f,g,h)\colon \mathbb{C}^3 \to \mathbb{C}^3$ with $u=1+xy$:
-
-$$
-\begin{aligned}
-f &= u^3 z + y^2 u(4+3xy),\\
-g &= y + 3x u^2 z + 3x y^2(4+3xy),\\
-h &= 2x - 3x^2 y - x^3 z.
-\end{aligned}
-$$
-
-$$
-\det J_F \equiv -2,
-\qquad
-F\!\left(0,0,-\tfrac14\right)
-= F\!\left(1,-\tfrac32,\tfrac{13}2\right)
-= F\!\left(-1,\tfrac32,\tfrac{13}2\right)
-= \left(-\tfrac14,\,0,\,0\right).
-$$
-
-So $F$ has $\det J_F$ a nonzero constant, yet is **not injective** — a counterexample for $n\ge 3$.
-
-Q&A: does this contradict the inverse function theorem? → [Appendix](appendix.html#/jacobian-ift)
-
-## The announcement
-
-```{=html}
-<div class="jacobian-tweet-slide">
-  <iframe
-    class="tweet-frame"
-    title="Tweet by levent (@__alpoge__)"
-    src="https://platform.twitter.com/embed/Tweet.html?id=2079028340955197566&amp;theme=dark&amp;dnt=true"
-    loading="lazy"
-    allowfullscreen
-  ></iframe>
-  <p class="tweet-fallback">
-    <a href="https://x.com/__alpoge__/status/2079028340955197566" target="_blank" rel="noopener">Open on X ↗</a>
-  </p>
-</div>
-```
-
-## Verify with Symbolics.jl
-
-```{=html}
-<div class="sjulia-executor" data-timeout-ms="120000" data-code="using Symbolics, LinearAlgebra\n@variables x y z\nu = 1 + x*y\nf = expand(u^3*z + y^2*u*(4 + 3x*y))\ng = expand(y + 3x*u^2*z + 3x*y^2*(4 + 3x*y))\nh = expand(2x - 3x^2*y - x^3*z)\n\n# Build JF from partial derivatives, then det\nJ = [\n  expand(derivative(f, x)) expand(derivative(f, y)) expand(derivative(f, z))\n  expand(derivative(g, x)) expand(derivative(g, y)) expand(derivative(g, z))\n  expand(derivative(h, x)) expand(derivative(h, y)) expand(derivative(h, z))\n]\nprintln(&quot;det JF = &quot;, expand(det(J)))\n\n# Three distinct inputs share one image\npts = [\n  (x = 0, y = 0, z = -1//4),\n  (x = 1, y = -3//2, z = 13//2),\n  (x = -1, y = 3//2, z = 13//2),\n]\nfor p in pts\n  println(p)\n  d = Dict(x => p.x, y => p.y, z => p.z)\n  println(substitute.((f, g, h), Ref(d)))\nend"></div>
-```
-
-## Try SubsetJuliaVM
-
-![](assets/julia-vm-oss.png){.absolute top="0" right="0" width="170"}
-
-- Try SubsetJuliaVM (`sjulia`) on your machine!!!
-- [Install Rust](https://rust-lang.org/tools/install/)
-- Run the following commands:
-
-```sh
-$ git clone https://github.com/AtelierArith/julia-vm-oss.git
-$ cd julia-vm-oss
-$ ./scripts/sjulia_install.sh
-$ sjulia examples/mandelbrot.jl
-  0.40394 seconds
-Mandelbrot Set (50x25):
-
-                              .
-                              . .
-                              .+
-                             ###+.
-                        .   .####.
-                       .#++#########....
-                      ..##############.
-            .        ..################..
-             ...... .##################.
-            .#######.###################
-          ...##########################.
-#####################################..
-          ...##########################.
-            .#######.###################
-             ...... .##################.
-            .        ..################..
-                      ..##############.
-                       .#++#########....
-                        .   .####.
-                             ###+.
-                              .+
-                              . .
-                              .
-
-```
-
-## `juliars`
-
-![](assets/julia-vm-oss.png){.absolute top="0" right="0" width="170"}
-
-- A Julia-to-Rust transpiler (experimental)
-- Unlike JuliaC, it does not require `libjulia`
-
-```sh
-$ cargo build --release -p subset_julia_vm \
-    --features aot --bin juliars
-$ target/release/juliars --minimal-prelude examples/mandelbrot.jl \
-    --emit-binary target/mandelbrot_aot
-$ target/mandelbrot_aot
-  9.4e-5 seconds
-Mandelbrot Set (50x25):
-
-                              .
-                              . .
-                              .+
-                             ###+.
-                        .   .####.
-                       .#++#########....
-                      ..##############.
-            .        ..################..
-             ...... .##################.
-            .#######.###################
-          ...##########################.
-#####################################..
-          ...##########################.
-            .#######.###################
-             ...... .##################.
-            .        ..################..
-                      ..##############.
-                       .#++#########....
-                        .   .####.
-                             ###+.
-                              .+
-                              . .
-                              .
-```
+---
 
 ## Performance: Julia vs. SubsetJuliaVM {.smaller}
 
-Mandelbrot set benchmark (Apple Silicon macOS, measured 2026-07):
+Coprime-π benchmark — $P(\gcd(a,b)=1)=6/\pi^2$ (Apple Silicon macOS):
 
 ::: {.columns}
 ::: {.column width="55%"}
 ```julia
-function mandel_point(c::ComplexF64,
-                      maxiter::Int64)::Int64
-    z = 0.0 + 0.0im
-    for k in 1:maxiter
-        abs2(z) > 4.0 && return k - 1
-        z = z * z + c
+# P(gcd(a,b)=1) = 6/π²  →  π = √(6/P)
+function mygcd(a, b)
+    while b != 0
+        tmp = b
+        b = a % b
+        a = tmp
     end
-    return maxiter
+    a
 end
 
-function mandel_count(width, height, maxiter)
-    total = 0
-    for y in 1:height
-        ci = -1.2 + 2.4 * (y - 1) / (height - 1)
-        for x in 1:width
-            cr = -2.0 + 3.0 * (x - 1) / (width - 1)
-            total += mandel_point(cr + ci * im, maxiter)
+function calc_pi(N)
+    cnt = 0
+    for a in 1:N
+        for b in 1:N
+            if mygcd(a, b) == 1
+                cnt += 1
+            end
         end
     end
-    total
+    sqrt(6.0 / (cnt / N / N))
 end
 
-mandel_count(1500, 1500, 500)  # same source for all implementations
+calc_pi(10000)  # same source for all runtimes
 ```
 :::
 ::: {.column width="45%"}
 | Runtime | Time |
 |-----------|-----:|
-| Official Julia | 0.50 s |
-| `juliars` (AoT) | 0.52 s |
-| sjulia **VM** | 4.0 s |
-| Python 3.14 | 20.8 s |
+| Official Julia | 2.12 s |
+| `juliars` (AoT) | 1.89 s |
+| sjulia **VM** | 9.99 s |
+| Python 3.14 | 16.76 s |
 
 - AoT is **about as fast as official Julia**
 :::
 :::
 
 ## Interested in the Android app?
-
-![](assets/email-qr.png){.absolute top="0" right="0" width="220"}
 
 - Coming soon — we are looking for testers.
 - Scan the QR code to email `s.terasaki@atelier-arith.jp`
