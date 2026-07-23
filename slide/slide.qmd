@@ -267,7 +267,7 @@ calc_pi(10000)  # same source for all runtimes
 ## Interested in the Android app?
 
 - Coming soon — we are looking for testers.
-- Scan the QR code to email `s.terasaki@atelier-arith.jp`
+- Please contact `s.terasaki@atelier-arith.jp`
 
 ![](assets/google_play.png){width="480"}
 
