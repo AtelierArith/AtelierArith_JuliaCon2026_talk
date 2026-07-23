@@ -205,6 +205,21 @@ More details: see the [Appendix slides](appendix.html)
 
 ---
 
+## `juliars` {.smaller}
+
+An **experimental Julia → Rust AoT transpiler** (same frontend as the VM).
+
+- Pipeline: source → CST → Core IR → **Rust source** → `rustc -O` → native binary
+- Unlike JuliaC / PackageCompiler, it does **not** need `libjulia`
+- Best for scalar numerics, loops, arrays — the broad package surface stays on the **VM**
+- On the coprime-π / Mandelbrot benches: **about as fast as official Julia**
+
+```sh
+$ cargo build --release -p subset_julia_vm --features aot --bin juliars
+$ target/release/juliars --minimal-prelude examples/mandelbrot.jl --emit-binary target/mandelbrot_aot
+$ target/release/mandelbrot_aot
+```
+
 ## Performance: Julia vs. SubsetJuliaVM {.smaller}
 
 Coprime-π benchmark — $P(\gcd(a,b)=1)=6/\pi^2$ (Apple Silicon macOS):
