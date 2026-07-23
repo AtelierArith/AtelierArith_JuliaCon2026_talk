@@ -257,7 +257,7 @@ calc_pi(10000)  # same source for all runtimes
 |-----------|-----:|
 | Official Julia | 2.12 s |
 | `juliars` (AoT) | 1.89 s |
-| sjulia **VM** | 9.99 s |
+| `sjulia` (VM) | 9.99 s |
 | Python 3.14 | 16.76 s |
 
 - AoT is **about as fast as official Julia**
