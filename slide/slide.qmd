@@ -10,8 +10,7 @@ format:
 
 ## Let’s run Julia everywhere from mobile to web
 
-- https://atelierarith.github.io/AtelierArith_JuliaCon2026_talk/
-- Link to slide ↓↓↓
+- [Link to slide](https://atelierarith.github.io/AtelierArith_JuliaCon2026_talk/) ↓↓↓
 
 ![](assets/slide-url-qr.png){width="320"}
 
