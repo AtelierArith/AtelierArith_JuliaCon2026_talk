@@ -1,106 +1,127 @@
 [
   {
+    "objectID": "slide/slide.html#lets-run-julia-everywhere-from-mobile-to-web",
+    "href": "slide/slide.html#lets-run-julia-everywhere-from-mobile-to-web",
+    "title": "Let’s run Julia everywhere",
+    "section": "Let’s run Julia everywhere from mobile to web",
+    "text": "Let’s run Julia everywhere from mobile to web\n\nhttps://atelierarith.github.io/AtelierArith_JuliaCon2026_talk/\nLink to slide ↓↓↓"
+  },
+  {
     "objectID": "slide/slide.html#what-i-created",
     "href": "slide/slide.html#what-i-created",
-    "title": "Let’s run Julia everywhere from mobile to web",
+    "title": "Let’s run Julia everywhere",
     "section": "What I created",
     "text": "What I created\n\nSubsetJuliaVM — a stack-based VM for a subset of Julia\n\nLooks like Julia and walks like Python\nCLI binary name: sjulia (think “subset Julia”)\nImplemented in Rust\n\nRuns on iOS and Android devices\n\nThe VM compiles to WebAssembly, so it also runs in the browser\n\nSupports parts of Plots.jl, OrdinaryDiffEq.jl, Symbolics.jl, AbstractAlgebra.jl, and more"
   },
   {
     "objectID": "slide/slide.html#deliverables",
     "href": "slide/slide.html#deliverables",
-    "title": "Let’s run Julia everywhere from mobile to web",
+    "title": "Let’s run Julia everywhere",
     "section": "Deliverables",
     "text": "Deliverables\niOS / iPadOS — a native app with no JIT, fully App Store compliant\n\n\niOS appApp Store\n\n\nSource codejulia-vm-oss\n\n\nWeb playgroundsubset_julia\n\n\nGoogle it SubsetJuliaVM"
   },
   {
     "objectID": "slide/slide.html#live-demo-inside-these-slides",
     "href": "slide/slide.html#live-demo-inside-these-slides",
-    "title": "Let’s run Julia everywhere from mobile to web",
+    "title": "Let’s run Julia everywhere",
     "section": "Live demo (inside these slides)",
     "text": "Live demo (inside these slides)\n\nSeeing is believing\nThe next slides embed the very same WASM VM.\n\nEdit the code and run it with Ctrl+Enter / ⌘+Enter (or Run). Press Clear to clear the output.\n\nThe demo is the heart of this talk. Keep the explanation short and run the code."
   },
   {
     "objectID": "slide/slide.html#hello-subsetjuliavm",
     "href": "slide/slide.html#hello-subsetjuliavm",
-    "title": "Let’s run Julia everywhere from mobile to web",
+    "title": "Let’s run Julia everywhere",
     "section": "Hello, SubsetJuliaVM",
     "text": "Hello, SubsetJuliaVM"
   },
   {
     "objectID": "slide/slide.html#why-i-created-it",
     "href": "slide/slide.html#why-i-created-it",
-    "title": "Let’s run Julia everywhere from mobile to web",
+    "title": "Let’s run Julia everywhere",
     "section": "Why I created it",
     "text": "Why I created it\n\nI loved Pythonista (iOS app)\nI wanted to run Julia on my iPad — offline"
   },
   {
     "objectID": "slide/slide.html#what-about-binder-or-google-colab",
     "href": "slide/slide.html#what-about-binder-or-google-colab",
-    "title": "Let’s run Julia everywhere from mobile to web",
+    "title": "Let’s run Julia everywhere",
     "section": "What about Binder or Google Colab?",
     "text": "What about Binder or Google Colab?\n\nUnusable where the internet connection is unreliable\nInstalling external packages takes a long time"
   },
   {
-    "objectID": "slide/slide.html#can-we-run-official-julia-on-ios",
-    "href": "slide/slide.html#can-we-run-official-julia-on-ios",
-    "title": "Let’s run Julia everywhere from mobile to web",
-    "section": "Can we run official Julia on iOS?",
-    "text": "Can we run official Julia on iOS?\n\nMaybe, No.\nOfficial Julia relies on JIT compilation\nOrdinary iOS apps cannot freely generate and execute native code at runtime (W^X)\nApp Store rules also restrict downloaded code that changes app functionality (Review Guidelines §2.5.2)\nSubsetJuliaVM uses a bundled interpreter instead: bytecode stays data, and the signed app interprets it"
+    "objectID": "slide/slide.html#can-we-run-official-julia-on-ios-13",
+    "href": "slide/slide.html#can-we-run-official-julia-on-ios-13",
+    "title": "Let’s run Julia everywhere",
+    "section": "Can we run official Julia on iOS? (1/3)",
+    "text": "Can we run official Julia on iOS? (1/3)\n\nIt’s difficult to run the original functionality as-is.\nOfficial Julia relies on JIT compilation\nOrdinary iOS apps cannot freely generate and execute native code at runtime (W^X)\nApp Store rules also restrict downloaded code that changes app functionality (Review Guidelines §2.5.2)\nSubsetJuliaVM uses a bundled interpreter instead: bytecode stays data, and the signed app interprets it"
   },
   {
-    "objectID": "slide/slide.html#how-i-created-it",
-    "href": "slide/slide.html#how-i-created-it",
-    "title": "Let’s run Julia everywhere from mobile to web",
-    "section": "How I created it",
-    "text": "How I created it\n\nApps like Pythonista and Carnets do run on iOS.\n\nSo why not build a virtual machine that accepts Julia syntax?!\n\nI don’t have the ability to create this 😭\n\nLet’s use AI 🤖\nBuilt with heavy use of AI tools: Claude Code, Codex, Cursor, DeepSeek, Kimi, etc."
+    "objectID": "slide/slide.html#can-we-run-official-julia-on-ios-23",
+    "href": "slide/slide.html#can-we-run-official-julia-on-ios-23",
+    "title": "Let’s run Julia everywhere",
+    "section": "Can we run official Julia on iOS? (2/3)",
+    "text": "Can we run official Julia on iOS? (2/3)\nExperimentally, yes — but this is not an official iOS port.\n\n\nVerified with Julia 1.12.6 on a physical iPhone 15 Pro Max:\nprintln(\"Hello World\")\nusing InteractiveUtils\nversioninfo()\nusing LinearAlgebra\n\nBundle the official macOS arm64 runtime and sysimage\nRewrite Mach-O platform metadata and sign every dylib\nRun with --compile=no and small compatibility shims\n\n\nMajor limitations\n\nNo JIT: only interpreter-compatible or already compiled paths work\nInteractiveUtils is reduced to the non-verbose versioninfo() path\nMost standard libraries, packages, and JLLs are unsupported\nLoading LinearAlgebra works, but BLAS-backed matrix operations still fail with `ccall` requires the compiler\nDevelopment-signed research prototype; not App Store-ready"
+  },
+  {
+    "objectID": "slide/slide.html#can-we-run-official-julia-on-ios-33",
+    "href": "slide/slide.html#can-we-run-official-julia-on-ios-33",
+    "title": "Let’s run Julia everywhere",
+    "section": "Can we run official Julia on iOS? (3/3)",
+    "text": "Can we run official Julia on iOS? (3/3)"
+  },
+  {
+    "objectID": "slide/slide.html#how-i-created-subsetjuliavm",
+    "href": "slide/slide.html#how-i-created-subsetjuliavm",
+    "title": "Let’s run Julia everywhere",
+    "section": "How I created SubsetJuliaVM",
+    "text": "How I created SubsetJuliaVM\n\nApps like Pythonista and Carnets do run on iOS.\n\nSo why not build a virtual machine that accepts Julia syntax?!\n\nI don’t have the ability to create this 😭\n\nLet’s use AI 🤖\nBuilt with heavy use of AI tools: Claude Code, Codex, Cursor, DeepSeek, Kimi, etc."
   },
   {
     "objectID": "slide/slide.html#lets-actually-build-it",
     "href": "slide/slide.html#lets-actually-build-it",
-    "title": "Let’s run Julia everywhere from mobile to web",
+    "title": "Let’s run Julia everywhere",
     "section": "Let’s actually build it!",
     "text": "Let’s actually build it!\n\nA stack-based bytecode interpreter (no JIT)\n\n\n  Julia source\n  →\n  parse → CST\n  →\n  lower → Core IR\n  →\n  compile → bytecode\n  →\n  stack VM → result\n\nResult: AtelierArith/julia-vm-oss\n$ git clone https://github.com/AtelierArith/julia-vm-oss.git\n$ cd julia-vm-oss\n$ ./scripts/sjulia_install.sh   # Windows: pwsh -File scripts/sjulia_install.ps1\n$ sjulia examples/mandelbrot.jl\n  0.027875 seconds\nMandelbrot Set (50x25):\n\n                              .\n                              . .\n                              .+\n                             ###+.\n                        .   .####.\n                       .#++#########....\n                      ..##############.\n            .        ..################..\n             ...... .##################.\n            .#######.###################\n          ...##########################.\n#####################################..\n          ...##########################.\n            .#######.###################\n             ...... .##################.\n            .        ..################..\n                      ..##############.\n                       .#++#########....\n                        .   .####.\n                             ###+.\n                              .+\n                              . .\n                              ."
   },
   {
     "objectID": "slide/slide.html#how-subsetjuliavm-differs-from-official-julia",
     "href": "slide/slide.html#how-subsetjuliavm-differs-from-official-julia",
-    "title": "Let’s run Julia everywhere from mobile to web",
+    "title": "Let’s run Julia everywhere",
     "section": "How SubsetJuliaVM differs from official Julia",
     "text": "How SubsetJuliaVM differs from official Julia\nHow code is interpreted and executed:\nEach cell: who does it → what it produces\n\n\n\n\n\n\n\n\nStage\nOfficial Julia\nSubsetJuliaVM\n\n\n\n\nParsing\nflisp / JuliaSyntax.jl → AST\npure-Rust parser → CST\n\n\nLowering\nJulia’s lowering → lowered IR\nRust lowering → Core IR\n\n\nCode generation\nLLVM JIT at runtime → native code\nbytecode compiler before execution → bytecode\n\n\nExecution\nCPU runs native code\nstack VM interprets bytecode\n\n\nRuntime library\nC runtime + pure-Julia base/\nRust builtins + a pure-Julia subset\n\n\n\n\nWith no JIT, SubsetJuliaVM runs even on iOS (W^X) and WASM"
   },
   {
     "objectID": "slide/slide.html#what-subsetjuliavm-does-not-provide",
     "href": "slide/slide.html#what-subsetjuliavm-does-not-provide",
-    "title": "Let’s run Julia everywhere from mobile to web",
+    "title": "Let’s run Julia everywhere",
     "section": "What SubsetJuliaVM does not provide",
     "text": "What SubsetJuliaVM does not provide\nEverything that would break the sandboxed, offline, no-downloaded-code model:\n\nPkg.jl / package management — no Pkg.add, no registry, no downloads; using X only reaches the ~34 packages bundled into the binary\nNetwork I/O — no Sockets, no Downloads/HTTP\nFilesystem access — file operations are unimplemented; include resolves through virtual embedded paths\nExternal processes — no run(cmd)\nC interface — no @ccall/pointer/unsafe_*\nReal parallelism — single-threaded by design; Tasks/Channels are cooperative continuations\n@generated macro\nNative-code reflection — no @code_llvm/@code_native (there is no LLVM); use sjulia --dump-bytecode instead More details: see the Appendix slides"
   },
   {
     "objectID": "slide/slide.html#what-we-support",
     "href": "slide/slide.html#what-we-support",
-    "title": "Let’s run Julia everywhere from mobile to web",
+    "title": "Let’s run Julia everywhere",
     "section": "What we support",
     "text": "What we support\n\nBasic Julia syntax (subset)\n~34 bundled 3rd-party packages (no download), including:\n\nPlots, StatsPlots, JSXGraph, Interact\nOrdinaryDiffEq, SciMLBase\nSymbolics, AbstractAlgebra, Primes, Combinatorics\nDistributions, StatsBase, Optim, QuadGK, HCubature\nStaticArrays, SparseArrays, SpecialFunctions, Quaternions, Rotations, …\n\nThese have been re-implemented specifically for SubsetJuliaVM."
   },
   {
     "objectID": "slide/slide.html#juliars",
     "href": "slide/slide.html#juliars",
-    "title": "Let’s run Julia everywhere from mobile to web",
+    "title": "Let’s run Julia everywhere",
     "section": "juliars",
     "text": "juliars\nAn experimental Julia → Rust AoT transpiler (same frontend as the VM).\n\nPipeline: source → CST → Core IR → Rust source → rustc -O → native binary\nUnlike JuliaC / PackageCompiler, it does not need libjulia\nBest for scalar numerics, loops, arrays — the broad package surface stays on the VM\nOn the coprime-π / Mandelbrot benches: about as fast as official Julia\n\n$ cargo build --release -p subset_julia_vm --features aot --bin juliars\n$ target/release/juliars --minimal-prelude examples/mandelbrot.jl --emit-binary target/mandelbrot_aot\n$ target/release/mandelbrot_aot"
   },
   {
     "objectID": "slide/slide.html#performance-julia-vs.-subsetjuliavm",
     "href": "slide/slide.html#performance-julia-vs.-subsetjuliavm",
-    "title": "Let’s run Julia everywhere from mobile to web",
+    "title": "Let’s run Julia everywhere",
     "section": "Performance: Julia vs. SubsetJuliaVM",
     "text": "Performance: Julia vs. SubsetJuliaVM\nCoprime-π benchmark — \\(P(\\gcd(a,b)=1)=6/\\pi^2\\) (Apple Silicon macOS):\n\n\n# P(gcd(a,b)=1) = 6/π²  →  π = √(6/P)\nfunction mygcd(a, b)\n    while b != 0\n        tmp = b\n        b = a % b\n        a = tmp\n    end\n    a\nend\n\nfunction calc_pi(N)\n    cnt = 0\n    for a in 1:N\n        for b in 1:N\n            if mygcd(a, b) == 1\n                cnt += 1\n            end\n        end\n    end\n    sqrt(6.0 / (cnt / N / N))\nend\n\ncalc_pi(10000)  # same source for all runtimes\n\n\n\n\nRuntime\nTime\n\n\n\n\nOfficial Julia\n2.12 s\n\n\njuliars (AoT)\n1.89 s\n\n\nsjulia (VM)\n9.99 s\n\n\nPython 3.14\n16.76 s\n\n\n\n\nAoT is about as fast as official Julia"
   },
   {
     "objectID": "slide/slide.html#interested-in-the-android-app",
     "href": "slide/slide.html#interested-in-the-android-app",
-    "title": "Let’s run Julia everywhere from mobile to web",
+    "title": "Let’s run Julia everywhere",
     "section": "Interested in the Android app?",
     "text": "Interested in the Android app?\n\nComing soon — we are looking for testers.\nPlease contact s.terasaki@atelier-arith.jp"
   },

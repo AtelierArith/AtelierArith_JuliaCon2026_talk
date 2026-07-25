@@ -9,8 +9,7 @@
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-0a6b7249c26820e032cb0bd839ff02b1.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
   <meta name="generator" content="quarto-1.9.38">
 
-  <meta name="author" content="Satoshi Terasaki@AtelierArith">
-  <title>Let’s run Julia everywhere – Let’s run Julia everywhere from mobile to web</title>
+  <title>Let’s run Julia everywhere – slide</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
@@ -196,18 +195,15 @@
   <div class="reveal">
     <div class="slides">
 
-<section id="title-slide" class="quarto-title-block center">
-  <h1 class="title">Let’s run Julia everywhere from mobile to web</h1>
 
-<div class="quarto-title-authors">
-<div class="quarto-title-author">
-<div class="quarto-title-author-name">
-Satoshi Terasaki@AtelierArith 
-</div>
-</div>
-</div>
+<section id="lets-run-julia-everywhere-from-mobile-to-web" class="slide level2">
+<h2>Let’s run Julia everywhere from mobile to web</h2>
+<ul>
+<li>https://atelierarith.github.io/AtelierArith_JuliaCon2026_talk/</li>
+<li>Link to slide ↓↓↓</li>
+</ul>
 
-</section>
+<img data-src="assets/slide-url-qr.png" width="320" class="r-stretch"></section>
 <section id="what-i-created" class="slide level2">
 <h2>What I created</h2>
 <ul>
@@ -280,18 +276,48 @@ Satoshi Terasaki@AtelierArith
 </ul>
 
 <img data-src="assets/colab.png" class="r-stretch"></section>
-<section id="can-we-run-official-julia-on-ios" class="slide level2">
-<h2>Can we run official Julia on iOS?</h2>
+<section id="can-we-run-official-julia-on-ios-13" class="slide level2">
+<h2>Can we run official Julia on iOS? (1/3)</h2>
 <ul>
-<li>Maybe, No.</li>
+<li>It’s difficult to run the original functionality as-is.</li>
 <li>Official Julia relies on <strong>JIT compilation</strong></li>
 <li>Ordinary iOS apps cannot freely generate and execute native code at runtime (<a href="https://support.apple.com/guide/security/security-of-runtime-process-sec15bfe098e/web">W^X</a>)</li>
 <li>App Store rules also restrict downloaded code that changes app functionality (<a href="https://developer.apple.com/app-store/review/guidelines/#2.5.2">Review Guidelines §2.5.2</a>)</li>
 <li>SubsetJuliaVM uses a <strong>bundled interpreter</strong> instead: bytecode stays data, and the signed app interprets it</li>
 </ul>
 </section>
-<section id="how-i-created-it" class="slide level2">
-<h2>How I created it</h2>
+<section id="can-we-run-official-julia-on-ios-23" class="slide level2 smaller">
+<h2>Can we run official Julia on iOS? (2/3)</h2>
+<p><strong>Experimentally, yes — but this is not an official iOS port.</strong></p>
+<div class="columns">
+<div class="column" style="width:48%;">
+<p>Verified with <strong>Julia 1.12.6</strong> on a physical iPhone 15 Pro Max:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource julia number-lines code-with-copy"><code class="sourceCode julia"><span id="cb1-1"><a></a><span class="fu">println</span>(<span class="st">"Hello World"</span>)</span>
+<span id="cb1-2"><a></a><span class="im">using</span> <span class="bu">InteractiveUtils</span></span>
+<span id="cb1-3"><a></a><span class="fu">versioninfo</span>()</span>
+<span id="cb1-4"><a></a><span class="im">using</span> <span class="bu">LinearAlgebra</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li>Bundle the official macOS arm64 runtime and sysimage</li>
+<li>Rewrite Mach-O platform metadata and sign every dylib</li>
+<li>Run with <code>--compile=no</code> and small compatibility shims</li>
+</ul>
+</div><div class="column" style="width:52%;">
+<p><strong>Major limitations</strong></p>
+<ul>
+<li>No JIT: only interpreter-compatible or already compiled paths work</li>
+<li><code>InteractiveUtils</code> is reduced to the non-verbose <code>versioninfo()</code> path</li>
+<li>Most standard libraries, packages, and JLLs are unsupported</li>
+<li>Loading <code>LinearAlgebra</code> works, but BLAS-backed matrix operations still fail with <code>`ccall` requires the compiler</code></li>
+<li>Development-signed research prototype; not App Store-ready</li>
+</ul>
+</div></div>
+</section>
+<section id="can-we-run-official-julia-on-ios-33" class="slide level2 smaller">
+<h2>Can we run official Julia on iOS? (3/3)</h2>
+
+<img data-src="assets/real_iphone.png" class="r-stretch"></section>
+<section id="how-i-created-subsetjuliavm" class="slide level2">
+<h2>How I created SubsetJuliaVM</h2>
 <ul>
 <li>Apps like Pythonista and Carnets do run on iOS.
 <ul>
@@ -321,36 +347,36 @@ Satoshi Terasaki@AtelierArith
   <div class="pipeline-node">stack VM → result</div>
 </div>
 <p>Result: <a href="https://github.com/AtelierArith/julia-vm-oss">AtelierArith/julia-vm-oss</a></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a></a><span class="ex">$</span> git clone https://github.com/AtelierArith/julia-vm-oss.git</span>
-<span id="cb1-2"><a></a><span class="ex">$</span> cd julia-vm-oss</span>
-<span id="cb1-3"><a></a><span class="ex">$</span> ./scripts/sjulia_install.sh   <span class="co"># Windows: pwsh -File scripts/sjulia_install.ps1</span></span>
-<span id="cb1-4"><a></a><span class="ex">$</span> sjulia examples/mandelbrot.jl</span>
-<span id="cb1-5"><a></a>  <span class="ex">0.027875</span> seconds</span>
-<span id="cb1-6"><a></a><span class="ex">Mandelbrot</span> Set <span class="er">(</span><span class="ex">50x25</span><span class="kw">)</span><span class="bu">:</span></span>
-<span id="cb1-7"><a></a></span>
-<span id="cb1-8"><a></a>                              <span class="bu">.</span></span>
-<span id="cb1-9"><a></a>                              <span class="bu">.</span> .</span>
-<span id="cb1-10"><a></a>                              <span class="bu">.</span>+</span>
-<span id="cb1-11"><a></a>                             <span class="co">###+.</span></span>
-<span id="cb1-12"><a></a>                        <span class="bu">.</span>   .####.</span>
-<span id="cb1-13"><a></a>                       <span class="ex">.#++#########....</span></span>
-<span id="cb1-14"><a></a>                      <span class="ex">..##############.</span></span>
-<span id="cb1-15"><a></a>            <span class="bu">.</span>        ..################..</span>
-<span id="cb1-16"><a></a>             <span class="ex">......</span> .##################.</span>
-<span id="cb1-17"><a></a>            <span class="ex">.#######.###################</span></span>
-<span id="cb1-18"><a></a>          <span class="ex">...##########################.</span></span>
-<span id="cb1-19"><a></a><span class="co">#####################################..</span></span>
-<span id="cb1-20"><a></a>          <span class="ex">...##########################.</span></span>
-<span id="cb1-21"><a></a>            <span class="ex">.#######.###################</span></span>
-<span id="cb1-22"><a></a>             <span class="ex">......</span> .##################.</span>
-<span id="cb1-23"><a></a>            <span class="bu">.</span>        ..################..</span>
-<span id="cb1-24"><a></a>                      <span class="ex">..##############.</span></span>
-<span id="cb1-25"><a></a>                       <span class="ex">.#++#########....</span></span>
-<span id="cb1-26"><a></a>                        <span class="bu">.</span>   .####.</span>
-<span id="cb1-27"><a></a>                             <span class="co">###+.</span></span>
-<span id="cb1-28"><a></a>                              <span class="bu">.</span>+</span>
-<span id="cb1-29"><a></a>                              <span class="bu">.</span> .</span>
-<span id="cb1-30"><a></a>                              <span class="bu">.</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a></a><span class="ex">$</span> git clone https://github.com/AtelierArith/julia-vm-oss.git</span>
+<span id="cb2-2"><a></a><span class="ex">$</span> cd julia-vm-oss</span>
+<span id="cb2-3"><a></a><span class="ex">$</span> ./scripts/sjulia_install.sh   <span class="co"># Windows: pwsh -File scripts/sjulia_install.ps1</span></span>
+<span id="cb2-4"><a></a><span class="ex">$</span> sjulia examples/mandelbrot.jl</span>
+<span id="cb2-5"><a></a>  <span class="ex">0.027875</span> seconds</span>
+<span id="cb2-6"><a></a><span class="ex">Mandelbrot</span> Set <span class="er">(</span><span class="ex">50x25</span><span class="kw">)</span><span class="bu">:</span></span>
+<span id="cb2-7"><a></a></span>
+<span id="cb2-8"><a></a>                              <span class="bu">.</span></span>
+<span id="cb2-9"><a></a>                              <span class="bu">.</span> .</span>
+<span id="cb2-10"><a></a>                              <span class="bu">.</span>+</span>
+<span id="cb2-11"><a></a>                             <span class="co">###+.</span></span>
+<span id="cb2-12"><a></a>                        <span class="bu">.</span>   .####.</span>
+<span id="cb2-13"><a></a>                       <span class="ex">.#++#########....</span></span>
+<span id="cb2-14"><a></a>                      <span class="ex">..##############.</span></span>
+<span id="cb2-15"><a></a>            <span class="bu">.</span>        ..################..</span>
+<span id="cb2-16"><a></a>             <span class="ex">......</span> .##################.</span>
+<span id="cb2-17"><a></a>            <span class="ex">.#######.###################</span></span>
+<span id="cb2-18"><a></a>          <span class="ex">...##########################.</span></span>
+<span id="cb2-19"><a></a><span class="co">#####################################..</span></span>
+<span id="cb2-20"><a></a>          <span class="ex">...##########################.</span></span>
+<span id="cb2-21"><a></a>            <span class="ex">.#######.###################</span></span>
+<span id="cb2-22"><a></a>             <span class="ex">......</span> .##################.</span>
+<span id="cb2-23"><a></a>            <span class="bu">.</span>        ..################..</span>
+<span id="cb2-24"><a></a>                      <span class="ex">..##############.</span></span>
+<span id="cb2-25"><a></a>                       <span class="ex">.#++#########....</span></span>
+<span id="cb2-26"><a></a>                        <span class="bu">.</span>   .####.</span>
+<span id="cb2-27"><a></a>                             <span class="co">###+.</span></span>
+<span id="cb2-28"><a></a>                              <span class="bu">.</span>+</span>
+<span id="cb2-29"><a></a>                              <span class="bu">.</span> .</span>
+<span id="cb2-30"><a></a>                              <span class="bu">.</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="how-subsetjuliavm-differs-from-official-julia" class="slide level2 smaller">
 <h2>How SubsetJuliaVM differs from official Julia</h2>
@@ -439,38 +465,38 @@ Satoshi Terasaki@AtelierArith
 <li>Best for scalar numerics, loops, arrays — the broad package surface stays on the <strong>VM</strong></li>
 <li>On the coprime-π / Mandelbrot benches: <strong>about as fast as official Julia</strong></li>
 </ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a></a><span class="ex">$</span> cargo build <span class="at">--release</span> <span class="at">-p</span> subset_julia_vm <span class="at">--features</span> aot <span class="at">--bin</span> juliars</span>
-<span id="cb2-2"><a></a><span class="ex">$</span> target/release/juliars <span class="at">--minimal-prelude</span> examples/mandelbrot.jl <span class="at">--emit-binary</span> target/mandelbrot_aot</span>
-<span id="cb2-3"><a></a><span class="ex">$</span> target/release/mandelbrot_aot</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a></a><span class="ex">$</span> cargo build <span class="at">--release</span> <span class="at">-p</span> subset_julia_vm <span class="at">--features</span> aot <span class="at">--bin</span> juliars</span>
+<span id="cb3-2"><a></a><span class="ex">$</span> target/release/juliars <span class="at">--minimal-prelude</span> examples/mandelbrot.jl <span class="at">--emit-binary</span> target/mandelbrot_aot</span>
+<span id="cb3-3"><a></a><span class="ex">$</span> target/release/mandelbrot_aot</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="performance-julia-vs.-subsetjuliavm" class="slide level2 smaller">
 <h2>Performance: Julia vs.&nbsp;SubsetJuliaVM</h2>
 <p>Coprime-π benchmark — <span class="math inline">\(P(\gcd(a,b)=1)=6/\pi^2\)</span> (Apple Silicon macOS):</p>
 <div class="columns">
 <div class="column" style="width:55%;">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode numberSource julia number-lines code-with-copy"><code class="sourceCode julia"><span id="cb3-1"><a></a><span class="co"># P(gcd(a,b)=1) = 6/π²  →  π = √(6/P)</span></span>
-<span id="cb3-2"><a></a><span class="kw">function</span> <span class="fu">mygcd</span>(a, b)</span>
-<span id="cb3-3"><a></a>    <span class="cf">while</span> b <span class="op">!=</span> <span class="fl">0</span></span>
-<span id="cb3-4"><a></a>        tmp <span class="op">=</span> b</span>
-<span id="cb3-5"><a></a>        b <span class="op">=</span> a <span class="op">%</span> b</span>
-<span id="cb3-6"><a></a>        a <span class="op">=</span> tmp</span>
-<span id="cb3-7"><a></a>    <span class="cf">end</span></span>
-<span id="cb3-8"><a></a>    a</span>
-<span id="cb3-9"><a></a><span class="kw">end</span></span>
-<span id="cb3-10"><a></a></span>
-<span id="cb3-11"><a></a><span class="kw">function</span> <span class="fu">calc_pi</span>(N)</span>
-<span id="cb3-12"><a></a>    cnt <span class="op">=</span> <span class="fl">0</span></span>
-<span id="cb3-13"><a></a>    <span class="cf">for</span> a <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span>N</span>
-<span id="cb3-14"><a></a>        <span class="cf">for</span> b <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span>N</span>
-<span id="cb3-15"><a></a>            <span class="cf">if</span> <span class="fu">mygcd</span>(a, b) <span class="op">==</span> <span class="fl">1</span></span>
-<span id="cb3-16"><a></a>                cnt <span class="op">+=</span> <span class="fl">1</span></span>
-<span id="cb3-17"><a></a>            <span class="cf">end</span></span>
-<span id="cb3-18"><a></a>        <span class="cf">end</span></span>
-<span id="cb3-19"><a></a>    <span class="cf">end</span></span>
-<span id="cb3-20"><a></a>    <span class="fu">sqrt</span>(<span class="fl">6.0</span> <span class="op">/</span> (cnt <span class="op">/</span> N <span class="op">/</span> N))</span>
-<span id="cb3-21"><a></a><span class="kw">end</span></span>
-<span id="cb3-22"><a></a></span>
-<span id="cb3-23"><a></a><span class="fu">calc_pi</span>(<span class="fl">10000</span>)  <span class="co"># same source for all runtimes</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode numberSource julia number-lines code-with-copy"><code class="sourceCode julia"><span id="cb4-1"><a></a><span class="co"># P(gcd(a,b)=1) = 6/π²  →  π = √(6/P)</span></span>
+<span id="cb4-2"><a></a><span class="kw">function</span> <span class="fu">mygcd</span>(a, b)</span>
+<span id="cb4-3"><a></a>    <span class="cf">while</span> b <span class="op">!=</span> <span class="fl">0</span></span>
+<span id="cb4-4"><a></a>        tmp <span class="op">=</span> b</span>
+<span id="cb4-5"><a></a>        b <span class="op">=</span> a <span class="op">%</span> b</span>
+<span id="cb4-6"><a></a>        a <span class="op">=</span> tmp</span>
+<span id="cb4-7"><a></a>    <span class="cf">end</span></span>
+<span id="cb4-8"><a></a>    a</span>
+<span id="cb4-9"><a></a><span class="kw">end</span></span>
+<span id="cb4-10"><a></a></span>
+<span id="cb4-11"><a></a><span class="kw">function</span> <span class="fu">calc_pi</span>(N)</span>
+<span id="cb4-12"><a></a>    cnt <span class="op">=</span> <span class="fl">0</span></span>
+<span id="cb4-13"><a></a>    <span class="cf">for</span> a <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span>N</span>
+<span id="cb4-14"><a></a>        <span class="cf">for</span> b <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span>N</span>
+<span id="cb4-15"><a></a>            <span class="cf">if</span> <span class="fu">mygcd</span>(a, b) <span class="op">==</span> <span class="fl">1</span></span>
+<span id="cb4-16"><a></a>                cnt <span class="op">+=</span> <span class="fl">1</span></span>
+<span id="cb4-17"><a></a>            <span class="cf">end</span></span>
+<span id="cb4-18"><a></a>        <span class="cf">end</span></span>
+<span id="cb4-19"><a></a>    <span class="cf">end</span></span>
+<span id="cb4-20"><a></a>    <span class="fu">sqrt</span>(<span class="fl">6.0</span> <span class="op">/</span> (cnt <span class="op">/</span> N <span class="op">/</span> N))</span>
+<span id="cb4-21"><a></a><span class="kw">end</span></span>
+<span id="cb4-22"><a></a></span>
+<span id="cb4-23"><a></a><span class="fu">calc_pi</span>(<span class="fl">10000</span>)  <span class="co"># same source for all runtimes</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div><div class="column" style="width:45%;">
 <table class="caption-top">
 <thead>
