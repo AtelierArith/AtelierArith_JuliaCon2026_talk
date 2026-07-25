@@ -109,7 +109,9 @@ Verified with **Julia 1.12.6** on a physical iPhone 15 Pro Max:
 println("Hello World")
 using InteractiveUtils
 versioninfo()
-using LinearAlgebra
+A = rand(2, 2)
+x = rand(2)
+y = A * x # <- does not work
 ```
 
 - Bundle the official macOS arm64 runtime and sysimage
@@ -123,8 +125,7 @@ using LinearAlgebra
 - No JIT: only interpreter-compatible or already compiled paths work
 - `InteractiveUtils` is reduced to the non-verbose `versioninfo()` path
 - Most standard libraries, packages, and JLLs are unsupported
-- Loading `LinearAlgebra` works, but BLAS-backed matrix operations still fail
-  with `` `ccall` requires the compiler ``
+- BLAS-backed matrix operations still fail with `` `ccall` requires the compiler ``
 - Development-signed research prototype; not App Store-ready
 :::
 :::
