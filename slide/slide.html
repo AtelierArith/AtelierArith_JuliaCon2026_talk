@@ -294,7 +294,9 @@
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource julia number-lines code-with-copy"><code class="sourceCode julia"><span id="cb1-1"><a></a><span class="fu">println</span>(<span class="st">"Hello World"</span>)</span>
 <span id="cb1-2"><a></a><span class="im">using</span> <span class="bu">InteractiveUtils</span></span>
 <span id="cb1-3"><a></a><span class="fu">versioninfo</span>()</span>
-<span id="cb1-4"><a></a><span class="im">using</span> <span class="bu">LinearAlgebra</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-4"><a></a>A <span class="op">=</span> <span class="fu">rand</span>(<span class="fl">2</span>, <span class="fl">2</span>)</span>
+<span id="cb1-5"><a></a>x <span class="op">=</span> <span class="fu">rand</span>(<span class="fl">2</span>)</span>
+<span id="cb1-6"><a></a>y <span class="op">=</span> A <span class="op">*</span> x <span class="co"># &lt;- does not work</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <ul>
 <li>Bundle the official macOS arm64 runtime and sysimage</li>
 <li>Rewrite Mach-O platform metadata and sign every dylib</li>
@@ -306,7 +308,7 @@
 <li>No JIT: only interpreter-compatible or already compiled paths work</li>
 <li><code>InteractiveUtils</code> is reduced to the non-verbose <code>versioninfo()</code> path</li>
 <li>Most standard libraries, packages, and JLLs are unsupported</li>
-<li>Loading <code>LinearAlgebra</code> works, but BLAS-backed matrix operations still fail with <code>`ccall` requires the compiler</code></li>
+<li>BLAS-backed matrix operations still fail with <code>`ccall` requires the compiler</code></li>
 <li>Development-signed research prototype; not App Store-ready</li>
 </ul>
 </div></div>
