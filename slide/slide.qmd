@@ -1,6 +1,4 @@
 ---
-title: "Let’s run Julia everywhere from mobile to web"
-author: "Satoshi Terasaki@AtelierArith"
 format:
   revealjs:
     theme: dark
@@ -9,6 +7,13 @@ format:
     css: assets/slide-executor.css
     include-after-body: assets/after-body.html
 ---
+
+## Let’s run Julia everywhere from mobile to web
+
+- https://atelierarith.github.io/AtelierArith_JuliaCon2026_talk/
+- Link to slide ↓↓↓
+
+![](assets/slide-url-qr.png){width="320"}
 
 ## What I created
 
@@ -80,9 +85,9 @@ The demo is the heart of this talk. Keep the explanation short and run the code.
 
 ---
 
-## Can we run official Julia on iOS?
+## Can we run official Julia on iOS? (1/3)
 
-- Maybe, No.
+- It's difficult to run the original functionality as-is.
 - Official Julia relies on **JIT compilation**
 - Ordinary iOS apps cannot freely generate and execute native code at runtime
   ([W^X](https://support.apple.com/guide/security/security-of-runtime-process-sec15bfe098e/web))
@@ -93,7 +98,47 @@ The demo is the heart of this talk. Keep the explanation short and run the code.
 
 ---
 
-## How I created it
+## Can we run official Julia on iOS? (2/3) {.smaller}
+
+**Experimentally, yes — but this is not an official iOS port.**
+
+::: {.columns}
+::: {.column width="48%"}
+Verified with **Julia 1.12.6** on a physical iPhone 15 Pro Max:
+
+```julia
+println("Hello World")
+using InteractiveUtils
+versioninfo()
+using LinearAlgebra
+```
+
+- Bundle the official macOS arm64 runtime and sysimage
+- Rewrite Mach-O platform metadata and sign every dylib
+- Run with `--compile=no` and small compatibility shims
+:::
+
+::: {.column width="52%"}
+**Major limitations**
+
+- No JIT: only interpreter-compatible or already compiled paths work
+- `InteractiveUtils` is reduced to the non-verbose `versioninfo()` path
+- Most standard libraries, packages, and JLLs are unsupported
+- Loading `LinearAlgebra` works, but BLAS-backed matrix operations still fail
+  with `` `ccall` requires the compiler ``
+- Development-signed research prototype; not App Store-ready
+:::
+:::
+
+---
+
+## Can we run official Julia on iOS? (3/3) {.smaller}
+
+![](assets/real_iphone.png)
+
+---
+
+## How I created SubsetJuliaVM
 
 - Apps like Pythonista and Carnets do run on iOS.
   - So why not build a virtual machine that accepts Julia syntax?!
