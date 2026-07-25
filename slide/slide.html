@@ -213,6 +213,7 @@ Satoshi Terasaki@AtelierArith
 <ul>
 <li><strong>SubsetJuliaVM</strong> — a stack-based VM for a subset of Julia
 <ul>
+<li>Looks like Julia and walks like Python</li>
 <li>CLI binary name: <code>sjulia</code> (think “subset Julia”)</li>
 <li>Implemented in Rust</li>
 </ul></li>
@@ -239,14 +240,36 @@ Satoshi Terasaki@AtelierArith
 </div></div>
 <h3 id="google-it-subsetjuliavm">Google it <code>SubsetJuliaVM</code></h3>
 </section>
-<section id="why-i-created-it" class="slide level2 smaller">
+<section id="live-demo-inside-these-slides" class="slide level2">
+<h2>Live demo (inside these slides)</h2>
+<ul>
+<li>Seeing is believing</li>
+<li>The next slides embed <strong>the very same WASM VM</strong>.</li>
+</ul>
+<p>Edit the code and run it with <strong>Ctrl+Enter</strong> / <strong>⌘+Enter</strong> (or <strong>Run</strong>). Press <strong>Clear</strong> to clear the output.</p>
+<aside class="notes">
+<p>The demo is the heart of this talk. Keep the explanation short and run the code.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="hello-subsetjuliavm" class="slide level2">
+<h2>Hello, SubsetJuliaVM</h2>
+<div class="sjulia-executor" data-code="println(&quot;Hello from WebAssembly!&quot;)\nprintln(1 + 2 * 3)"></div>
+</section>
+<section id="why-i-created-it" class="slide level2">
 <h2>Why I created it</h2>
 <ul>
+<li>I loved Pythonista (iOS app)</li>
 <li>I wanted to run Julia on my iPad — <strong>offline</strong></li>
-<li>Official Julia relies on <strong>JIT compilation</strong></li>
-<li>Ordinary iOS apps cannot freely generate and execute native code at runtime (<a href="https://support.apple.com/guide/security/security-of-runtime-process-sec15bfe098e/web">W^X</a>)</li>
-<li>App Store rules also restrict downloaded code that changes app functionality (<a href="https://developer.apple.com/app-store/review/guidelines/#2.5.2">Review Guidelines §2.5.2</a>)</li>
-<li>SubsetJuliaVM uses a <strong>bundled interpreter</strong> instead: bytecode stays data, and the signed app interprets it</li>
 </ul>
 </section>
 <section id="what-about-binder-or-google-colab" class="slide level2">
@@ -257,6 +280,16 @@ Satoshi Terasaki@AtelierArith
 </ul>
 
 <img data-src="assets/colab.png" class="r-stretch"></section>
+<section id="can-we-run-official-julia-on-ios" class="slide level2">
+<h2>Can we run official Julia on iOS?</h2>
+<ul>
+<li>Maybe, No.</li>
+<li>Official Julia relies on <strong>JIT compilation</strong></li>
+<li>Ordinary iOS apps cannot freely generate and execute native code at runtime (<a href="https://support.apple.com/guide/security/security-of-runtime-process-sec15bfe098e/web">W^X</a>)</li>
+<li>App Store rules also restrict downloaded code that changes app functionality (<a href="https://developer.apple.com/app-store/review/guidelines/#2.5.2">Review Guidelines §2.5.2</a>)</li>
+<li>SubsetJuliaVM uses a <strong>bundled interpreter</strong> instead: bytecode stays data, and the signed app interprets it</li>
+</ul>
+</section>
 <section id="how-i-created-it" class="slide level2">
 <h2>How I created it</h2>
 <ul>
@@ -264,9 +297,9 @@ Satoshi Terasaki@AtelierArith
 <ul>
 <li>So why not build a virtual machine that accepts Julia syntax?!</li>
 </ul></li>
-<li>I don’t have the ability to create this
+<li>I don’t have the ability to create this 😭
 <ul>
-<li>Let’s use AI</li>
+<li>Let’s use AI 🤖</li>
 <li>Built with heavy use of AI tools: Claude Code, Codex, Cursor, DeepSeek, Kimi, etc.</li>
 </ul></li>
 </ul>
@@ -288,6 +321,36 @@ Satoshi Terasaki@AtelierArith
   <div class="pipeline-node">stack VM → result</div>
 </div>
 <p>Result: <a href="https://github.com/AtelierArith/julia-vm-oss">AtelierArith/julia-vm-oss</a></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a></a><span class="ex">$</span> git clone https://github.com/AtelierArith/julia-vm-oss.git</span>
+<span id="cb1-2"><a></a><span class="ex">$</span> cd julia-vm-oss</span>
+<span id="cb1-3"><a></a><span class="ex">$</span> ./scripts/sjulia_install.sh   <span class="co"># Windows: pwsh -File scripts/sjulia_install.ps1</span></span>
+<span id="cb1-4"><a></a><span class="ex">$</span> sjulia examples/mandelbrot.jl</span>
+<span id="cb1-5"><a></a>  <span class="ex">0.027875</span> seconds</span>
+<span id="cb1-6"><a></a><span class="ex">Mandelbrot</span> Set <span class="er">(</span><span class="ex">50x25</span><span class="kw">)</span><span class="bu">:</span></span>
+<span id="cb1-7"><a></a></span>
+<span id="cb1-8"><a></a>                              <span class="bu">.</span></span>
+<span id="cb1-9"><a></a>                              <span class="bu">.</span> .</span>
+<span id="cb1-10"><a></a>                              <span class="bu">.</span>+</span>
+<span id="cb1-11"><a></a>                             <span class="co">###+.</span></span>
+<span id="cb1-12"><a></a>                        <span class="bu">.</span>   .####.</span>
+<span id="cb1-13"><a></a>                       <span class="ex">.#++#########....</span></span>
+<span id="cb1-14"><a></a>                      <span class="ex">..##############.</span></span>
+<span id="cb1-15"><a></a>            <span class="bu">.</span>        ..################..</span>
+<span id="cb1-16"><a></a>             <span class="ex">......</span> .##################.</span>
+<span id="cb1-17"><a></a>            <span class="ex">.#######.###################</span></span>
+<span id="cb1-18"><a></a>          <span class="ex">...##########################.</span></span>
+<span id="cb1-19"><a></a><span class="co">#####################################..</span></span>
+<span id="cb1-20"><a></a>          <span class="ex">...##########################.</span></span>
+<span id="cb1-21"><a></a>            <span class="ex">.#######.###################</span></span>
+<span id="cb1-22"><a></a>             <span class="ex">......</span> .##################.</span>
+<span id="cb1-23"><a></a>            <span class="bu">.</span>        ..################..</span>
+<span id="cb1-24"><a></a>                      <span class="ex">..##############.</span></span>
+<span id="cb1-25"><a></a>                       <span class="ex">.#++#########....</span></span>
+<span id="cb1-26"><a></a>                        <span class="bu">.</span>   .####.</span>
+<span id="cb1-27"><a></a>                             <span class="co">###+.</span></span>
+<span id="cb1-28"><a></a>                              <span class="bu">.</span>+</span>
+<span id="cb1-29"><a></a>                              <span class="bu">.</span> .</span>
+<span id="cb1-30"><a></a>                              <span class="bu">.</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="how-subsetjuliavm-differs-from-official-julia" class="slide level2 smaller">
 <h2>How SubsetJuliaVM differs from official Julia</h2>
@@ -348,187 +411,66 @@ Satoshi Terasaki@AtelierArith
 <li><strong>External processes</strong> — no <code>run(cmd)</code></li>
 <li><strong>C interface</strong> — no <code>@ccall</code>/<code>pointer</code>/<code>unsafe_*</code></li>
 <li><strong>Real parallelism</strong> — single-threaded by design; Tasks/Channels are cooperative continuations</li>
-<li><strong>Native-code reflection</strong> — no <code>@code_llvm</code>/<code>@code_native</code> (there is no LLVM); use <code>sjulia --dump-bytecode</code> instead</li>
+<li><code>@generated</code> macro</li>
+<li><strong>Native-code reflection</strong> — no <code>@code_llvm</code>/<code>@code_native</code> (there is no LLVM); use <code>sjulia --dump-bytecode</code> instead More details: see the <a href="appendix.html">Appendix slides</a></li>
 </ul>
-<p>More details: see the <a href="appendix.html">Appendix slides</a></p>
 </section>
-<section id="live-demo-inside-these-slides" class="slide level2">
-<h2>Live demo (inside these slides)</h2>
+<section id="what-we-support" class="slide level2 smaller">
+<h2>What we support</h2>
 <ul>
-<li>Seeing is believing</li>
-<li>The next slides embed <strong>the very same WASM VM</strong>.</li>
-</ul>
-<p>Edit the code and run it with <strong>Ctrl+Enter</strong> / <strong>⌘+Enter</strong> (or <strong>Run</strong>). Press <strong>Clear</strong> to clear the output.</p>
-<aside class="notes">
-<p>The demo is the heart of this talk. Keep the explanation short and run the code.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="hello-subsetjuliavm" class="slide level2">
-<h2>Hello, SubsetJuliaVM</h2>
-<div class="sjulia-executor" data-code="println(&quot;Hello from WebAssembly!&quot;)\nprintln(1 + 2 * 3)"></div>
-</section>
-<section id="plotly-via-plots" class="slide level2">
-<h2>Plotly via Plots</h2>
-<div class="sjulia-executor" data-code="using Plots\nx = 0:0.1:2π\nplot(x, sin.(x), label=&quot;sin&quot;)\nplot!(x, cos.(x), label=&quot;cos&quot;)\ntitle!(&quot;Running in your browser&quot;)"></div>
-</section>
-<section id="mandelbrot-heatmap" class="slide level2">
-<h2>Mandelbrot heatmap</h2>
-<div class="sjulia-executor" data-code="using Plots\nfunction kernel(c, n)\n  z = 0.0+0.0im\n  for k in 1:n\n    abs2(z) > 4 &amp;&amp; return k\n    z = z^2 + c\n  end; n\nend\nxs = range(-2, 1; length=80)\nys = range(\n  -1.2, 1.2;length=60\n)\ncs = xs' .+ im .* ys\nzs = kernel.(cs, Ref(40))\nheatmap(xs, ys, zs)"></div>
-</section>
-<section id="lorenz-attractor-ordinarydiffeq" class="slide level2">
-<h2>Lorenz attractor (OrdinaryDiffEq)</h2>
-<div class="sjulia-executor" data-code="using OrdinaryDiffEq\nfunction lorenz!(du, u, p, t)\n    du[1] = 10.0 * (u[2] - u[1])\n    du[2] = u[1] * (28.0 - u[3]) - u[2]\n    du[3] = u[1] * u[2] - (8 / 3) * u[3]\nend\nu0 = [1.0, 0.0, 0.0]\ntspan = (0.0, 60.0)\nprob = ODEProblem(lorenz!, u0, tspan)\nsol = solve(prob, Tsit5(), dt=0.05, saveat=0.05)\nusing Plots\nplot(sol, idxs=(1, 2, 3), title=&quot;Lorenz attractor&quot;)"></div>
-</section>
-<section id="jacobian-conjecture-counterexample" class="slide level2 smaller">
-<h2>Jacobian conjecture counterexample</h2>
-<p>Alpöge · Jul 2026 — <span class="math inline">\(F=(f,g,h)\colon \mathbb{C}^3 \to \mathbb{C}^3\)</span> with <span class="math inline">\(u=1+xy\)</span>:</p>
-<p><span class="math display">\[
-\begin{aligned}
-f &amp;= u^3 z + y^2 u(4+3xy),\\
-g &amp;= y + 3x u^2 z + 3x y^2(4+3xy),\\
-h &amp;= 2x - 3x^2 y - x^3 z.
-\end{aligned}
-\]</span></p>
-<p><span class="math display">\[
-\det J_F \equiv -2,
-\qquad
-F\!\left(0,0,-\tfrac14\right)
-= F\!\left(1,-\tfrac32,\tfrac{13}2\right)
-= F\!\left(-1,\tfrac32,\tfrac{13}2\right)
-= \left(-\tfrac14,\,0,\,0\right).
-\]</span></p>
-<p>So <span class="math inline">\(F\)</span> has <span class="math inline">\(\det J_F\)</span> a nonzero constant, yet is <strong>not injective</strong> — a counterexample for <span class="math inline">\(n\ge 3\)</span>.</p>
-<p>Q&amp;A: does this contradict the inverse function theorem? → <a href="appendix.html#/jacobian-ift">Appendix</a></p>
-</section>
-<section id="the-announcement" class="slide level2">
-<h2>The announcement</h2>
-<div class="jacobian-tweet-slide">
-  <iframe class="tweet-frame" title="Tweet by levent (@__alpoge__)" src="https://platform.twitter.com/embed/Tweet.html?id=2079028340955197566&amp;theme=dark&amp;dnt=true" loading="lazy" allowfullscreen=""></iframe>
-  <p class="tweet-fallback">
-    <a href="https://x.com/__alpoge__/status/2079028340955197566" target="_blank" rel="noopener">Open on X ↗</a>
-  </p>
-</div>
-</section>
-<section id="verify-with-symbolics.jl" class="slide level2">
-<h2>Verify with Symbolics.jl</h2>
-<div class="sjulia-executor" data-timeout-ms="120000" data-code="using Symbolics, LinearAlgebra\n@variables x y z\nu = 1 + x*y\nf = expand(u^3*z + y^2*u*(4 + 3x*y))\ng = expand(y + 3x*u^2*z + 3x*y^2*(4 + 3x*y))\nh = expand(2x - 3x^2*y - x^3*z)\n\n# Build JF from partial derivatives, then det\nJ = [\n  expand(derivative(f, x)) expand(derivative(f, y)) expand(derivative(f, z))\n  expand(derivative(g, x)) expand(derivative(g, y)) expand(derivative(g, z))\n  expand(derivative(h, x)) expand(derivative(h, y)) expand(derivative(h, z))\n]\nprintln(&quot;det JF = &quot;, expand(det(J)))\n\n# Three distinct inputs share one image\npts = [\n  (x = 0, y = 0, z = -1//4),\n  (x = 1, y = -3//2, z = 13//2),\n  (x = -1, y = 3//2, z = 13//2),\n]\nfor p in pts\n  println(p)\n  d = Dict(x => p.x, y => p.y, z => p.z)\n  println(substitute.((f, g, h), Ref(d)))\nend"></div>
-</section>
-<section id="try-subsetjuliavm" class="slide level2">
-<h2>Try SubsetJuliaVM</h2>
-<p><img data-src="assets/julia-vm-oss.png" class="absolute" style="top: 0px; right: 0px; width: 170px; "></p>
+<li>Basic Julia syntax (subset)</li>
+<li>~34 bundled 3rd-party packages (no download), including:
 <ul>
-<li>Try SubsetJuliaVM (<code>sjulia</code>) on your machine!!!</li>
-<li><a href="https://rust-lang.org/tools/install/">Install Rust</a></li>
-<li>Run the following commands:</li>
+<li><strong>Plots</strong>, StatsPlots, JSXGraph, Interact</li>
+<li><strong>OrdinaryDiffEq</strong>, SciMLBase</li>
+<li><strong>Symbolics</strong>, AbstractAlgebra, Primes, Combinatorics</li>
+<li><strong>Distributions</strong>, StatsBase, Optim, QuadGK, HCubature</li>
+<li>StaticArrays, SparseArrays, SpecialFunctions, Quaternions, Rotations, …</li>
+</ul></li>
+<li>These have been re-implemented specifically for SubsetJuliaVM.</li>
 </ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a></a><span class="ex">$</span> git clone https://github.com/AtelierArith/julia-vm-oss.git</span>
-<span id="cb1-2"><a></a><span class="ex">$</span> cd julia-vm-oss</span>
-<span id="cb1-3"><a></a><span class="ex">$</span> ./scripts/sjulia_install.sh</span>
-<span id="cb1-4"><a></a><span class="ex">$</span> sjulia examples/mandelbrot.jl</span>
-<span id="cb1-5"><a></a>  <span class="ex">0.40394</span> seconds</span>
-<span id="cb1-6"><a></a><span class="ex">Mandelbrot</span> Set <span class="er">(</span><span class="ex">50x25</span><span class="kw">)</span><span class="bu">:</span></span>
-<span id="cb1-7"><a></a></span>
-<span id="cb1-8"><a></a>                              <span class="bu">.</span></span>
-<span id="cb1-9"><a></a>                              <span class="bu">.</span> .</span>
-<span id="cb1-10"><a></a>                              <span class="bu">.</span>+</span>
-<span id="cb1-11"><a></a>                             <span class="co">###+.</span></span>
-<span id="cb1-12"><a></a>                        <span class="bu">.</span>   .####.</span>
-<span id="cb1-13"><a></a>                       <span class="ex">.#++#########....</span></span>
-<span id="cb1-14"><a></a>                      <span class="ex">..##############.</span></span>
-<span id="cb1-15"><a></a>            <span class="bu">.</span>        ..################..</span>
-<span id="cb1-16"><a></a>             <span class="ex">......</span> .##################.</span>
-<span id="cb1-17"><a></a>            <span class="ex">.#######.###################</span></span>
-<span id="cb1-18"><a></a>          <span class="ex">...##########################.</span></span>
-<span id="cb1-19"><a></a><span class="co">#####################################..</span></span>
-<span id="cb1-20"><a></a>          <span class="ex">...##########################.</span></span>
-<span id="cb1-21"><a></a>            <span class="ex">.#######.###################</span></span>
-<span id="cb1-22"><a></a>             <span class="ex">......</span> .##################.</span>
-<span id="cb1-23"><a></a>            <span class="bu">.</span>        ..################..</span>
-<span id="cb1-24"><a></a>                      <span class="ex">..##############.</span></span>
-<span id="cb1-25"><a></a>                       <span class="ex">.#++#########....</span></span>
-<span id="cb1-26"><a></a>                        <span class="bu">.</span>   .####.</span>
-<span id="cb1-27"><a></a>                             <span class="co">###+.</span></span>
-<span id="cb1-28"><a></a>                              <span class="bu">.</span>+</span>
-<span id="cb1-29"><a></a>                              <span class="bu">.</span> .</span>
-<span id="cb1-30"><a></a>                              <span class="bu">.</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
-<section id="juliars" class="slide level2">
+<section id="juliars" class="slide level2 smaller">
 <h2><code>juliars</code></h2>
-<p><img data-src="assets/julia-vm-oss.png" class="absolute" style="top: 0px; right: 0px; width: 170px; "></p>
+<p>An <strong>experimental Julia → Rust AoT transpiler</strong> (same frontend as the VM).</p>
 <ul>
-<li>A Julia-to-Rust transpiler (experimental)</li>
-<li>Unlike JuliaC, it does not require <code>libjulia</code></li>
+<li>Pipeline: source → CST → Core IR → <strong>Rust source</strong> → <code>rustc -O</code> → native binary</li>
+<li>Unlike JuliaC / PackageCompiler, it does <strong>not</strong> need <code>libjulia</code></li>
+<li>Best for scalar numerics, loops, arrays — the broad package surface stays on the <strong>VM</strong></li>
+<li>On the coprime-π / Mandelbrot benches: <strong>about as fast as official Julia</strong></li>
 </ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a></a><span class="ex">$</span> cargo build <span class="at">--release</span> <span class="at">-p</span> subset_julia_vm <span class="dt">\</span></span>
-<span id="cb2-2"><a></a>    <span class="at">--features</span> aot <span class="at">--bin</span> juliars</span>
-<span id="cb2-3"><a></a><span class="ex">$</span> target/release/juliars <span class="at">--minimal-prelude</span> examples/mandelbrot.jl <span class="dt">\</span></span>
-<span id="cb2-4"><a></a>    <span class="at">--emit-binary</span> target/mandelbrot_aot</span>
-<span id="cb2-5"><a></a><span class="ex">$</span> target/mandelbrot_aot</span>
-<span id="cb2-6"><a></a>  <span class="ex">9.4e-5</span> seconds</span>
-<span id="cb2-7"><a></a><span class="ex">Mandelbrot</span> Set <span class="er">(</span><span class="ex">50x25</span><span class="kw">)</span><span class="bu">:</span></span>
-<span id="cb2-8"><a></a></span>
-<span id="cb2-9"><a></a>                              <span class="bu">.</span></span>
-<span id="cb2-10"><a></a>                              <span class="bu">.</span> .</span>
-<span id="cb2-11"><a></a>                              <span class="bu">.</span>+</span>
-<span id="cb2-12"><a></a>                             <span class="co">###+.</span></span>
-<span id="cb2-13"><a></a>                        <span class="bu">.</span>   .####.</span>
-<span id="cb2-14"><a></a>                       <span class="ex">.#++#########....</span></span>
-<span id="cb2-15"><a></a>                      <span class="ex">..##############.</span></span>
-<span id="cb2-16"><a></a>            <span class="bu">.</span>        ..################..</span>
-<span id="cb2-17"><a></a>             <span class="ex">......</span> .##################.</span>
-<span id="cb2-18"><a></a>            <span class="ex">.#######.###################</span></span>
-<span id="cb2-19"><a></a>          <span class="ex">...##########################.</span></span>
-<span id="cb2-20"><a></a><span class="co">#####################################..</span></span>
-<span id="cb2-21"><a></a>          <span class="ex">...##########################.</span></span>
-<span id="cb2-22"><a></a>            <span class="ex">.#######.###################</span></span>
-<span id="cb2-23"><a></a>             <span class="ex">......</span> .##################.</span>
-<span id="cb2-24"><a></a>            <span class="bu">.</span>        ..################..</span>
-<span id="cb2-25"><a></a>                      <span class="ex">..##############.</span></span>
-<span id="cb2-26"><a></a>                       <span class="ex">.#++#########....</span></span>
-<span id="cb2-27"><a></a>                        <span class="bu">.</span>   .####.</span>
-<span id="cb2-28"><a></a>                             <span class="co">###+.</span></span>
-<span id="cb2-29"><a></a>                              <span class="bu">.</span>+</span>
-<span id="cb2-30"><a></a>                              <span class="bu">.</span> .</span>
-<span id="cb2-31"><a></a>                              <span class="bu">.</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a></a><span class="ex">$</span> cargo build <span class="at">--release</span> <span class="at">-p</span> subset_julia_vm <span class="at">--features</span> aot <span class="at">--bin</span> juliars</span>
+<span id="cb2-2"><a></a><span class="ex">$</span> target/release/juliars <span class="at">--minimal-prelude</span> examples/mandelbrot.jl <span class="at">--emit-binary</span> target/mandelbrot_aot</span>
+<span id="cb2-3"><a></a><span class="ex">$</span> target/release/mandelbrot_aot</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="performance-julia-vs.-subsetjuliavm" class="slide level2 smaller">
 <h2>Performance: Julia vs.&nbsp;SubsetJuliaVM</h2>
-<p>Mandelbrot set benchmark (Apple Silicon macOS, measured 2026-07):</p>
+<p>Coprime-π benchmark — <span class="math inline">\(P(\gcd(a,b)=1)=6/\pi^2\)</span> (Apple Silicon macOS):</p>
 <div class="columns">
 <div class="column" style="width:55%;">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode numberSource julia number-lines code-with-copy"><code class="sourceCode julia"><span id="cb3-1"><a></a><span class="kw">function</span> <span class="fu">mandel_point</span>(c<span class="op">::</span><span class="dt">ComplexF64</span>,</span>
-<span id="cb3-2"><a></a>                      maxiter<span class="op">::</span><span class="dt">Int64</span>)<span class="op">::</span><span class="dt">Int64</span></span>
-<span id="cb3-3"><a></a>    z <span class="op">=</span> <span class="fl">0.0</span> <span class="op">+</span> <span class="fl">0.0im</span></span>
-<span id="cb3-4"><a></a>    <span class="cf">for</span> k <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span>maxiter</span>
-<span id="cb3-5"><a></a>        <span class="fu">abs2</span>(z) <span class="op">&gt;</span> <span class="fl">4.0</span> <span class="op">&amp;&amp;</span> <span class="cf">return</span> k <span class="op">-</span> <span class="fl">1</span></span>
-<span id="cb3-6"><a></a>        z <span class="op">=</span> z <span class="op">*</span> z <span class="op">+</span> c</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode numberSource julia number-lines code-with-copy"><code class="sourceCode julia"><span id="cb3-1"><a></a><span class="co"># P(gcd(a,b)=1) = 6/π²  →  π = √(6/P)</span></span>
+<span id="cb3-2"><a></a><span class="kw">function</span> <span class="fu">mygcd</span>(a, b)</span>
+<span id="cb3-3"><a></a>    <span class="cf">while</span> b <span class="op">!=</span> <span class="fl">0</span></span>
+<span id="cb3-4"><a></a>        tmp <span class="op">=</span> b</span>
+<span id="cb3-5"><a></a>        b <span class="op">=</span> a <span class="op">%</span> b</span>
+<span id="cb3-6"><a></a>        a <span class="op">=</span> tmp</span>
 <span id="cb3-7"><a></a>    <span class="cf">end</span></span>
-<span id="cb3-8"><a></a>    <span class="cf">return</span> maxiter</span>
+<span id="cb3-8"><a></a>    a</span>
 <span id="cb3-9"><a></a><span class="kw">end</span></span>
 <span id="cb3-10"><a></a></span>
-<span id="cb3-11"><a></a><span class="kw">function</span> <span class="fu">mandel_count</span>(width, height, maxiter)</span>
-<span id="cb3-12"><a></a>    total <span class="op">=</span> <span class="fl">0</span></span>
-<span id="cb3-13"><a></a>    <span class="cf">for</span> y <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span>height</span>
-<span id="cb3-14"><a></a>        ci <span class="op">=</span> <span class="op">-</span><span class="fl">1.2</span> <span class="op">+</span> <span class="fl">2.4</span> <span class="op">*</span> (y <span class="op">-</span> <span class="fl">1</span>) <span class="op">/</span> (height <span class="op">-</span> <span class="fl">1</span>)</span>
-<span id="cb3-15"><a></a>        <span class="cf">for</span> x <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span>width</span>
-<span id="cb3-16"><a></a>            cr <span class="op">=</span> <span class="op">-</span><span class="fl">2.0</span> <span class="op">+</span> <span class="fl">3.0</span> <span class="op">*</span> (x <span class="op">-</span> <span class="fl">1</span>) <span class="op">/</span> (width <span class="op">-</span> <span class="fl">1</span>)</span>
-<span id="cb3-17"><a></a>            total <span class="op">+=</span> <span class="fu">mandel_point</span>(cr <span class="op">+</span> ci <span class="op">*</span> <span class="cn">im</span>, maxiter)</span>
+<span id="cb3-11"><a></a><span class="kw">function</span> <span class="fu">calc_pi</span>(N)</span>
+<span id="cb3-12"><a></a>    cnt <span class="op">=</span> <span class="fl">0</span></span>
+<span id="cb3-13"><a></a>    <span class="cf">for</span> a <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span>N</span>
+<span id="cb3-14"><a></a>        <span class="cf">for</span> b <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span>N</span>
+<span id="cb3-15"><a></a>            <span class="cf">if</span> <span class="fu">mygcd</span>(a, b) <span class="op">==</span> <span class="fl">1</span></span>
+<span id="cb3-16"><a></a>                cnt <span class="op">+=</span> <span class="fl">1</span></span>
+<span id="cb3-17"><a></a>            <span class="cf">end</span></span>
 <span id="cb3-18"><a></a>        <span class="cf">end</span></span>
 <span id="cb3-19"><a></a>    <span class="cf">end</span></span>
-<span id="cb3-20"><a></a>    total</span>
+<span id="cb3-20"><a></a>    <span class="fu">sqrt</span>(<span class="fl">6.0</span> <span class="op">/</span> (cnt <span class="op">/</span> N <span class="op">/</span> N))</span>
 <span id="cb3-21"><a></a><span class="kw">end</span></span>
 <span id="cb3-22"><a></a></span>
-<span id="cb3-23"><a></a><span class="fu">mandel_count</span>(<span class="fl">1500</span>, <span class="fl">1500</span>, <span class="fl">500</span>)  <span class="co"># same source for all implementations</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb3-23"><a></a><span class="fu">calc_pi</span>(<span class="fl">10000</span>)  <span class="co"># same source for all runtimes</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div><div class="column" style="width:45%;">
 <table class="caption-top">
 <thead>
@@ -540,19 +482,19 @@ F\!\left(0,0,-\tfrac14\right)
 <tbody>
 <tr class="odd">
 <td>Official Julia</td>
-<td style="text-align: right;">0.50 s</td>
+<td style="text-align: right;">2.12 s</td>
 </tr>
 <tr class="even">
 <td><code>juliars</code> (AoT)</td>
-<td style="text-align: right;">0.52 s</td>
+<td style="text-align: right;">1.89 s</td>
 </tr>
 <tr class="odd">
-<td>sjulia <strong>VM</strong></td>
-<td style="text-align: right;">4.0 s</td>
+<td><code>sjulia</code> (VM)</td>
+<td style="text-align: right;">9.99 s</td>
 </tr>
 <tr class="even">
 <td>Python 3.14</td>
-<td style="text-align: right;">20.8 s</td>
+<td style="text-align: right;">16.76 s</td>
 </tr>
 </tbody>
 </table>
@@ -563,13 +505,12 @@ F\!\left(0,0,-\tfrac14\right)
 </section>
 <section id="interested-in-the-android-app" class="slide level2">
 <h2>Interested in the Android app?</h2>
-<p><img data-src="assets/email-qr.png" class="absolute" style="top: 0px; right: 0px; width: 220px; "></p>
 <ul>
 <li>Coming soon — we are looking for testers.</li>
-<li>Scan the QR code to email <code>s.terasaki@atelier-arith.jp</code></li>
+<li>Please contact <code>s.terasaki@atelier-arith.jp</code></li>
 </ul>
-<p><img data-src="assets/google_play.png" width="480"></p>
-</section>
+
+<img data-src="assets/google_play.png" width="480" class="r-stretch"></section>
 <section class="slide level2">
 
 </section>

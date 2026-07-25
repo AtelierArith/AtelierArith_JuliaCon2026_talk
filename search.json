@@ -4,7 +4,7 @@
     "href": "slide/slide.html#what-i-created",
     "title": "Let’s run Julia everywhere from mobile to web",
     "section": "What I created",
-    "text": "What I created\n\nSubsetJuliaVM — a stack-based VM for a subset of Julia\n\nCLI binary name: sjulia (think “subset Julia”)\nImplemented in Rust\n\nRuns on iOS and Android devices\n\nThe VM compiles to WebAssembly, so it also runs in the browser\n\nSupports parts of Plots.jl, OrdinaryDiffEq.jl, Symbolics.jl, AbstractAlgebra.jl, and more"
+    "text": "What I created\n\nSubsetJuliaVM — a stack-based VM for a subset of Julia\n\nLooks like Julia and walks like Python\nCLI binary name: sjulia (think “subset Julia”)\nImplemented in Rust\n\nRuns on iOS and Android devices\n\nThe VM compiles to WebAssembly, so it also runs in the browser\n\nSupports parts of Plots.jl, OrdinaryDiffEq.jl, Symbolics.jl, AbstractAlgebra.jl, and more"
   },
   {
     "objectID": "slide/slide.html#deliverables",
@@ -12,48 +12,6 @@
     "title": "Let’s run Julia everywhere from mobile to web",
     "section": "Deliverables",
     "text": "Deliverables\niOS / iPadOS — a native app with no JIT, fully App Store compliant\n\n\niOS appApp Store\n\n\nSource codejulia-vm-oss\n\n\nWeb playgroundsubset_julia\n\n\nGoogle it SubsetJuliaVM"
-  },
-  {
-    "objectID": "slide/slide.html#why-i-created-it",
-    "href": "slide/slide.html#why-i-created-it",
-    "title": "Let’s run Julia everywhere from mobile to web",
-    "section": "Why I created it",
-    "text": "Why I created it\n\nI wanted to run Julia on my iPad — offline\nOfficial Julia relies on JIT compilation\nOrdinary iOS apps cannot freely generate and execute native code at runtime (W^X)\nApp Store rules also restrict downloaded code that changes app functionality (Review Guidelines §2.5.2)\nSubsetJuliaVM uses a bundled interpreter instead: bytecode stays data, and the signed app interprets it"
-  },
-  {
-    "objectID": "slide/slide.html#what-about-binder-or-google-colab",
-    "href": "slide/slide.html#what-about-binder-or-google-colab",
-    "title": "Let’s run Julia everywhere from mobile to web",
-    "section": "What about Binder or Google Colab?",
-    "text": "What about Binder or Google Colab?\n\nUnusable where the internet connection is unreliable\nInstalling external packages takes a long time"
-  },
-  {
-    "objectID": "slide/slide.html#how-i-created-it",
-    "href": "slide/slide.html#how-i-created-it",
-    "title": "Let’s run Julia everywhere from mobile to web",
-    "section": "How I created it",
-    "text": "How I created it\n\nApps like Pythonista and Carnets do run on iOS.\n\nSo why not build a virtual machine that accepts Julia syntax?!\n\nI don’t have the ability to create this\n\nLet’s use AI\nBuilt with heavy use of AI tools: Claude Code, Codex, Cursor, DeepSeek, Kimi, etc."
-  },
-  {
-    "objectID": "slide/slide.html#lets-actually-build-it",
-    "href": "slide/slide.html#lets-actually-build-it",
-    "title": "Let’s run Julia everywhere from mobile to web",
-    "section": "Let’s actually build it!",
-    "text": "Let’s actually build it!\n\nA stack-based bytecode interpreter (no JIT)\n\n\n  Julia source\n  →\n  parse → CST\n  →\n  lower → Core IR\n  →\n  compile → bytecode\n  →\n  stack VM → result\n\nResult: AtelierArith/julia-vm-oss"
-  },
-  {
-    "objectID": "slide/slide.html#how-subsetjuliavm-differs-from-official-julia",
-    "href": "slide/slide.html#how-subsetjuliavm-differs-from-official-julia",
-    "title": "Let’s run Julia everywhere from mobile to web",
-    "section": "How SubsetJuliaVM differs from official Julia",
-    "text": "How SubsetJuliaVM differs from official Julia\nHow code is interpreted and executed:\nEach cell: who does it → what it produces\n\n\n\n\n\n\n\n\nStage\nOfficial Julia\nSubsetJuliaVM\n\n\n\n\nParsing\nflisp / JuliaSyntax.jl → AST\npure-Rust parser → CST\n\n\nLowering\nJulia’s lowering → lowered IR\nRust lowering → Core IR\n\n\nCode generation\nLLVM JIT at runtime → native code\nbytecode compiler before execution → bytecode\n\n\nExecution\nCPU runs native code\nstack VM interprets bytecode\n\n\nRuntime library\nC runtime + pure-Julia base/\nRust builtins + a pure-Julia subset\n\n\n\n\nWith no JIT, SubsetJuliaVM runs even on iOS (W^X) and WASM"
-  },
-  {
-    "objectID": "slide/slide.html#what-subsetjuliavm-does-not-provide",
-    "href": "slide/slide.html#what-subsetjuliavm-does-not-provide",
-    "title": "Let’s run Julia everywhere from mobile to web",
-    "section": "What SubsetJuliaVM does not provide",
-    "text": "What SubsetJuliaVM does not provide\nEverything that would break the sandboxed, offline, no-downloaded-code model:\n\nPkg.jl / package management — no Pkg.add, no registry, no downloads; using X only reaches the ~34 packages bundled into the binary\nNetwork I/O — no Sockets, no Downloads/HTTP\nFilesystem access — file operations are unimplemented; include resolves through virtual embedded paths\nExternal processes — no run(cmd)\nC interface — no @ccall/pointer/unsafe_*\nReal parallelism — single-threaded by design; Tasks/Channels are cooperative continuations\nNative-code reflection — no @code_llvm/@code_native (there is no LLVM); use sjulia --dump-bytecode instead\n\nMore details: see the Appendix slides"
   },
   {
     "objectID": "slide/slide.html#live-demo-inside-these-slides",
@@ -70,74 +28,81 @@
     "text": "Hello, SubsetJuliaVM"
   },
   {
-    "objectID": "slide/slide.html#plotly-via-plots",
-    "href": "slide/slide.html#plotly-via-plots",
+    "objectID": "slide/slide.html#why-i-created-it",
+    "href": "slide/slide.html#why-i-created-it",
     "title": "Let’s run Julia everywhere from mobile to web",
-    "section": "Plotly via Plots",
-    "text": "Plotly via Plots"
+    "section": "Why I created it",
+    "text": "Why I created it\n\nI loved Pythonista (iOS app)\nI wanted to run Julia on my iPad — offline"
   },
   {
-    "objectID": "slide/slide.html#mandelbrot-heatmap",
-    "href": "slide/slide.html#mandelbrot-heatmap",
+    "objectID": "slide/slide.html#what-about-binder-or-google-colab",
+    "href": "slide/slide.html#what-about-binder-or-google-colab",
     "title": "Let’s run Julia everywhere from mobile to web",
-    "section": "Mandelbrot heatmap",
-    "text": "Mandelbrot heatmap"
+    "section": "What about Binder or Google Colab?",
+    "text": "What about Binder or Google Colab?\n\nUnusable where the internet connection is unreliable\nInstalling external packages takes a long time"
   },
   {
-    "objectID": "slide/slide.html#lorenz-attractor-ordinarydiffeq",
-    "href": "slide/slide.html#lorenz-attractor-ordinarydiffeq",
+    "objectID": "slide/slide.html#can-we-run-official-julia-on-ios",
+    "href": "slide/slide.html#can-we-run-official-julia-on-ios",
     "title": "Let’s run Julia everywhere from mobile to web",
-    "section": "Lorenz attractor (OrdinaryDiffEq)",
-    "text": "Lorenz attractor (OrdinaryDiffEq)"
+    "section": "Can we run official Julia on iOS?",
+    "text": "Can we run official Julia on iOS?\n\nMaybe, No.\nOfficial Julia relies on JIT compilation\nOrdinary iOS apps cannot freely generate and execute native code at runtime (W^X)\nApp Store rules also restrict downloaded code that changes app functionality (Review Guidelines §2.5.2)\nSubsetJuliaVM uses a bundled interpreter instead: bytecode stays data, and the signed app interprets it"
   },
   {
-    "objectID": "slide/slide.html#jacobian-conjecture-counterexample",
-    "href": "slide/slide.html#jacobian-conjecture-counterexample",
+    "objectID": "slide/slide.html#how-i-created-it",
+    "href": "slide/slide.html#how-i-created-it",
     "title": "Let’s run Julia everywhere from mobile to web",
-    "section": "Jacobian conjecture counterexample",
-    "text": "Jacobian conjecture counterexample\nAlpöge · Jul 2026 — \\(F=(f,g,h)\\colon \\mathbb{C}^3 \\to \\mathbb{C}^3\\) with \\(u=1+xy\\):\n\\[\n\\begin{aligned}\nf &= u^3 z + y^2 u(4+3xy),\\\\\ng &= y + 3x u^2 z + 3x y^2(4+3xy),\\\\\nh &= 2x - 3x^2 y - x^3 z.\n\\end{aligned}\n\\]\n\\[\n\\det J_F \\equiv -2,\n\\qquad\nF\\!\\left(0,0,-\\tfrac14\\right)\n= F\\!\\left(1,-\\tfrac32,\\tfrac{13}2\\right)\n= F\\!\\left(-1,\\tfrac32,\\tfrac{13}2\\right)\n= \\left(-\\tfrac14,\\,0,\\,0\\right).\n\\]\nSo \\(F\\) has \\(\\det J_F\\) a nonzero constant, yet is not injective — a counterexample for \\(n\\ge 3\\).\nQ&A: does this contradict the inverse function theorem? → Appendix"
+    "section": "How I created it",
+    "text": "How I created it\n\nApps like Pythonista and Carnets do run on iOS.\n\nSo why not build a virtual machine that accepts Julia syntax?!\n\nI don’t have the ability to create this 😭\n\nLet’s use AI 🤖\nBuilt with heavy use of AI tools: Claude Code, Codex, Cursor, DeepSeek, Kimi, etc."
   },
   {
-    "objectID": "slide/slide.html#the-announcement",
-    "href": "slide/slide.html#the-announcement",
+    "objectID": "slide/slide.html#lets-actually-build-it",
+    "href": "slide/slide.html#lets-actually-build-it",
     "title": "Let’s run Julia everywhere from mobile to web",
-    "section": "The announcement",
-    "text": "The announcement\n\n  \n  \n    Open on X ↗"
+    "section": "Let’s actually build it!",
+    "text": "Let’s actually build it!\n\nA stack-based bytecode interpreter (no JIT)\n\n\n  Julia source\n  →\n  parse → CST\n  →\n  lower → Core IR\n  →\n  compile → bytecode\n  →\n  stack VM → result\n\nResult: AtelierArith/julia-vm-oss\n$ git clone https://github.com/AtelierArith/julia-vm-oss.git\n$ cd julia-vm-oss\n$ ./scripts/sjulia_install.sh   # Windows: pwsh -File scripts/sjulia_install.ps1\n$ sjulia examples/mandelbrot.jl\n  0.027875 seconds\nMandelbrot Set (50x25):\n\n                              .\n                              . .\n                              .+\n                             ###+.\n                        .   .####.\n                       .#++#########....\n                      ..##############.\n            .        ..################..\n             ...... .##################.\n            .#######.###################\n          ...##########################.\n#####################################..\n          ...##########################.\n            .#######.###################\n             ...... .##################.\n            .        ..################..\n                      ..##############.\n                       .#++#########....\n                        .   .####.\n                             ###+.\n                              .+\n                              . .\n                              ."
   },
   {
-    "objectID": "slide/slide.html#verify-with-symbolics.jl",
-    "href": "slide/slide.html#verify-with-symbolics.jl",
+    "objectID": "slide/slide.html#how-subsetjuliavm-differs-from-official-julia",
+    "href": "slide/slide.html#how-subsetjuliavm-differs-from-official-julia",
     "title": "Let’s run Julia everywhere from mobile to web",
-    "section": "Verify with Symbolics.jl",
-    "text": "Verify with Symbolics.jl"
+    "section": "How SubsetJuliaVM differs from official Julia",
+    "text": "How SubsetJuliaVM differs from official Julia\nHow code is interpreted and executed:\nEach cell: who does it → what it produces\n\n\n\n\n\n\n\n\nStage\nOfficial Julia\nSubsetJuliaVM\n\n\n\n\nParsing\nflisp / JuliaSyntax.jl → AST\npure-Rust parser → CST\n\n\nLowering\nJulia’s lowering → lowered IR\nRust lowering → Core IR\n\n\nCode generation\nLLVM JIT at runtime → native code\nbytecode compiler before execution → bytecode\n\n\nExecution\nCPU runs native code\nstack VM interprets bytecode\n\n\nRuntime library\nC runtime + pure-Julia base/\nRust builtins + a pure-Julia subset\n\n\n\n\nWith no JIT, SubsetJuliaVM runs even on iOS (W^X) and WASM"
   },
   {
-    "objectID": "slide/slide.html#try-subsetjuliavm",
-    "href": "slide/slide.html#try-subsetjuliavm",
+    "objectID": "slide/slide.html#what-subsetjuliavm-does-not-provide",
+    "href": "slide/slide.html#what-subsetjuliavm-does-not-provide",
     "title": "Let’s run Julia everywhere from mobile to web",
-    "section": "Try SubsetJuliaVM",
-    "text": "Try SubsetJuliaVM\n\n\nTry SubsetJuliaVM (sjulia) on your machine!!!\nInstall Rust\nRun the following commands:\n\n$ git clone https://github.com/AtelierArith/julia-vm-oss.git\n$ cd julia-vm-oss\n$ ./scripts/sjulia_install.sh\n$ sjulia examples/mandelbrot.jl\n  0.40394 seconds\nMandelbrot Set (50x25):\n\n                              .\n                              . .\n                              .+\n                             ###+.\n                        .   .####.\n                       .#++#########....\n                      ..##############.\n            .        ..################..\n             ...... .##################.\n            .#######.###################\n          ...##########################.\n#####################################..\n          ...##########################.\n            .#######.###################\n             ...... .##################.\n            .        ..################..\n                      ..##############.\n                       .#++#########....\n                        .   .####.\n                             ###+.\n                              .+\n                              . .\n                              ."
+    "section": "What SubsetJuliaVM does not provide",
+    "text": "What SubsetJuliaVM does not provide\nEverything that would break the sandboxed, offline, no-downloaded-code model:\n\nPkg.jl / package management — no Pkg.add, no registry, no downloads; using X only reaches the ~34 packages bundled into the binary\nNetwork I/O — no Sockets, no Downloads/HTTP\nFilesystem access — file operations are unimplemented; include resolves through virtual embedded paths\nExternal processes — no run(cmd)\nC interface — no @ccall/pointer/unsafe_*\nReal parallelism — single-threaded by design; Tasks/Channels are cooperative continuations\n@generated macro\nNative-code reflection — no @code_llvm/@code_native (there is no LLVM); use sjulia --dump-bytecode instead More details: see the Appendix slides"
+  },
+  {
+    "objectID": "slide/slide.html#what-we-support",
+    "href": "slide/slide.html#what-we-support",
+    "title": "Let’s run Julia everywhere from mobile to web",
+    "section": "What we support",
+    "text": "What we support\n\nBasic Julia syntax (subset)\n~34 bundled 3rd-party packages (no download), including:\n\nPlots, StatsPlots, JSXGraph, Interact\nOrdinaryDiffEq, SciMLBase\nSymbolics, AbstractAlgebra, Primes, Combinatorics\nDistributions, StatsBase, Optim, QuadGK, HCubature\nStaticArrays, SparseArrays, SpecialFunctions, Quaternions, Rotations, …\n\nThese have been re-implemented specifically for SubsetJuliaVM."
   },
   {
     "objectID": "slide/slide.html#juliars",
     "href": "slide/slide.html#juliars",
     "title": "Let’s run Julia everywhere from mobile to web",
     "section": "juliars",
-    "text": "juliars\n\n\nA Julia-to-Rust transpiler (experimental)\nUnlike JuliaC, it does not require libjulia\n\n$ cargo build --release -p subset_julia_vm \\\n    --features aot --bin juliars\n$ target/release/juliars --minimal-prelude examples/mandelbrot.jl \\\n    --emit-binary target/mandelbrot_aot\n$ target/mandelbrot_aot\n  9.4e-5 seconds\nMandelbrot Set (50x25):\n\n                              .\n                              . .\n                              .+\n                             ###+.\n                        .   .####.\n                       .#++#########....\n                      ..##############.\n            .        ..################..\n             ...... .##################.\n            .#######.###################\n          ...##########################.\n#####################################..\n          ...##########################.\n            .#######.###################\n             ...... .##################.\n            .        ..################..\n                      ..##############.\n                       .#++#########....\n                        .   .####.\n                             ###+.\n                              .+\n                              . .\n                              ."
+    "text": "juliars\nAn experimental Julia → Rust AoT transpiler (same frontend as the VM).\n\nPipeline: source → CST → Core IR → Rust source → rustc -O → native binary\nUnlike JuliaC / PackageCompiler, it does not need libjulia\nBest for scalar numerics, loops, arrays — the broad package surface stays on the VM\nOn the coprime-π / Mandelbrot benches: about as fast as official Julia\n\n$ cargo build --release -p subset_julia_vm --features aot --bin juliars\n$ target/release/juliars --minimal-prelude examples/mandelbrot.jl --emit-binary target/mandelbrot_aot\n$ target/release/mandelbrot_aot"
   },
   {
     "objectID": "slide/slide.html#performance-julia-vs.-subsetjuliavm",
     "href": "slide/slide.html#performance-julia-vs.-subsetjuliavm",
     "title": "Let’s run Julia everywhere from mobile to web",
     "section": "Performance: Julia vs. SubsetJuliaVM",
-    "text": "Performance: Julia vs. SubsetJuliaVM\nMandelbrot set benchmark (Apple Silicon macOS, measured 2026-07):\n\n\nfunction mandel_point(c::ComplexF64,\n                      maxiter::Int64)::Int64\n    z = 0.0 + 0.0im\n    for k in 1:maxiter\n        abs2(z) &gt; 4.0 && return k - 1\n        z = z * z + c\n    end\n    return maxiter\nend\n\nfunction mandel_count(width, height, maxiter)\n    total = 0\n    for y in 1:height\n        ci = -1.2 + 2.4 * (y - 1) / (height - 1)\n        for x in 1:width\n            cr = -2.0 + 3.0 * (x - 1) / (width - 1)\n            total += mandel_point(cr + ci * im, maxiter)\n        end\n    end\n    total\nend\n\nmandel_count(1500, 1500, 500)  # same source for all implementations\n\n\n\n\nRuntime\nTime\n\n\n\n\nOfficial Julia\n0.50 s\n\n\njuliars (AoT)\n0.52 s\n\n\nsjulia VM\n4.0 s\n\n\nPython 3.14\n20.8 s\n\n\n\n\nAoT is about as fast as official Julia"
+    "text": "Performance: Julia vs. SubsetJuliaVM\nCoprime-π benchmark — \\(P(\\gcd(a,b)=1)=6/\\pi^2\\) (Apple Silicon macOS):\n\n\n# P(gcd(a,b)=1) = 6/π²  →  π = √(6/P)\nfunction mygcd(a, b)\n    while b != 0\n        tmp = b\n        b = a % b\n        a = tmp\n    end\n    a\nend\n\nfunction calc_pi(N)\n    cnt = 0\n    for a in 1:N\n        for b in 1:N\n            if mygcd(a, b) == 1\n                cnt += 1\n            end\n        end\n    end\n    sqrt(6.0 / (cnt / N / N))\nend\n\ncalc_pi(10000)  # same source for all runtimes\n\n\n\n\nRuntime\nTime\n\n\n\n\nOfficial Julia\n2.12 s\n\n\njuliars (AoT)\n1.89 s\n\n\nsjulia (VM)\n9.99 s\n\n\nPython 3.14\n16.76 s\n\n\n\n\nAoT is about as fast as official Julia"
   },
   {
     "objectID": "slide/slide.html#interested-in-the-android-app",
     "href": "slide/slide.html#interested-in-the-android-app",
     "title": "Let’s run Julia everywhere from mobile to web",
     "section": "Interested in the Android app?",
-    "text": "Interested in the Android app?\n\n\nComing soon — we are looking for testers.\nScan the QR code to email s.terasaki@atelier-arith.jp"
+    "text": "Interested in the Android app?\n\nComing soon — we are looking for testers.\nPlease contact s.terasaki@atelier-arith.jp"
   },
   {
     "objectID": "index.html",
@@ -266,18 +231,18 @@
     "text": "Q. Is there a garbage collector?\nA. A hybrid scheme, tuned for a single-threaded, no-JIT VM:\n\nScalars live inline in the Value enum; strings and other shared immutable data use Rust reference counting (Rc — cloning is a refcount bump, not a copy).\nMutable structs live on a VM-managed heap (Vec&lt;StructInstance&gt;), referenced by index.\nA stop-the-world mark & compact pass runs only at safe points (e.g. after a top-level evaluation): mark reachable objects from all VM roots (stack, frames, globals, tasks, …), rebuild the heap densely, rewrite indices.\nThis avoids per-assignment refcount traffic in hot loops, and cross-eval compaction keeps long REPL sessions bounded."
   },
   {
-    "objectID": "slide/appendix.html#q.-why-is-the-vm-8-slower-than-julia",
-    "href": "slide/appendix.html#q.-why-is-the-vm-8-slower-than-julia",
+    "objectID": "slide/appendix.html#q.-why-is-the-vm-5-slower-than-julia",
+    "href": "slide/appendix.html#q.-why-is-the-vm-5-slower-than-julia",
     "title": "Appendix — Q&A",
-    "section": "Q. Why is the VM ~8× slower than Julia?",
-    "text": "Q. Why is the VM ~8× slower than Julia?\nA. That is the price of “no JIT”:\n\nEvery operation pays bytecode-dispatch overhead — fetch an instruction, branch on its opcode, execute, repeat.\nNo native code is specialized for your types at runtime, which is exactly where official Julia’s LLVM JIT gets its speed.\nWhen top speed matters, juliars (AoT → Rust) removes interpretation entirely and matches official Julia.\n(The ~8× and ~5× ratios are from the scalar Mandelbrot benchmark in the main slides; the gap varies by workload.)"
+    "section": "Q. Why is the VM ~5× slower than Julia?",
+    "text": "Q. Why is the VM ~5× slower than Julia?\nA. That is the price of “no JIT”:\n\nEvery operation pays bytecode-dispatch overhead — fetch an instruction, branch on its opcode, execute, repeat.\nNo native code is specialized for your types at runtime, which is exactly where official Julia’s LLVM JIT gets its speed.\nWhen top speed matters, juliars (AoT → Rust) removes interpretation entirely and matches official Julia.\n(The ~5× Julia / ~1.7× Python ratios are from the coprime-π benchmark in the main slides; the gap varies by workload.)"
   },
   {
-    "objectID": "slide/appendix.html#q.-then-why-is-the-vm-still-5-faster-than-python",
-    "href": "slide/appendix.html#q.-then-why-is-the-vm-still-5-faster-than-python",
+    "objectID": "slide/appendix.html#q.-then-why-is-the-vm-still-faster-than-python",
+    "href": "slide/appendix.html#q.-then-why-is-the-vm-still-faster-than-python",
     "title": "Appendix — Q&A",
-    "section": "Q. Then why is the VM still ~5× faster than Python?",
-    "text": "Q. Then why is the VM still ~5× faster than Python?\nA. sjulia claws a lot back before execution, at compile time:\n\ntype inference → typed opcodes and typed local slots (AddI64, LoadSlotF64) instead of boxed generic ops\npeephole superinstructions (fused compare-and-jump, load-add, loop back-edge)\nmethod dispatch caches and lazy per-signature specialization\nstraight-line typed block execution that bypasses the generic dispatch loop"
+    "section": "Q. Then why is the VM still faster than Python?",
+    "text": "Q. Then why is the VM still faster than Python?\nA. sjulia claws a lot back before execution, at compile time:\n\ntype inference → typed opcodes and typed local slots (AddI64, LoadSlotF64) instead of boxed generic ops\npeephole superinstructions (fused compare-and-jump, load-add, loop back-edge)\nmethod dispatch caches and lazy per-signature specialization\nstraight-line typed block execution that bypasses the generic dispatch loop"
   },
   {
     "objectID": "slide/appendix.html#q.-does-sjulia-have-a-ttfx-ttfl-ttfp-problem",
@@ -298,7 +263,7 @@
     "href": "slide/appendix.html#q.-isnt-python-also-a-stack-based-vm",
     "title": "Appendix — Q&A",
     "section": "Q. Isn’t Python also a stack-based VM?",
-    "text": "Q. Isn’t Python also a stack-based VM?\nA. Yes — CPython compiles to bytecode and interprets it on an operand stack, same family as sjulia.\n\nCPython: .py → .pyc bytecode → the eval loop interprets it. Same architecture “family”.\nSo the difference is not stack VM vs. something else — it is how much work is done before execution starts.\nCPython resolves almost everything at run time; sjulia front-loads it at compile time (type inference, specialization, fusion).\nThat gap is what the benchmark shows: sjulia VM 4.0 s vs. Python 20.8 s on Mandelbrot."
+    "text": "Q. Isn’t Python also a stack-based VM?\nA. Yes — CPython compiles to bytecode and interprets it on an operand stack, same family as sjulia.\n\nCPython: .py → .pyc bytecode → the eval loop interprets it. Same architecture “family”.\nSo the difference is not stack VM vs. something else — it is how much work is done before execution starts.\nCPython resolves almost everything at run time; sjulia front-loads it at compile time (type inference, specialization, fusion).\nThat gap is what the benchmark shows: sjulia VM 9.99 s vs. Python 16.76 s on coprime π (\\(N=10000\\))."
   },
   {
     "objectID": "slide/appendix.html#q.-sjulia-vs.-cpython-1-bytecode",
@@ -425,19 +390,5 @@
     "title": "Appendix — Q&A",
     "section": "Q. Why Rust (and not C/C++/Swift/Julia itself)?",
     "text": "Q. Why Rust (and not C/C++/Swift/Julia itself)?\nA.\n\nOne codebase targets macOS/Linux, iOS (staticlib), Android (cdylib), and WASM — wasm32-unknown-unknown support with no C toolchain involved was decisive (it is also why the parser was rewritten from tree-sitter’s generated C into pure Rust).\nMemory safety without a runtime GC of its own; enum + match fit a bytecode interpreter naturally (tagged Value, exhaustive opcode dispatch).\nThe project is ratcheting toward a panic-free VM policy — user code should raise Julia exceptions, not Rust panics/aborts, which matters inside an app process.\nDevelopment leaned heavily on AI coding agents; a strict compiler + ~3,100 parity fixtures made that loop safe."
-  },
-  {
-    "objectID": "slide/appendix.html#jacobian-ift",
-    "href": "slide/appendix.html#jacobian-ift",
-    "title": "Appendix — Q&A",
-    "section": "Q. Doesn’t this contradict the inverse function theorem?",
-    "text": "Q. Doesn’t this contradict the inverse function theorem?\nA. No. The inverse function theorem is local; the Jacobian conjecture is global.\n\nIFT: if \\(\\det J_F(p)\\neq 0\\), then \\(F\\) is invertible in a neighborhood of \\(p\\)\nAlpöge’s \\(F\\) has \\(\\det J_F\\equiv -2\\) everywhere, so it is locally invertible at every finite point\nBut three distant inputs share one image, so \\(F\\) is not globally injective\nLocal sheets do not collide at a finite critical point; a fiber can lose points when a preimage escapes to infinity (failure of properness)\n\nLocal invertibility everywhere \\(\\neq\\) a global (polynomial) inverse."
-  },
-  {
-    "objectID": "slide/appendix.html#q.-what-did-we-check-with-symbolics.jl",
-    "href": "slide/appendix.html#q.-what-did-we-check-with-symbolics.jl",
-    "title": "Appendix — Q&A",
-    "section": "Q. What did we check with Symbolics.jl?",
-    "text": "Q. What did we check with Symbolics.jl?\nA. Exactly the two certificates that kill the conjecture:\n\nBuild \\(J_F\\) from partial derivatives and expand \\(\\det J_F\\) → the constant \\(-2\\)\nEvaluate \\(F\\) at \\((0,0,-1/4)\\), \\((1,-3/2,13/2)\\), \\((-1,3/2,13/2)\\) → all map to \\((-1/4,0,0)\\)\n\nNo floating-point approximation: rational arithmetic via Symbolics + LinearAlgebra.det."
   }
 ]
