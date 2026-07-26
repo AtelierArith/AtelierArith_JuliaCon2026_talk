@@ -395,7 +395,7 @@ not the second-scale native-compilation latency associated with Julia TTFP workl
 
 **A.** Parity with **official Julia 1.12** is enforced mechanically:
 
-- ~**3,100 registered test fixtures** across 114 categories, checked against expected
+- ~**3,250 registered test fixtures** across 114 categories, checked against expected
   outputs (floats within `1e-10`); a separate **parity sweep** runs eligible fixtures
   under both real `julia` and `sjulia` and compares.
 - Plus differential fuzzing, official-test-suite sweeps, and subtype/dispatch parity tests.
@@ -554,14 +554,14 @@ not as conformance to a standard.
 
 **A.** Roughly **570k lines of Rust** (`src/` code, excluding tests), plus a large pure-Julia layer:
 
-- A Cargo workspace of **12 crates** — parser, lowering, IR, compiler, bytecode,
+- A Cargo workspace of **14 crates** — parser, lowering, IR, compiler, bytecode,
   VM, FFI, web/WASM, AoT runtime, …
 - The bytecode instruction set alone has **400+ opcodes**.
 - The AoT pipeline (`juliars`) is ~53k lines — roughly **9–10%** of the Rust code.
 - On top of that, Base is reimplemented as **~46k lines of pure-Julia subset code**
-  (74 files mirroring official Julia's `base/`, plus 10 stdlib modules),
+  (75 files mirroring official Julia's `base/`, plus 10 stdlib modules),
   and **~34 bundled packages** (Plots, Distributions, AbstractAlgebra, …).
-- Verified by **~3,100 registered fixtures** across 114 categories,
+- Verified by **~3,250 registered fixtures** across 114 categories,
   with a parity sweep against real `julia`.
 - Most of it was written with AI coding agents in the loop —
   the parity suite is what kept that tractable.
@@ -577,5 +577,5 @@ not as conformance to a standard.
   bytecode interpreter naturally (tagged `Value`, exhaustive opcode dispatch).
 - The project is ratcheting toward a **panic-free VM policy** — user code should raise
   Julia exceptions, not Rust panics/aborts, which matters inside an app process.
-- Development leaned heavily on AI coding agents; a strict compiler + ~3,100 parity
+- Development leaned heavily on AI coding agents; a strict compiler + ~3,250 parity
   fixtures made that loop safe.
