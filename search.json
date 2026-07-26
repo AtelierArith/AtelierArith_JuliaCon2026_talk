@@ -28,11 +28,18 @@
     "text": "Live demo (inside these slides)\n\nSeeing is believing\nThe next slides embed the very same WASM VM.\n\nEdit the code and run it with Ctrl+Enter / ⌘+Enter (or Run). Press Clear to clear the output.\n\nThe demo is the heart of this talk. Keep the explanation short and run the code."
   },
   {
-    "objectID": "slide/slide.html#hello-subsetjuliavm",
-    "href": "slide/slide.html#hello-subsetjuliavm",
+    "objectID": "slide/slide.html#hello-world",
+    "href": "slide/slide.html#hello-world",
     "title": "Let’s run Julia everywhere",
-    "section": "Hello, SubsetJuliaVM",
-    "text": "Hello, SubsetJuliaVM"
+    "section": "Hello World",
+    "text": "Hello World"
+  },
+  {
+    "objectID": "slide/slide.html#ifs-fractals-interact-plots",
+    "href": "slide/slide.html#ifs-fractals-interact-plots",
+    "title": "Let’s run Julia everywhere",
+    "section": "IFS fractals (Interact + Plots)",
+    "text": "IFS fractals (Interact + Plots)"
   },
   {
     "objectID": "slide/slide.html#why-i-created-it",
@@ -53,14 +60,14 @@
     "href": "slide/slide.html#can-we-run-official-julia-on-ios-13",
     "title": "Let’s run Julia everywhere",
     "section": "Can we run official Julia on iOS? (1/3)",
-    "text": "Can we run official Julia on iOS? (1/3)\n\nIt’s difficult to run the original functionality as-is.\nOfficial Julia relies on JIT compilation\nOrdinary iOS apps cannot freely generate and execute native code at runtime (W^X)\nApp Store rules also restrict downloaded code that changes app functionality (Review Guidelines §2.5.2)\nSubsetJuliaVM uses a bundled interpreter instead: bytecode stays data, and the signed app interprets it"
+    "text": "Can we run official Julia on iOS? (1/3)\n\nIt’s difficult to run the original functionality as-is.\n\nOfficial Julia relies on JIT compilation\nOrdinary iOS apps cannot freely generate and execute native code at runtime (W^X)\nApp Store rules also restrict downloaded code that changes app functionality (Review Guidelines §2.5.2)\n\nSubsetJuliaVM uses a bundled interpreter instead: bytecode stays data as Vec&lt;Instruction&gt;."
   },
   {
     "objectID": "slide/slide.html#can-we-run-official-julia-on-ios-23",
     "href": "slide/slide.html#can-we-run-official-julia-on-ios-23",
     "title": "Let’s run Julia everywhere",
     "section": "Can we run official Julia on iOS? (2/3)",
-    "text": "Can we run official Julia on iOS? (2/3)\nExperimentally, yes — but this is not an official iOS port.\n\n\nVerified with Julia 1.12.6 on a physical iPhone 15 Pro Max:\nprintln(\"Hello World\")\nusing InteractiveUtils\nversioninfo()\nA = rand(2, 2)\nx = rand(2)\ny = A * x # &lt;- does not work\n\nBundle the official macOS arm64 runtime and sysimage\nRewrite Mach-O platform metadata and sign every dylib\nRun with --compile=no and small compatibility shims\n\n\nMajor limitations\n\nNo JIT: only interpreter-compatible or already compiled paths work\nInteractiveUtils is reduced to the non-verbose versioninfo() path\nMost standard libraries, packages, and JLLs are unsupported\nBLAS-backed matrix operations still fail with `ccall` requires the compiler\nDevelopment-signed research prototype; not App Store-ready"
+    "text": "Can we run official Julia on iOS? (2/3)\nExperimentally, yes — but this is not an official iOS port.\n\n\nVerified with Julia 1.12.6 on a physical iPhone 15 Pro Max:\nprintln(\"Hello World\")\nusing InteractiveUtils\nversioninfo()\nA = rand(2, 2)\nx = rand(2)\ny = A * x # &lt;- does not work\n\nBundle the official macOS arm64 runtime and sysimage\nRewrite Mach-O platform metadata and sign every dylib\nRun with --compile=no and small compatibility shims\n\n\nMajor limitations\n\nMost standard libraries, packages, and JLLs are unsupported\nBLAS-backed matrix operations still fail with `ccall` requires the compiler\nDevelopment-signed research prototype; not App Store-ready"
   },
   {
     "objectID": "slide/slide.html#can-we-run-official-julia-on-ios-33",
@@ -77,11 +84,11 @@
     "text": "How I created SubsetJuliaVM\n\nApps like Pythonista and Carnets do run on iOS.\n\nSo why not build a virtual machine that accepts Julia syntax?!\n\nI don’t have the ability to create this 😭\n\nLet’s use AI 🤖\nBuilt with heavy use of AI tools: Claude Code, Codex, Cursor, DeepSeek, Kimi, etc."
   },
   {
-    "objectID": "slide/slide.html#lets-actually-build-it",
-    "href": "slide/slide.html#lets-actually-build-it",
+    "objectID": "slide/slide.html#lets-actually-build-subsetjuliavm",
+    "href": "slide/slide.html#lets-actually-build-subsetjuliavm",
     "title": "Let’s run Julia everywhere",
-    "section": "Let’s actually build it!",
-    "text": "Let’s actually build it!\n\nA stack-based bytecode interpreter (no JIT)\n\n\n  Julia source\n  →\n  parse → CST\n  →\n  lower → Core IR\n  →\n  compile → bytecode\n  →\n  stack VM → result\n\nResult: AtelierArith/julia-vm-oss\n$ git clone https://github.com/AtelierArith/julia-vm-oss.git\n$ cd julia-vm-oss\n$ ./scripts/sjulia_install.sh   # Windows: pwsh -File scripts/sjulia_install.ps1\n$ sjulia examples/mandelbrot.jl\n  0.027875 seconds\nMandelbrot Set (50x25):\n\n                              .\n                              . .\n                              .+\n                             ###+.\n                        .   .####.\n                       .#++#########....\n                      ..##############.\n            .        ..################..\n             ...... .##################.\n            .#######.###################\n          ...##########################.\n#####################################..\n          ...##########################.\n            .#######.###################\n             ...... .##################.\n            .        ..################..\n                      ..##############.\n                       .#++#########....\n                        .   .####.\n                             ###+.\n                              .+\n                              . .\n                              ."
+    "section": "Let’s actually build SubsetJuliaVM!",
+    "text": "Let’s actually build SubsetJuliaVM!\n\n  Julia source\n  →\n  parse → CST\n  →\n  lower → Core IR\n  →\n  compile → bytecode\n  →\n  stack VM → result\n\nResult: AtelierArith/julia-vm-oss\n$ git clone https://github.com/AtelierArith/julia-vm-oss.git\n$ cd julia-vm-oss\n$ ./scripts/sjulia_install.sh   # Windows: pwsh -File scripts/sjulia_install.ps1\n$ sjulia examples/mandelbrot.jl\n  0.027875 seconds\nMandelbrot Set (50x25):\n\n                              .\n                              . .\n                              .+\n                             ###+.\n                        .   .####.\n                       .#++#########....\n                      ..##############.\n            .        ..################..\n             ...... .##################.\n            .#######.###################\n          ...##########################.\n#####################################..\n          ...##########################.\n            .#######.###################\n             ...... .##################.\n            .        ..################..\n                      ..##############.\n                       .#++#########....\n                        .   .####.\n                             ###+.\n                              .+\n                              . .\n                              ."
   },
   {
     "objectID": "slide/slide.html#how-subsetjuliavm-differs-from-official-julia",

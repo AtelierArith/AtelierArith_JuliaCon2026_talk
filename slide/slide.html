@@ -255,9 +255,70 @@
           display:block!important;
       }</style></aside>
 </section>
-<section id="hello-subsetjuliavm" class="slide level2">
-<h2>Hello, SubsetJuliaVM</h2>
-<div class="sjulia-executor" data-code="println(&quot;Hello from WebAssembly!&quot;)\nprintln(1 + 2 * 3)"></div>
+<section id="hello-world" class="slide level2">
+<h2>Hello World</h2>
+<div class="sjulia-executor" data-code="println(&quot;Hello World&quot;)"></div>
+</section>
+<section id="ifs-fractals-interact-plots" class="slide level2">
+<h2>IFS fractals (Interact + Plots)</h2>
+<div class="sjulia-executor" data-timeout-ms="60000" data-code="using Interact, Plots, Distributions, Random
+
+struct Affine
+    a::Float64
+    b::Float64
+    c::Float64
+    d::Float64
+    e::Float64
+    f::Float64
+end
+
+(m::Affine)(x1, x2) = (m.a * x1 + m.b * x2 + m.e, m.c * x1 + m.d * x2 + m.f)
+
+@manipulate for fractal = [:fern, :sierpinski, :dragon]
+    Random.seed!(42)
+    if fractal == :fern
+        # Barnsley fern: coefficients (a, b, c, d, e, f) for x -> W*x + b.
+        maps = (
+            Affine(0.0, 0.0, 0.0, 0.16, 0.0, 0.0),
+            Affine(0.85, 0.04, -0.04, 0.85, 0.0, 1.6),
+            Affine(0.20, -0.26, 0.23, 0.22, 0.0, 1.6),
+            Affine(-0.15, 0.28, 0.26, 0.24, 0.0, 0.44),
+        )
+        picker = Categorical([0.01, 0.85, 0.07, 0.07])
+        ttl = &quot;Barnsley Fern&quot;
+    elseif fractal == :sierpinski
+        # Sierpinski triangle: shrink by 1/2 toward one of three vertices, equal odds.
+        maps = (
+            Affine(0.5, 0.0, 0.0, 0.5, 0.0, 0.0),
+            Affine(0.5, 0.0, 0.0, 0.5, 1.0, 0.0),
+            Affine(0.5, 0.0, 0.0, 0.5, 0.5, 0.866),
+        )
+        picker = Categorical([1/3, 1/3, 1/3])
+        ttl = &quot;Sierpinski Triangle&quot;
+    else
+        # Heighway dragon: two rotate-and-scale maps, equal odds.
+        maps = (
+            Affine(0.5, -0.5, 0.5, 0.5, 0.0, 0.0),
+            Affine(-0.5, -0.5, 0.5, -0.5, 1.0, 0.0),
+        )
+        picker = Categorical([0.5, 0.5])
+        ttl = &quot;Heighway Dragon&quot;
+    end
+    n = 5000
+    xs = zeros(n)
+    ys = zeros(n)
+    x1 = 0.0
+    x2 = 0.0
+    for i in 1:n
+        idx = rand(picker)
+        q = maps[idx](x1, x2)
+        x1 = q[1]
+        x2 = q[2]
+        xs[i] = x1
+        ys[i] = x2
+    end
+    scatter(xs, ys; aspect_ratio = :equal, title = ttl)
+end"></div>
 </section>
 <section id="why-i-created-it" class="slide level2">
 <h2>Why I created it</h2>
@@ -277,11 +338,13 @@
 <section id="can-we-run-official-julia-on-ios-13" class="slide level2">
 <h2>Can we run official Julia on iOS? (1/3)</h2>
 <ul>
-<li>It’s difficult to run the original functionality as-is.</li>
+<li>It’s difficult to run the original functionality as-is.
+<ul>
 <li>Official Julia relies on <strong>JIT compilation</strong></li>
 <li>Ordinary iOS apps cannot freely generate and execute native code at runtime (<a href="https://support.apple.com/guide/security/security-of-runtime-process-sec15bfe098e/web">W^X</a>)</li>
 <li>App Store rules also restrict downloaded code that changes app functionality (<a href="https://developer.apple.com/app-store/review/guidelines/#2.5.2">Review Guidelines §2.5.2</a>)</li>
-<li>SubsetJuliaVM uses a <strong>bundled interpreter</strong> instead: bytecode stays data, and the signed app interprets it</li>
+</ul></li>
+<li>SubsetJuliaVM uses a <strong>bundled interpreter</strong> instead: bytecode stays data as <code>Vec&lt;Instruction&gt;</code>.</li>
 </ul>
 </section>
 <section id="can-we-run-official-julia-on-ios-23" class="slide level2 smaller">
@@ -304,8 +367,6 @@
 </div><div class="column" style="width:52%;">
 <p><strong>Major limitations</strong></p>
 <ul>
-<li>No JIT: only interpreter-compatible or already compiled paths work</li>
-<li><code>InteractiveUtils</code> is reduced to the non-verbose <code>versioninfo()</code> path</li>
 <li>Most standard libraries, packages, and JLLs are unsupported</li>
 <li>BLAS-backed matrix operations still fail with <code>`ccall` requires the compiler</code></li>
 <li>Development-signed research prototype; not App Store-ready</li>
@@ -330,11 +391,8 @@
 </ul></li>
 </ul>
 </section>
-<section id="lets-actually-build-it" class="slide level2">
-<h2>Let’s actually build it!</h2>
-<ul>
-<li>A stack-based bytecode interpreter (<strong>no JIT</strong>)</li>
-</ul>
+<section id="lets-actually-build-subsetjuliavm" class="slide level2">
+<h2>Let’s actually build SubsetJuliaVM!</h2>
 <div class="pipeline">
   <div class="pipeline-node">Julia source</div>
   <div class="pipeline-arrow">→</div>
