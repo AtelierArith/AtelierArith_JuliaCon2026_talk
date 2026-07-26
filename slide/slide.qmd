@@ -191,8 +191,6 @@ y = A * x # <- does not work
 ::: {.column width="52%"}
 **Major limitations**
 
-- No JIT: only interpreter-compatible or already compiled paths work
-- `InteractiveUtils` is reduced to the non-verbose `versioninfo()` path
 - Most standard libraries, packages, and JLLs are unsupported
 - BLAS-backed matrix operations still fail with `` `ccall` requires the compiler ``
 - Development-signed research prototype; not App Store-ready
@@ -215,8 +213,7 @@ y = A * x # <- does not work
   - Let's use AI 🤖
   - Built with heavy use of AI tools: Claude Code, Codex, Cursor, DeepSeek, Kimi, etc.
 
-## Let's actually build it!
-  - A stack-based bytecode interpreter (**no JIT**)
+## Let's actually build SubsetJuliaVM!
 
 ```{=html}
 <div class="pipeline">
