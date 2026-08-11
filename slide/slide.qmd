@@ -142,6 +142,7 @@ end"></div>
 
 - I loved Pythonista (iOS app)
 - I wanted to run Julia on my iPad — **offline**
+- I was asked by some of the teachers who teach mathematics in Japan, "Can I use Julia on an iPad?"
 
 ---
 
