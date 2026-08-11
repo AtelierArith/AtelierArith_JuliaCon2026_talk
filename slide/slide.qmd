@@ -329,7 +329,7 @@ An **experimental Julia → Rust AoT transpiler** (same frontend as the VM).
 ```sh
 $ cargo build --release -p subset_julia_vm --features aot --bin juliars
 $ target/release/juliars --minimal-prelude examples/mandelbrot.jl --emit-binary target/mandelbrot_aot
-$ target/release/mandelbrot_aot
+$ target/mandelbrot_aot
 ```
 
 ## Performance: Julia vs. SubsetJuliaVM {.smaller}
