@@ -116,7 +116,7 @@
     "href": "slide/slide.html#juliars",
     "title": "Let’s run Julia everywhere",
     "section": "juliars",
-    "text": "juliars\nAn experimental Julia → Rust AoT transpiler (same frontend as the VM).\n\nPipeline: source → CST → Core IR → Rust source → rustc -O → native binary\nUnlike JuliaC / PackageCompiler, it does not need libjulia\nBest for scalar numerics, loops, arrays — the broad package surface stays on the VM\nOn the coprime-π / Mandelbrot benches: about as fast as official Julia\n\n$ cargo build --release -p subset_julia_vm --features aot --bin juliars\n$ target/release/juliars --minimal-prelude examples/mandelbrot.jl --emit-binary target/mandelbrot_aot\n$ target/release/mandelbrot_aot"
+    "text": "juliars\nAn experimental Julia → Rust AoT transpiler (same frontend as the VM).\n\nPipeline: source → CST → Core IR → Rust source → rustc -O → native binary\nUnlike JuliaC / PackageCompiler, it does not need libjulia\nBest for scalar numerics, loops, arrays — the broad package surface stays on the VM\nOn the coprime-π / Mandelbrot benches: about as fast as official Julia\n\n$ cargo build --release -p subset_julia_vm --features aot --bin juliars\n$ target/release/juliars --minimal-prelude examples/mandelbrot.jl --emit-binary target/mandelbrot_aot\n$ target/mandelbrot_aot"
   },
   {
     "objectID": "slide/slide.html#performance-julia-vs.-subsetjuliavm",
