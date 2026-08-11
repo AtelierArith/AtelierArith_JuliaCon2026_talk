@@ -501,7 +501,7 @@ Satoshi Terasaki@AtelierArith
 <h2>Q. How close is it to real Julia? How do you verify that?</h2>
 <p><strong>A.</strong> Parity with <strong>official Julia 1.12</strong> is enforced mechanically:</p>
 <ul>
-<li>~<strong>3,100 registered test fixtures</strong> across 114 categories, checked against expected outputs (floats within <code>1e-10</code>); a separate <strong>parity sweep</strong> runs eligible fixtures under both real <code>julia</code> and <code>sjulia</code> and compares.</li>
+<li>~<strong>3,250 registered test fixtures</strong> across 114 categories, checked against expected outputs (floats within <code>1e-10</code>); a separate <strong>parity sweep</strong> runs eligible fixtures under both real <code>julia</code> and <code>sjulia</code> and compares.</li>
 <li>Plus differential fuzzing, official-test-suite sweeps, and subtype/dispatch parity tests.</li>
 <li>Implemented (as a subset): parametric types, multiple dispatch, user-defined macros with hygiene, broadcasting, closures, comprehensions, exceptions, modules, <code>eval</code>/<code>Expr</code>, BigInt/BigFloat/Rational/Complex, Tasks &amp; Channels (via VM-level continuations).</li>
 <li>Known gaps: no real threads (single-threaded by design), partial LinearAlgebra/views, some macros are no-ops (<code>@inbounds</code>, <code>@inline</code>), and <code>Dict</code>-heavy hot loops are unoptimized.</li>
@@ -606,11 +606,11 @@ Satoshi Terasaki@AtelierArith
 <h2>Q. How big is the sjulia codebase?</h2>
 <p><strong>A.</strong> Roughly <strong>570k lines of Rust</strong> (<code>src/</code> code, excluding tests), plus a large pure-Julia layer:</p>
 <ul>
-<li>A Cargo workspace of <strong>12 crates</strong> — parser, lowering, IR, compiler, bytecode, VM, FFI, web/WASM, AoT runtime, …</li>
+<li>A Cargo workspace of <strong>14 crates</strong> — parser, lowering, IR, compiler, bytecode, VM, FFI, web/WASM, AoT runtime, …</li>
 <li>The bytecode instruction set alone has <strong>400+ opcodes</strong>.</li>
 <li>The AoT pipeline (<code>juliars</code>) is ~53k lines — roughly <strong>9–10%</strong> of the Rust code.</li>
-<li>On top of that, Base is reimplemented as <strong>~46k lines of pure-Julia subset code</strong> (74 files mirroring official Julia’s <code>base/</code>, plus 10 stdlib modules), and <strong>~34 bundled packages</strong> (Plots, Distributions, AbstractAlgebra, …).</li>
-<li>Verified by <strong>~3,100 registered fixtures</strong> across 114 categories, with a parity sweep against real <code>julia</code>.</li>
+<li>On top of that, Base is reimplemented as <strong>~46k lines of pure-Julia subset code</strong> (75 files mirroring official Julia’s <code>base/</code>, plus 10 stdlib modules), and <strong>~34 bundled packages</strong> (Plots, Distributions, AbstractAlgebra, …).</li>
+<li>Verified by <strong>~3,250 registered fixtures</strong> across 114 categories, with a parity sweep against real <code>julia</code>.</li>
 <li>Most of it was written with AI coding agents in the loop — the parity suite is what kept that tractable.</li>
 </ul>
 </section>
@@ -621,7 +621,7 @@ Satoshi Terasaki@AtelierArith
 <li>One codebase targets <strong>macOS/Linux, iOS (staticlib), Android (cdylib), and WASM</strong> — <code>wasm32-unknown-unknown</code> support with no C toolchain involved was decisive (it is also why the parser was rewritten from tree-sitter’s generated C into pure Rust).</li>
 <li>Memory safety without a runtime GC of its own; <code>enum</code> + <code>match</code> fit a bytecode interpreter naturally (tagged <code>Value</code>, exhaustive opcode dispatch).</li>
 <li>The project is ratcheting toward a <strong>panic-free VM policy</strong> — user code should raise Julia exceptions, not Rust panics/aborts, which matters inside an app process.</li>
-<li>Development leaned heavily on AI coding agents; a strict compiler + ~3,100 parity fixtures made that loop safe.</li>
+<li>Development leaned heavily on AI coding agents; a strict compiler + ~3,250 parity fixtures made that loop safe.</li>
 </ul>
 
 

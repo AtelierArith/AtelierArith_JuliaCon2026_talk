@@ -46,7 +46,7 @@
     "href": "slide/slide.html#why-i-created-it",
     "title": "Let’s run Julia everywhere",
     "section": "Why I created it",
-    "text": "Why I created it\n\nI loved Pythonista (iOS app)\nI wanted to run Julia on my iPad — offline"
+    "text": "Why I created it\n\nI loved Pythonista (iOS app)\nI wanted to run Julia on my iPad — offline\nI was asked by some of the teachers who teach mathematics in Japan, “Can I use Julia on an iPad?”"
   },
   {
     "objectID": "slide/slide.html#what-about-binder-or-google-colab",
@@ -340,7 +340,7 @@
     "href": "slide/appendix.html#q.-how-close-is-it-to-real-julia-how-do-you-verify-that",
     "title": "Appendix — Q&A",
     "section": "Q. How close is it to real Julia? How do you verify that?",
-    "text": "Q. How close is it to real Julia? How do you verify that?\nA. Parity with official Julia 1.12 is enforced mechanically:\n\n~3,100 registered test fixtures across 114 categories, checked against expected outputs (floats within 1e-10); a separate parity sweep runs eligible fixtures under both real julia and sjulia and compares.\nPlus differential fuzzing, official-test-suite sweeps, and subtype/dispatch parity tests.\nImplemented (as a subset): parametric types, multiple dispatch, user-defined macros with hygiene, broadcasting, closures, comprehensions, exceptions, modules, eval/Expr, BigInt/BigFloat/Rational/Complex, Tasks & Channels (via VM-level continuations).\nKnown gaps: no real threads (single-threaded by design), partial LinearAlgebra/views, some macros are no-ops (@inbounds, @inline), and Dict-heavy hot loops are unoptimized."
+    "text": "Q. How close is it to real Julia? How do you verify that?\nA. Parity with official Julia 1.12 is enforced mechanically:\n\n~3,250 registered test fixtures across 114 categories, checked against expected outputs (floats within 1e-10); a separate parity sweep runs eligible fixtures under both real julia and sjulia and compares.\nPlus differential fuzzing, official-test-suite sweeps, and subtype/dispatch parity tests.\nImplemented (as a subset): parametric types, multiple dispatch, user-defined macros with hygiene, broadcasting, closures, comprehensions, exceptions, modules, eval/Expr, BigInt/BigFloat/Rational/Complex, Tasks & Channels (via VM-level continuations).\nKnown gaps: no real threads (single-threaded by design), partial LinearAlgebra/views, some macros are no-ops (@inbounds, @inline), and Dict-heavy hot loops are unoptimized."
   },
   {
     "objectID": "slide/appendix.html#q.-why-test-compatibility-this-way-isnt-there-a-julia-spec",
@@ -410,13 +410,13 @@
     "href": "slide/appendix.html#q.-how-big-is-the-sjulia-codebase",
     "title": "Appendix — Q&A",
     "section": "Q. How big is the sjulia codebase?",
-    "text": "Q. How big is the sjulia codebase?\nA. Roughly 570k lines of Rust (src/ code, excluding tests), plus a large pure-Julia layer:\n\nA Cargo workspace of 12 crates — parser, lowering, IR, compiler, bytecode, VM, FFI, web/WASM, AoT runtime, …\nThe bytecode instruction set alone has 400+ opcodes.\nThe AoT pipeline (juliars) is ~53k lines — roughly 9–10% of the Rust code.\nOn top of that, Base is reimplemented as ~46k lines of pure-Julia subset code (74 files mirroring official Julia’s base/, plus 10 stdlib modules), and ~34 bundled packages (Plots, Distributions, AbstractAlgebra, …).\nVerified by ~3,100 registered fixtures across 114 categories, with a parity sweep against real julia.\nMost of it was written with AI coding agents in the loop — the parity suite is what kept that tractable."
+    "text": "Q. How big is the sjulia codebase?\nA. Roughly 570k lines of Rust (src/ code, excluding tests), plus a large pure-Julia layer:\n\nA Cargo workspace of 14 crates — parser, lowering, IR, compiler, bytecode, VM, FFI, web/WASM, AoT runtime, …\nThe bytecode instruction set alone has 400+ opcodes.\nThe AoT pipeline (juliars) is ~53k lines — roughly 9–10% of the Rust code.\nOn top of that, Base is reimplemented as ~46k lines of pure-Julia subset code (75 files mirroring official Julia’s base/, plus 10 stdlib modules), and ~34 bundled packages (Plots, Distributions, AbstractAlgebra, …).\nVerified by ~3,250 registered fixtures across 114 categories, with a parity sweep against real julia.\nMost of it was written with AI coding agents in the loop — the parity suite is what kept that tractable."
   },
   {
     "objectID": "slide/appendix.html#q.-why-rust-and-not-ccswiftjulia-itself",
     "href": "slide/appendix.html#q.-why-rust-and-not-ccswiftjulia-itself",
     "title": "Appendix — Q&A",
     "section": "Q. Why Rust (and not C/C++/Swift/Julia itself)?",
-    "text": "Q. Why Rust (and not C/C++/Swift/Julia itself)?\nA.\n\nOne codebase targets macOS/Linux, iOS (staticlib), Android (cdylib), and WASM — wasm32-unknown-unknown support with no C toolchain involved was decisive (it is also why the parser was rewritten from tree-sitter’s generated C into pure Rust).\nMemory safety without a runtime GC of its own; enum + match fit a bytecode interpreter naturally (tagged Value, exhaustive opcode dispatch).\nThe project is ratcheting toward a panic-free VM policy — user code should raise Julia exceptions, not Rust panics/aborts, which matters inside an app process.\nDevelopment leaned heavily on AI coding agents; a strict compiler + ~3,100 parity fixtures made that loop safe."
+    "text": "Q. Why Rust (and not C/C++/Swift/Julia itself)?\nA.\n\nOne codebase targets macOS/Linux, iOS (staticlib), Android (cdylib), and WASM — wasm32-unknown-unknown support with no C toolchain involved was decisive (it is also why the parser was rewritten from tree-sitter’s generated C into pure Rust).\nMemory safety without a runtime GC of its own; enum + match fit a bytecode interpreter naturally (tagged Value, exhaustive opcode dispatch).\nThe project is ratcheting toward a panic-free VM policy — user code should raise Julia exceptions, not Rust panics/aborts, which matters inside an app process.\nDevelopment leaned heavily on AI coding agents; a strict compiler + ~3,250 parity fixtures made that loop safe."
   }
 ]
