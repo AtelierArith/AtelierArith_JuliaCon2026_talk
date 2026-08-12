@@ -16,6 +16,8 @@ Satoshi Terasaki@AtelierArith
 
 ![](assets/slide-url-qr.png){width="320"}
 
+---
+
 ## What I created
 
 - **SubsetJuliaVM** — a stack-based VM for a subset of Julia
@@ -25,6 +27,14 @@ Satoshi Terasaki@AtelierArith
 - Runs on iOS and Android devices
   - The VM compiles to WebAssembly, so it also runs in the browser
 - Supports parts of Plots.jl, OrdinaryDiffEq.jl, Symbolics.jl, AbstractAlgebra.jl, and more
+
+---
+
+## What I created
+
+![](assets/sjulia_overview.jpg)
+
+---
 
 ## Deliverables {.smaller}
 
@@ -295,12 +305,6 @@ Everything that would break the sandboxed, offline, no-downloaded-code model:
   `include` resolves through virtual embedded paths
 - **External processes** — no `run(cmd)`
 - **C interface** — no `@ccall`/`pointer`/`unsafe_*`
-- **Real parallelism** — single-threaded by design;
-  Tasks/Channels are cooperative continuations
-- `@generated` macro
-- **Native-code reflection** — no `@code_llvm`/`@code_native` (there is no LLVM);
-  use `sjulia --dump-bytecode` instead
-More details: see the [Appendix slides](appendix.html)
 
 ---
 
@@ -314,6 +318,12 @@ More details: see the [Appendix slides](appendix.html)
   - **Distributions**, StatsBase, Optim, QuadGK, HCubature
   - StaticArrays, SparseArrays, SpecialFunctions, Quaternions, Rotations, …
 - These have been re-implemented specifically for SubsetJuliaVM.
+
+---
+
+## What we support
+
+![](assets/area_sjulia_supports.jpg)
 
 ---
 
