@@ -83,7 +83,7 @@ The demo is the heart of this talk. Keep the explanation short and run the code.
 
 ---
 
-## IFS fractals (Interact + Plots)
+## Fractals (Interact + Distributions + Plots)
 
 ```{=html}
 <div class="sjulia-executor" data-timeout-ms="60000" data-code="using Interact, Plots, Distributions, Random
