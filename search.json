@@ -14,6 +14,13 @@
     "text": "What I created\n\nSubsetJuliaVM — a stack-based VM for a subset of Julia\n\nLooks like Julia and walks like Python\nCLI binary name: sjulia (think “subset Julia”)\nImplemented in Rust\n\nRuns on iOS and Android devices\n\nThe VM compiles to WebAssembly, so it also runs in the browser\n\nSupports parts of Plots.jl, OrdinaryDiffEq.jl, Symbolics.jl, AbstractAlgebra.jl, and more"
   },
   {
+    "objectID": "slide/slide.html#what-i-created-1",
+    "href": "slide/slide.html#what-i-created-1",
+    "title": "Let’s run Julia everywhere",
+    "section": "What I created",
+    "text": "What I created"
+  },
+  {
     "objectID": "slide/slide.html#deliverables",
     "href": "slide/slide.html#deliverables",
     "title": "Let’s run Julia everywhere",
@@ -102,7 +109,7 @@
     "href": "slide/slide.html#what-subsetjuliavm-does-not-provide",
     "title": "Let’s run Julia everywhere",
     "section": "What SubsetJuliaVM does not provide",
-    "text": "What SubsetJuliaVM does not provide\nEverything that would break the sandboxed, offline, no-downloaded-code model:\n\nPkg.jl / package management — no Pkg.add, no registry, no downloads; using X only reaches the ~34 packages bundled into the binary\nNetwork I/O — no Sockets, no Downloads/HTTP\nFilesystem access — file operations are unimplemented; include resolves through virtual embedded paths\nExternal processes — no run(cmd)\nC interface — no @ccall/pointer/unsafe_*\nReal parallelism — single-threaded by design; Tasks/Channels are cooperative continuations\n@generated macro\nNative-code reflection — no @code_llvm/@code_native (there is no LLVM); use sjulia --dump-bytecode instead More details: see the Appendix slides"
+    "text": "What SubsetJuliaVM does not provide\nEverything that would break the sandboxed, offline, no-downloaded-code model:\n\nPkg.jl / package management — no Pkg.add, no registry, no downloads; using X only reaches the ~34 packages bundled into the binary\nNetwork I/O — no Sockets, no Downloads/HTTP\nFilesystem access — file operations are unimplemented; include resolves through virtual embedded paths\nExternal processes — no run(cmd)\nC interface — no @ccall/pointer/unsafe_*"
   },
   {
     "objectID": "slide/slide.html#what-we-support",
@@ -110,6 +117,13 @@
     "title": "Let’s run Julia everywhere",
     "section": "What we support",
     "text": "What we support\n\nBasic Julia syntax (subset)\n~34 bundled 3rd-party packages (no download), including:\n\nPlots, StatsPlots, JSXGraph, Interact\nOrdinaryDiffEq, SciMLBase\nSymbolics, AbstractAlgebra, Primes, Combinatorics\nDistributions, StatsBase, Optim, QuadGK, HCubature\nStaticArrays, SparseArrays, SpecialFunctions, Quaternions, Rotations, …\n\nThese have been re-implemented specifically for SubsetJuliaVM."
+  },
+  {
+    "objectID": "slide/slide.html#what-we-support-1",
+    "href": "slide/slide.html#what-we-support-1",
+    "title": "Let’s run Julia everywhere",
+    "section": "What we support",
+    "text": "What we support"
   },
   {
     "objectID": "slide/slide.html#juliars",

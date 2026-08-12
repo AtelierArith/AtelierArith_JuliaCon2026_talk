@@ -218,6 +218,10 @@
 <li>Supports parts of Plots.jl, OrdinaryDiffEq.jl, Symbolics.jl, AbstractAlgebra.jl, and more</li>
 </ul>
 </section>
+<section id="what-i-created-1" class="slide level2">
+<h2>What I created</h2>
+
+<img data-src="assets/sjulia_overview.jpg" class="r-stretch"></section>
 <section id="deliverables" class="slide level2 smaller">
 <h2>Deliverables</h2>
 <p><strong>iOS / iPadOS</strong> — a native app with no JIT, fully App Store compliant</p>
@@ -495,9 +499,6 @@ end"></div>
 <li><strong>Filesystem access</strong> — file operations are unimplemented; <code>include</code> resolves through virtual embedded paths</li>
 <li><strong>External processes</strong> — no <code>run(cmd)</code></li>
 <li><strong>C interface</strong> — no <code>@ccall</code>/<code>pointer</code>/<code>unsafe_*</code></li>
-<li><strong>Real parallelism</strong> — single-threaded by design; Tasks/Channels are cooperative continuations</li>
-<li><code>@generated</code> macro</li>
-<li><strong>Native-code reflection</strong> — no <code>@code_llvm</code>/<code>@code_native</code> (there is no LLVM); use <code>sjulia --dump-bytecode</code> instead More details: see the <a href="appendix.html">Appendix slides</a></li>
 </ul>
 </section>
 <section id="what-we-support" class="slide level2 smaller">
@@ -515,6 +516,10 @@ end"></div>
 <li>These have been re-implemented specifically for SubsetJuliaVM.</li>
 </ul>
 </section>
+<section id="what-we-support-1" class="slide level2">
+<h2>What we support</h2>
+
+<img data-src="assets/area_sjulia_supports.jpg" class="r-stretch"></section>
 <section id="juliars" class="slide level2 smaller">
 <h2><code>juliars</code></h2>
 <p>An <strong>experimental Julia → Rust AoT transpiler</strong> (same frontend as the VM).</p>
