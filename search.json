@@ -42,11 +42,11 @@
     "text": "Hello World"
   },
   {
-    "objectID": "slide/slide.html#ifs-fractals-interact-plots",
-    "href": "slide/slide.html#ifs-fractals-interact-plots",
+    "objectID": "slide/slide.html#fractals-interact-distributions-plots",
+    "href": "slide/slide.html#fractals-interact-distributions-plots",
     "title": "Let’s run Julia everywhere",
-    "section": "IFS fractals (Interact + Plots)",
-    "text": "IFS fractals (Interact + Plots)"
+    "section": "Fractals (Interact + Distributions + Plots)",
+    "text": "Fractals (Interact + Distributions + Plots)"
   },
   {
     "objectID": "slide/slide.html#why-i-created-it",
