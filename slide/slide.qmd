@@ -18,6 +18,18 @@ Satoshi Terasaki@AtelierArith
 
 ---
 
+## Goma-chan (my family)
+
+![](assets/goma_3D.png)
+
+---
+
+## Goma-chan (projected into 2D space)
+
+![](assets/goma_2D.png)
+
+---
+
 ## What I created
 
 - **SubsetJuliaVM** — a stack-based VM for a subset of Julia
