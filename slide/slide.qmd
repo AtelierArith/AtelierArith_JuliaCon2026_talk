@@ -407,6 +407,12 @@ calc_pi(10000)  # same source for all runtimes
 
 ---
 
-# Thank you!!!
+## Conclusion
+
+![](slide/assets/invite_friends.png)
+
+---
+
+## Thank you!!!
 
 Q&A material: see the [Appendix slides](appendix.html)
