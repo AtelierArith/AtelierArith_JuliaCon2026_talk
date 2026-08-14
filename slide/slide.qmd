@@ -409,7 +409,7 @@ calc_pi(10000)  # same source for all runtimes
 
 ## Conclusion
 
-![](slide/assets/invite_friends.png)
+![](assets/invite_friends.png)
 
 ---
 
